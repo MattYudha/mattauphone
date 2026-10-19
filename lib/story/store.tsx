@@ -2,19 +2,25 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { contacts } from './contacts'
-import { EVENT_JY_MESSAGES, EVENT_YH_MESSAGES } from './events'
+import { playSound, unlockSounds } from '@/lib/sound'
+import { AFTER_CALL_BANNER_MESSAGES, AFTER_CALL_ROOM_MESSAGES, EVENT_JY_MESSAGES, EVENT_YH_MESSAGES } from './events'
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
 import { toTime } from './time'
 
-export type AppId = 'kakao' | 'messages' | 'phone' | 'photos' | 'settings' | 'safari' | 'anyai'
+export type AppId = 'kakao' | 'messages' | 'phone' | 'photos' | 'settings' | 'safari' | 'anyai' | 'notes'
 export type Screen = { kind: 'lock' } | { kind: 'passcode' } | { kind: 'home' } | { kind: 'app'; app: AppId }
 
 type StoryProgress = {
   yhArrived: boolean
   jyArrived: boolean
+  /** 영현의 전화를 받은 뒤 직접 끊었는지. 이후 시각이 18:58로 바뀐다. */
+  yhCallEnded: boolean
   addedMessages: KakaoMessage[]
   readMessageIds: string[]
 }
+
+const BANNER_GAP_MS = 1800
+const ROOM_GAP_MS = 1500
 
 export type Banner = {
   key: string
@@ -25,7 +31,13 @@ export type Banner = {
 }
 
 const STORAGE_KEY = 'wonpil-phone-story-v1'
-const INITIAL: StoryProgress = { yhArrived: false, jyArrived: false, addedMessages: [], readMessageIds: [] }
+const INITIAL: StoryProgress = {
+  yhArrived: false,
+  jyArrived: false,
+  yhCallEnded: false,
+  addedMessages: [],
+  readMessageIds: [],
+}
 
 function loadProgress(): StoryProgress {
   if (typeof window === 'undefined') return INITIAL
@@ -34,7 +46,7 @@ function loadProgress(): StoryProgress {
     if (!raw) return INITIAL
     const parsed = JSON.parse(raw) as StoryProgress
     if (!Array.isArray(parsed.addedMessages) || !Array.isArray(parsed.readMessageIds)) return INITIAL
-    return parsed
+    return { ...INITIAL, ...parsed }
   } catch {
     return INITIAL
   }
@@ -59,6 +71,9 @@ type StoryContext = {
   totalUnread: number
   markRoomRead: (id: KakaoRoomId) => void
   onYhRoomShown: () => void
+  clock: string
+  yhCallEnded: boolean
+  endYhCall: () => void
   banner: Banner | null
   dismissBanner: () => void
   openBanner: (banner: Banner) => void
@@ -75,6 +90,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const progressRef = useRef(progress)
   progressRef.current = progress
   const timers = useRef<number[]>([])
+  const viewRef = useRef({ screen, kakaoRoomId })
+  viewRef.current = { screen, kakaoRoomId }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -84,6 +101,15 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       // Storage can be unavailable (e.g. privacy mode); progress then lives in memory only.
     }
   }, [progress])
+
+  useEffect(() => {
+    window.addEventListener('pointerdown', unlockSounds, { once: true })
+    window.addEventListener('keydown', unlockSounds, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', unlockSounds)
+      window.removeEventListener('keydown', unlockSounds)
+    }
+  }, [])
 
   useEffect(() => {
     const list = timers.current
@@ -103,8 +129,54 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     }
     progressRef.current = next
     setProgress(next)
+    playSound('kakao')
     setBanner({ key: 'yh', roomId: 'yh', sender: contacts.yh.name, lines: ['퇴근 안했지?'], time: '18:57' })
   }, [])
+
+  /** 메시지를 하나씩 도착시킨다. 이미 도착한 메시지는 건너뛰어 새로고침 후 이어 받을 때도 중복되지 않는다. */
+  const deliverSequentially = useCallback((messages: KakaoMessage[], gapMs: number, firstDelayMs: number) => {
+    const pending = messages.filter((m) => !progressRef.current.addedMessages.some((x) => x.id === m.id))
+    pending.forEach((message, i) => {
+      timers.current.push(
+        window.setTimeout(() => {
+          const p = progressRef.current
+          if (p.addedMessages.some((x) => x.id === message.id)) return
+          const next = { ...p, addedMessages: [...p.addedMessages, message] }
+          progressRef.current = next
+          setProgress(next)
+          playSound('kakao')
+          const { screen: s, kakaoRoomId: openRoom } = viewRef.current
+          const viewingRoom = s.kind === 'app' && s.app === 'kakao' && openRoom === message.roomId
+          if (!viewingRoom && message.content.type === 'text') {
+            setBanner({
+              key: message.id,
+              roomId: message.roomId,
+              sender: contacts.yh.name,
+              lines: [message.content.text],
+              time: '18:58',
+            })
+          }
+        }, firstDelayMs + i * gapMs),
+      )
+    })
+  }, [])
+
+  const endYhCall = useCallback(() => {
+    if (progressRef.current.yhCallEnded) return
+    const next = { ...progressRef.current, yhCallEnded: true }
+    progressRef.current = next
+    setProgress(next)
+    deliverSequentially(AFTER_CALL_BANNER_MESSAGES, BANNER_GAP_MS, 1000)
+  }, [deliverSequentially])
+
+  useEffect(() => {
+    const p = progressRef.current
+    if (!p.yhCallEnded) return
+    deliverSequentially(AFTER_CALL_BANNER_MESSAGES, BANNER_GAP_MS, 1500)
+    if (AFTER_CALL_ROOM_MESSAGES.some((m) => p.addedMessages.some((x) => x.id === m.id))) {
+      deliverSequentially(AFTER_CALL_ROOM_MESSAGES, ROOM_GAP_MS, 1500)
+    }
+  }, [deliverSequentially])
 
   const triggerJy = useCallback(() => {
     const p = progressRef.current
@@ -112,6 +184,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     const next = { ...p, jyArrived: true, addedMessages: [...p.addedMessages, ...EVENT_JY_MESSAGES] }
     progressRef.current = next
     setProgress(next)
+    playSound('kakao')
     setBanner({
       key: 'jy',
       roomId: 'jy',
@@ -129,7 +202,12 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const onYhRoomShown = useCallback(() => {
     const p = progressRef.current
     if (p.yhArrived && !p.jyArrived) schedule(triggerJy, 1200)
-  }, [triggerJy])
+    const bannerBatchDone = AFTER_CALL_BANNER_MESSAGES.every((m) => p.addedMessages.some((x) => x.id === m.id))
+    const roomBatchStarted = AFTER_CALL_ROOM_MESSAGES.some((m) => p.addedMessages.some((x) => x.id === m.id))
+    if (p.yhCallEnded && bannerBatchDone && !roomBatchStarted) {
+      deliverSequentially(AFTER_CALL_ROOM_MESSAGES, ROOM_GAP_MS, 1500)
+    }
+  }, [triggerJy, deliverSequentially])
 
   const markRoomRead = useCallback((id: KakaoRoomId) => {
     const p = progressRef.current
@@ -187,6 +265,9 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     totalUnread,
     markRoomRead,
     onYhRoomShown,
+    clock: progress.yhCallEnded ? '18:58' : '18:57',
+    yhCallEnded: progress.yhCallEnded,
+    endYhCall,
     banner,
     dismissBanner: () => setBanner(null),
     openBanner: (b) => {

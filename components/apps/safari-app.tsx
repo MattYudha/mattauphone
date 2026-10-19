@@ -5,6 +5,10 @@ import { BookOpen, ChevronLeft, ChevronRight, Clock, Copy, Lock, RotateCw, Searc
 import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { recentSearches } from '@/lib/story/search'
 import { useBackHandler } from '@/lib/story/back-nav'
+import { withBasePath } from '@/lib/base-path'
+import { KinPost } from './naver/kin-post'
+import { DepressionResults } from './naver/depression-results'
+import { FlightResults } from './naver/flight-results'
 
 type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string }
 
@@ -134,6 +138,20 @@ function Portal({ onSearch }: { onSearch: () => void }) {
           </p>
         </div>
       </section>
+      <section className="mx-4 mt-3 overflow-hidden rounded-[14px] border border-black/[0.06]" aria-labelledby="portal-news">
+        <p className="px-4 pt-3 text-[13px] font-bold text-[#2d7cf6]">뉴스</p>
+        <img
+          src={withBasePath('/images/naver/concert-news.png')}
+          alt="콘서트장을 가득 채운 관객과 무대 조명"
+          className="mt-2 aspect-[16/9] w-full object-cover"
+        />
+        <div className="px-4 py-3">
+          <h2 id="portal-news" className="text-[16px] font-bold leading-snug">
+            {"한국 대표 밴드 '데이식스', 이번 콘서트도 전석 매진..."}
+          </h2>
+          <p className="mt-1 text-[12.5px] text-black/45">스타뉴스 · 32분 전</p>
+        </div>
+      </section>
     </div>
   )
 }
@@ -216,6 +234,21 @@ function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
         <span>VIEW</span>
         <span>지식iN</span>
       </div>
+      {query === '개짜증나게 연락하는 남자 차단법' ? (
+        <KinPost />
+      ) : query === '갑자기 우울할때' ? (
+        <DepressionResults />
+      ) : query === '캐나다에서 한국 비행시간' ? (
+        <FlightResults />
+      ) : (
+        <NoResults query={query} />
+      )}
+    </div>
+  )
+}
+
+function NoResults({ query }: { query: string }) {
+  return (
       <div className="px-5 pt-10">
         <p className="text-[16px] font-semibold leading-snug">
           <span className="text-[#03c75a]">{`'${query}'`}</span>에 대한 검색결과가 없습니다.
@@ -226,6 +259,5 @@ function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
           <li>두 단어 이상의 검색어인 경우, 띄어쓰기를 확인해 보세요.</li>
         </ul>
       </div>
-    </div>
   )
 }

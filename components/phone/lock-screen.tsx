@@ -7,7 +7,7 @@ import { useStory } from '@/lib/story/store'
 import { HomeIndicator, StatusBar } from './chrome'
 
 export function LockScreen() {
-  const { openPasscode } = useStory()
+  const { openPasscode, clock } = useStory()
   const startY = useRef<number | null>(null)
 
   return (
@@ -29,7 +29,7 @@ export function LockScreen() {
             className="-mt-1 text-[104px] font-semibold leading-[1.05] tracking-[-0.03em] tabular-nums text-white/90"
             style={{ fontFamily: 'ui-rounded, "SF Pro Rounded", -apple-system, var(--font-noto), sans-serif' }}
           >
-            18:57
+            {clock}
           </p>
         </div>
         <div className="flex-1" />

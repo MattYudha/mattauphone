@@ -12,6 +12,7 @@ const HOME_APPS: { kind: IconKind; app: AppId | null; label: string }[] = [
   { kind: 'anyai', app: 'anyai', label: 'any ai' },
   { kind: 'photos', app: 'photos', label: '사진' },
   { kind: 'settings', app: 'settings', label: '설정' },
+  { kind: 'notes', app: 'notes', label: '메모' },
   { kind: 'calendar', app: null, label: '캘린더' },
   { kind: 'clock', app: null, label: '시계' },
 ]

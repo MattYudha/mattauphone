@@ -38,6 +38,7 @@ function BatteryGlyph() {
 }
 
 export function StatusBar({ tone = 'dark', className }: { tone?: 'dark' | 'light'; className?: string }) {
+  const { clock } = useStory()
   return (
     <div
       className={cn(
@@ -46,7 +47,7 @@ export function StatusBar({ tone = 'dark', className }: { tone?: 'dark' | 'light
         className,
       )}
     >
-      <span className="w-14 text-center tabular-nums tracking-tight">18:57</span>
+      <span className="w-14 text-center tabular-nums tracking-tight">{clock}</span>
       <span
         className="absolute left-1/2 top-[11px] hidden h-[34px] w-[118px] -translate-x-1/2 rounded-full bg-black sm:block"
         aria-hidden

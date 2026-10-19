@@ -8,6 +8,7 @@ import { PhotosApp } from '@/components/apps/photos-app'
 import { SettingsApp } from '@/components/apps/settings-app'
 import { SafariApp } from '@/components/apps/safari-app'
 import { AnyAiApp } from '@/components/apps/anyai-app'
+import { NotesApp } from '@/components/apps/notes-app'
 import { LockScreen } from './lock-screen'
 import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
@@ -24,6 +25,7 @@ const APPS: Record<AppId, () => React.ReactNode> = {
   settings: () => <SettingsApp />,
   safari: () => <SafariApp />,
   anyai: () => <AnyAiApp />,
+  notes: () => <NotesApp />,
 }
 
 function Screens() {

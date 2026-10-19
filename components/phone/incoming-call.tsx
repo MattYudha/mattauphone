@@ -4,6 +4,8 @@ import { withBasePath } from '@/lib/base-path'
 import { useEffect, useState } from 'react'
 import { Phone, PhoneOff, Mic, MicOff, Grid3x3, Volume2, Plus, Video, UserRound } from 'lucide-react'
 import { contacts } from '@/lib/story/contacts'
+import { useStory } from '@/lib/story/store'
+import { playSound, stopSound } from '@/lib/sound'
 
 const RING_DELAY_MS = 30_000
 
@@ -21,11 +23,26 @@ export function IncomingCall() {
   const [muted, setMuted] = useState(false)
   const [speaker, setSpeaker] = useState(false)
   const caller = contacts.yh
+  const { yhCallEnded, endYhCall } = useStory()
 
   useEffect(() => {
+    if (yhCallEnded) return
     const timer = window.setTimeout(() => setState('ringing'), RING_DELAY_MS)
     return () => window.clearTimeout(timer)
+    // The call should ring only once per session, so a later yhCallEnded change must not reschedule it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (state !== 'ringing') return
+    playSound('ringtone', { loop: true })
+    return () => stopSound('ringtone')
+  }, [state])
+
+  useEffect(() => {
+    if (state !== 'connected') return
+    return () => stopSound('yhCall')
+  }, [state])
 
   useEffect(() => {
     if (state !== 'ringing' || typeof navigator.vibrate !== 'function') return
@@ -46,7 +63,20 @@ export function IncomingCall() {
 
   if (state === 'idle') return null
 
-  const hangUp = () => setState('idle')
+  const decline = () => setState('idle')
+
+  const answer = () => {
+    stopSound('ringtone')
+    // Must start inside the tap handler so mobile browsers allow playback.
+    playSound('yhCall')
+    setState('connected')
+  }
+
+  const endCall = () => {
+    stopSound('yhCall')
+    setState('idle')
+    endYhCall()
+  }
 
   return (
     <div
@@ -73,10 +103,10 @@ export function IncomingCall() {
 
       {state === 'ringing' ? (
         <div className="relative flex items-end justify-between px-14 pb-20">
-          <CallButton label="거절" onClick={hangUp} className="bg-[#ff3b30]">
+          <CallButton label="거절" onClick={decline} className="bg-[#ff3b30]">
             <PhoneOff className="h-8 w-8" aria-hidden="true" />
           </CallButton>
-          <CallButton label="응답" onClick={() => setState('connected')} className="animate-bounce bg-[#34c759]">
+          <CallButton label="응답" onClick={answer} className="animate-bounce bg-[#34c759]">
             <Phone className="h-8 w-8" aria-hidden="true" />
           </CallButton>
         </div>
@@ -102,7 +132,7 @@ export function IncomingCall() {
               <UserRound className="h-7 w-7" aria-hidden="true" />
             </Control>
           </div>
-          <CallButton label="통화 종료" onClick={hangUp} className="bg-[#ff3b30]" hideText>
+          <CallButton label="통화 종료" onClick={endCall} className="bg-[#ff3b30]" hideText>
             <PhoneOff className="h-8 w-8" aria-hidden="true" />
           </CallButton>
         </div>

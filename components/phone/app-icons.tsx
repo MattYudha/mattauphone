@@ -11,6 +11,7 @@ export type IconKind =
   | 'anyai'
   | 'calendar'
   | 'clock'
+  | 'notes'
 
 const base = 'relative flex size-full items-center justify-center overflow-hidden rounded-[23%]'
 
@@ -118,6 +119,17 @@ export function AppGlyph({ kind }: { kind: IconKind }) {
             />
             <circle cx="38" cy="38" r="4" fill="#b9c3ff" />
           </svg>
+        </span>
+      )
+    case 'notes':
+      return (
+        <span className={`${base} flex-col justify-start bg-white`}>
+          <span className="h-[26%] w-full bg-gradient-to-b from-[#ffd84d] to-[#f8c537]" />
+          <span className="mt-[12%] flex w-full flex-col gap-[9%] px-[16%]">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="h-px w-full bg-black/15" />
+            ))}
+          </span>
         </span>
       )
     case 'calendar':
