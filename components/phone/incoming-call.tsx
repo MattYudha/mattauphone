@@ -97,11 +97,11 @@ export function IncomingCall() {
       className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden bg-[#1c1c1e] text-white"
     >
 
-      <div className="relative flex flex-1 flex-col items-center px-8 pt-24">
+      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-8 pb-4 pt-10">
         <p className="text-[15px] text-white/70">{state === 'ringing' ? '휴대전화' : formatDuration(seconds)}</p>
-        <h2 className="mt-2 text-balance text-center text-[34px] font-normal tracking-tight">{caller.name}</h2>
+        <h2 className="mt-2 text-balance text-center text-[30px] font-normal tracking-tight">{caller.name}</h2>
         {state === 'ringing' && (
-          <div className="animate-ring-buzz relative mt-14 flex h-32 w-32 items-center justify-center">
+          <div className="animate-ring-buzz relative mt-10 flex h-32 w-32 shrink-0 items-center justify-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-white/15" />
             <img
               src={caller.photo || withBasePath('/placeholder.svg')}
@@ -113,7 +113,7 @@ export function IncomingCall() {
       </div>
 
       {state === 'ringing' ? (
-        <div className="relative flex items-end justify-between px-14 pb-20">
+        <div className="relative flex shrink-0 items-end justify-between px-14 pb-14">
           <CallButton label="거절" onClick={decline} className="bg-[#ff3b30]">
             <PhoneOff className="h-8 w-8" aria-hidden="true" />
           </CallButton>
@@ -122,8 +122,8 @@ export function IncomingCall() {
           </CallButton>
         </div>
       ) : (
-        <div className="relative flex flex-col items-center gap-14 px-10 pb-20">
-          <div className="grid w-full grid-cols-3 gap-x-6 gap-y-6">
+        <div className="relative flex shrink-0 flex-col items-center gap-8 px-10 pb-10">
+          <div className="grid w-full grid-cols-3 gap-x-6 gap-y-5">
             <Control text="소리 끔" active={muted} onClick={() => setMuted((v) => !v)}>
               {muted ? <MicOff className="h-7 w-7" aria-hidden="true" /> : <Mic className="h-7 w-7" aria-hidden="true" />}
             </Control>
@@ -189,7 +189,7 @@ function Control({
   return (
     <button type="button" onClick={onClick} aria-pressed={onClick ? !!active : undefined} className="flex flex-col items-center gap-2">
       <span
-        className={`flex h-[72px] w-[72px] items-center justify-center rounded-full backdrop-blur-md transition-colors ${
+        className={`flex h-16 w-16 items-center justify-center rounded-full backdrop-blur-md transition-colors ${
           active ? 'bg-white text-black' : 'bg-white/20 text-white'
         }`}
       >

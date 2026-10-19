@@ -89,20 +89,20 @@ function OutgoingCallScreen({ contactId, state }: { contactId: ContactId; state:
       aria-label={state === 'dialing' ? `${contact.name}에게 전화 거는 중` : `${contact.name}와 통화 중`}
       className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden bg-[#1c1c1e] text-white"
     >
-      <div className="flex flex-1 flex-col items-center px-8 pt-24">
-        <p className="text-[15px] text-white/70" aria-live="polite">
-          {state === 'dialing' ? '전화 거는 중...' : formatDuration(seconds)}
-        </p>
-        <h2 className="mt-2 text-balance text-center text-[34px] font-normal tracking-tight">{contact.name}</h2>
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-8 pb-4 pt-10">
         <img
           src={contact.photo || withBasePath('/placeholder.svg')}
           alt={`${contact.name} 프로필 사진`}
-          className="mt-14 h-32 w-32 rounded-full object-cover ring-2 ring-white/30"
+          className="h-24 w-24 shrink-0 rounded-full object-cover ring-2 ring-white/30"
         />
+        <h2 className="mt-3 text-balance text-center text-[30px] font-normal tracking-tight">{contact.name}</h2>
+        <p className="mt-1 text-[15px] text-white/70" aria-live="polite">
+          {state === 'dialing' ? '전화 거는 중...' : formatDuration(seconds)}
+        </p>
       </div>
 
-      <div className="flex flex-col items-center gap-14 px-10 pb-20">
-        <div className="grid w-full grid-cols-3 gap-6">
+      <div className="flex shrink-0 flex-col items-center gap-8 px-10 pb-10">
+        <div className="grid w-full grid-cols-3 gap-x-6 gap-y-5">
           <Control text="소리 끔" active={muted} onClick={() => setMuted((v) => !v)}>
             {muted ? <MicOff className="h-7 w-7" aria-hidden="true" /> : <Mic className="h-7 w-7" aria-hidden="true" />}
           </Control>
@@ -149,7 +149,7 @@ function Control({
   return (
     <button type="button" onClick={onClick} aria-pressed={onClick ? !!active : undefined} className="flex flex-col items-center gap-2">
       <span
-        className={`flex h-[72px] w-[72px] items-center justify-center rounded-full transition-colors ${
+        className={`flex h-16 w-16 items-center justify-center rounded-full transition-colors ${
           active ? 'bg-white text-black' : 'bg-white/20 text-white'
         }`}
       >
