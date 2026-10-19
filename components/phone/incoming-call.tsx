@@ -41,10 +41,8 @@ export function IncomingCall() {
       role="dialog"
       aria-modal="true"
       aria-label={state === 'ringing' ? `${caller.name}에게서 걸려온 전화` : `${caller.name}와 통화 중`}
-      className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden text-white"
+      className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden bg-[#1c1c1e] text-white"
     >
-      <img src={caller.photo || '/placeholder.svg'} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl" />
-      <div className="absolute inset-0 bg-black/55" />
 
       <div className="relative flex flex-1 flex-col items-center px-8 pt-24">
         <p className="text-[15px] text-white/70">{state === 'ringing' ? '휴대전화' : formatDuration(seconds)}</p>
