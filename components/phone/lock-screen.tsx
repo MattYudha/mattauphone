@@ -13,7 +13,7 @@ export function LockScreen() {
   return (
     <div
       className="absolute inset-0 flex touch-none select-none flex-col bg-cover bg-center text-white"
-      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }}
+      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.jpg')})` }}
       onPointerDown={(e) => (startY.current = e.clientY)}
       onPointerUp={(e) => {
         if (startY.current !== null && startY.current - e.clientY > 60) openPasscode()

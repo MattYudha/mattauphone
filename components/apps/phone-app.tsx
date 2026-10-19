@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { AppShell, Avatar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
 import { useBackHandler } from '@/lib/story/back-nav'
+import { startOutgoingCall } from '@/components/phone/outgoing-call'
 import { calls, callTypeLabel, type CallRecord } from '@/lib/story/calls'
 import { formatDuration, formatFullDate, formatIosListDate, formatTime } from '@/lib/story/time'
 
@@ -47,7 +48,7 @@ export function PhoneApp() {
             <li key={call.id}>
               <button
                 type="button"
-                onClick={() => setSelected(call)}
+                onClick={() => (call.contactId === 'yh' ? startOutgoingCall('yh') : setSelected(call))}
                 className="flex w-full items-center gap-2 pl-4 text-left active:bg-black/5"
               >
                 <span className="w-4 shrink-0">

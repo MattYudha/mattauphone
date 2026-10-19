@@ -1,11 +1,13 @@
 import { withBasePath } from '@/lib/base-path'
 
-export type SoundId = 'kakao' | 'ringtone' | 'yhCall'
+export type SoundId = 'kakao' | 'ringtone' | 'yhCall' | 'dialing' | 'yhOutgoing'
 
 const SOURCES: Record<SoundId, string> = {
   kakao: '/sounds/kakao.mp3',
   ringtone: '/sounds/ringtone.mp3',
   yhCall: '/sounds/yh-call.mp3',
+  dialing: '/sounds/dialing.mp3',
+  yhOutgoing: '/sounds/yh-outgoing.mp3',
 }
 
 type AudioStore = {
@@ -65,11 +67,19 @@ export function unlockSounds() {
   }
 }
 
-export function playSound(id: SoundId, { loop = false }: { loop?: boolean } = {}) {
+export function playSound(
+  id: SoundId,
+  { loop = false, onEnded }: { loop?: boolean; onEnded?: () => void } = {},
+) {
   const audio = get(id)
   if (!audio) return
   wanted[id] = true
   audio.loop = loop
+  audio.onended = onEnded
+    ? () => {
+        if (wanted[id]) onEnded()
+      }
+    : null
   audio.muted = false
   audio.currentTime = 0
   audio
@@ -89,6 +99,7 @@ export function stopSound(id: SoundId) {
   wanted[id] = false
   const audio = cache[id]
   if (!audio) return
+  audio.onended = null
   audio.loop = false
   audio.pause()
   audio.currentTime = 0

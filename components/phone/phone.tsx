@@ -14,6 +14,7 @@ import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
 import { NotificationBanner } from './notification-banner'
 import { IncomingCall } from './incoming-call'
+import { OutgoingCall } from './outgoing-call'
 import { TopNav } from './top-nav'
 import { BackNavProvider } from '@/lib/story/back-nav'
 
@@ -43,6 +44,7 @@ function Screens() {
       <TopNav />
       <NotificationBanner />
       <IncomingCall />
+      <OutgoingCall />
     </div>
   )
 }

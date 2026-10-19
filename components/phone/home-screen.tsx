@@ -30,7 +30,7 @@ export function HomeScreen() {
   return (
     <div
       className="animate-screen-in absolute inset-0 flex flex-col bg-cover bg-center text-white"
-      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }}
+      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.jpg')})` }}
     >
       <div className="relative flex h-full min-h-0 flex-col">
         <StatusBar tone="light" />
