@@ -159,5 +159,53 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-noto), -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    overflow-x: hidden;
   }
+}
+
+@keyframes passcode-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-12px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: passcode-shake 0.4s ease-in-out;
+}
+
+@keyframes banner-in {
+  from { transform: translateY(-120%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-banner-in {
+  animation: banner-in 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+@keyframes screen-in {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-screen-in {
+  animation: screen-in 0.28s ease-out;
+}
+
+@keyframes push-in {
+  from { transform: translateX(30%); opacity: 0.4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-push-in {
+  animation: push-in 0.25s ease-out;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

@@ -1,0 +1,49 @@
+'use client'
+
+import { StoryProvider, useStory, type AppId } from '@/lib/story/store'
+import { KakaoApp } from '@/components/apps/kakao/kakao-app'
+import { MessagesApp } from '@/components/apps/messages-app'
+import { PhoneApp } from '@/components/apps/phone-app'
+import { PhotosApp } from '@/components/apps/photos-app'
+import { SettingsApp } from '@/components/apps/settings-app'
+import { SafariApp } from '@/components/apps/safari-app'
+import { LockScreen } from './lock-screen'
+import { Passcode } from './passcode'
+import { HomeScreen } from './home-screen'
+import { NotificationBanner } from './notification-banner'
+
+const APPS: Record<AppId, () => React.ReactNode> = {
+  kakao: () => <KakaoApp />,
+  messages: () => <MessagesApp />,
+  phone: () => <PhoneApp />,
+  photos: () => <PhotosApp />,
+  settings: () => <SettingsApp />,
+  safari: () => <SafariApp />,
+}
+
+function Screens() {
+  const { screen } = useStory()
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-black">
+      {screen.kind === 'lock' && <LockScreen />}
+      {screen.kind === 'passcode' && <Passcode />}
+      {screen.kind === 'home' && <HomeScreen />}
+      {screen.kind === 'app' && (
+        <div key={screen.app} className="animate-screen-in absolute inset-0">
+          {APPS[screen.app]()}
+        </div>
+      )}
+      <NotificationBanner />
+    </div>
+  )
+}
+
+export function Phone() {
+  return (
+    <StoryProvider>
+      <div className="relative h-dvh w-full overflow-hidden bg-black sm:h-[min(844px,calc(100dvh-2rem))] sm:w-[390px] sm:rounded-[48px] sm:shadow-[0_0_0_10px_#0b0b0c,0_0_0_12px_#3a3a3c,0_30px_80px_rgba(0,0,0,0.6)]">
+        <Screens />
+      </div>
+    </StoryProvider>
+  )
+}
