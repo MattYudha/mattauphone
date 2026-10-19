@@ -8,10 +8,24 @@ const SOURCES: Record<SoundId, string> = {
   yhCall: '/sounds/yh-call.mp3',
 }
 
-const cache: Partial<Record<SoundId, HTMLAudioElement>> = {}
-// play() resolves asynchronously, so a stop can arrive before playback actually starts.
-// This flag records whether each sound should currently be audible.
-const wanted: Partial<Record<SoundId, boolean>> = {}
+type AudioStore = {
+  cache: Partial<Record<SoundId, HTMLAudioElement>>
+  // play() resolves asynchronously, so a stop can arrive before playback actually starts.
+  // This flag records whether each sound should currently be audible.
+  wanted: Partial<Record<SoundId, boolean>>
+}
+
+// Kept on globalThis so a hot reload of this module reuses (and can stop) audio that is
+// already playing, instead of orphaning a looping ringtone nothing can reach.
+const store: AudioStore = ((globalThis as { __storyAudio?: AudioStore }).__storyAudio ??= {
+  cache: {},
+  wanted: {},
+})
+const { cache, wanted } = store
+for (const audio of Object.values(cache)) {
+  audio?.pause()
+}
+for (const id of Object.keys(wanted) as SoundId[]) wanted[id] = false
 let unlocked = false
 
 function get(id: SoundId): HTMLAudioElement | null {
