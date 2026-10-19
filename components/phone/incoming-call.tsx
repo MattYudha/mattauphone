@@ -6,6 +6,7 @@ import { Phone, PhoneOff, Mic, MicOff, Grid3x3, Volume2, Plus, Video, UserRound 
 import { contacts } from '@/lib/story/contacts'
 import { useStory } from '@/lib/story/store'
 import { playSound, stopSound } from '@/lib/sound'
+import { isOutgoingCallActive } from './outgoing-call'
 
 const RING_DELAY_MS = 30_000
 
@@ -27,7 +28,13 @@ export function IncomingCall() {
 
   useEffect(() => {
     if (yhCallEnded) return
-    const timer = window.setTimeout(() => setState('ringing'), RING_DELAY_MS)
+    let timer = 0
+    // Don't interrupt a call the user placed; ring once it has ended.
+    const ring = () => {
+      if (isOutgoingCallActive()) timer = window.setTimeout(ring, 1000)
+      else setState('ringing')
+    }
+    timer = window.setTimeout(ring, RING_DELAY_MS)
     return () => window.clearTimeout(timer)
     // The call should ring only once per session, so a later yhCallEnded change must not reschedule it.
     // eslint-disable-next-line react-hooks/exhaustive-deps

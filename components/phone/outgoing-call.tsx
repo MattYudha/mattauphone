@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { PhoneOff, Mic, MicOff, Grid3x3, Volume2, Plus, Video, UserRound } from 'lucide-react'
 import { withBasePath } from '@/lib/base-path'
 import { contacts, type ContactId } from '@/lib/story/contacts'
-import { playSound, stopSound } from '@/lib/sound'
+import { playSound, primeSound, stopSound } from '@/lib/sound'
 
 type CallState = 'dialing' | 'connected'
 type ActiveCall = { contactId: ContactId; state: CallState } | null
@@ -22,7 +22,17 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener)
 }
 
+// The dialing tone is ~8s; if it can't play or never reports "ended", still pick up.
+const MAX_DIAL_MS = 10_000
+let connectTimer: number | undefined
+
+export function isOutgoingCallActive() {
+  return active !== null
+}
+
 function hangUp() {
+  window.clearTimeout(connectTimer)
+  connectTimer = undefined
   stopSound('dialing')
   stopSound('yhOutgoing')
   setActive(null)
@@ -30,14 +40,22 @@ function hangUp() {
 
 /** Must be called from a tap handler so mobile browsers allow the dialing tone to play. */
 export function startOutgoingCall(contactId: ContactId) {
+  window.clearTimeout(connectTimer)
   setActive({ contactId, state: 'dialing' })
-  playSound('dialing', {
-    onEnded: () => {
-      if (active?.contactId !== contactId) return
-      setActive({ contactId, state: 'connected' })
-      playSound('yhOutgoing')
-    },
-  })
+  // Unlock the answer audio inside this tap; it starts later from a non-gesture callback.
+  primeSound('yhOutgoing')
+
+  const connect = () => {
+    window.clearTimeout(connectTimer)
+    connectTimer = undefined
+    if (active?.contactId !== contactId || active.state !== 'dialing') return
+    stopSound('dialing')
+    setActive({ contactId, state: 'connected' })
+    playSound('yhOutgoing')
+  }
+
+  playSound('dialing', { onEnded: connect })
+  connectTimer = window.setTimeout(connect, MAX_DIAL_MS)
 }
 
 function formatDuration(totalSeconds: number) {
@@ -63,11 +81,6 @@ function OutgoingCallScreen({ contactId, state }: { contactId: ContactId; state:
     const interval = window.setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => window.clearInterval(interval)
   }, [state])
-
-  useEffect(() => () => {
-    stopSound('dialing')
-    stopSound('yhOutgoing')
-  }, [])
 
   return (
     <div

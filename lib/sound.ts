@@ -95,6 +95,24 @@ export function playSound(
     })
 }
 
+/** Briefly plays a sound muted inside a tap so it can be started later without a gesture. */
+export function primeSound(id: SoundId) {
+  const audio = get(id)
+  if (!audio || wanted[id]) return
+  audio.muted = true
+  audio
+    .play()
+    .then(() => {
+      if (wanted[id]) return
+      audio.pause()
+      audio.currentTime = 0
+    })
+    .catch(() => {})
+    .finally(() => {
+      audio.muted = false
+    })
+}
+
 export function stopSound(id: SoundId) {
   wanted[id] = false
   const audio = cache[id]
