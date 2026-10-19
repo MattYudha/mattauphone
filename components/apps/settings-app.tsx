@@ -1,5 +1,6 @@
 'use client'
 
+import { withBasePath } from '@/lib/base-path'
 import { useState } from 'react'
 import {
   Battery,
@@ -212,7 +213,7 @@ function PageBody({ page, toggles, flip }: { page: PageId; toggles: Toggles; fli
       )
     case 'wallpaper':
       return (
-        <div className="mx-auto aspect-[9/19] w-32 overflow-hidden rounded-2xl bg-cover bg-center shadow" style={{ backgroundImage: 'url(/images/wallpaper.png)' }} role="img" aria-label="현재 배경화면" />
+        <div className="mx-auto aspect-[9/19] w-32 overflow-hidden rounded-2xl bg-cover bg-center shadow" style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }} role="img" aria-label="현재 배경화면" />
       )
     case 'battery':
       return (

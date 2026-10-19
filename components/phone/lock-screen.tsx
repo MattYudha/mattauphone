@@ -1,5 +1,6 @@
 'use client'
 
+import { withBasePath } from '@/lib/base-path'
 import { useRef } from 'react'
 import { Camera, Flashlight, Lock } from 'lucide-react'
 import { useStory } from '@/lib/story/store'
@@ -12,7 +13,7 @@ export function LockScreen() {
   return (
     <div
       className="absolute inset-0 flex touch-none select-none flex-col bg-cover bg-center text-white"
-      style={{ backgroundImage: 'url(/images/wallpaper.png)' }}
+      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }}
       onPointerDown={(e) => (startY.current = e.clientY)}
       onPointerUp={(e) => {
         if (startY.current !== null && startY.current - e.clientY > 60) openPasscode()

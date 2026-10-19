@@ -77,7 +77,12 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const timers = useRef<number[]>([])
 
   useEffect(() => {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    if (typeof window === 'undefined') return
+    try {
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    } catch {
+      // Storage can be unavailable (e.g. privacy mode); progress then lives in memory only.
+    }
   }, [progress])
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 'use client'
 
+import { withBasePath } from '@/lib/base-path'
 import { Search } from 'lucide-react'
 import { useStory, type AppId } from '@/lib/story/store'
 import { AppGlyph, type IconKind } from './app-icons'
@@ -28,7 +29,7 @@ export function HomeScreen() {
   return (
     <div
       className="animate-screen-in absolute inset-0 flex flex-col bg-cover bg-center text-white"
-      style={{ backgroundImage: 'url(/images/wallpaper.png)' }}
+      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }}
     >
       <div className="relative flex h-full min-h-0 flex-col">
         <StatusBar tone="light" />

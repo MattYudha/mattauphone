@@ -1,5 +1,6 @@
 'use client'
 
+import { withBasePath } from '@/lib/base-path'
 import { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useStory } from '@/lib/story/store'
@@ -61,7 +62,7 @@ export function Passcode() {
   return (
     <div
       className="absolute inset-0 flex flex-col bg-cover bg-center text-white"
-      style={{ backgroundImage: 'url(/images/wallpaper.png)' }}
+      style={{ backgroundImage: `url(${withBasePath('/images/wallpaper.png')})` }}
     >
       <div className="absolute inset-0 bg-black/45 backdrop-blur-xl" aria-hidden />
       <div className="relative flex h-full flex-col">

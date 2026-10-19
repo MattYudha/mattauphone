@@ -1,5 +1,6 @@
 'use client'
 
+import { withBasePath } from '@/lib/base-path'
 import { useEffect, useState } from 'react'
 import { Phone, PhoneOff, Mic, MicOff, Grid3x3, Volume2, Plus, Video, UserRound } from 'lucide-react'
 import { contacts } from '@/lib/story/contacts'
@@ -62,7 +63,7 @@ export function IncomingCall() {
           <div className="animate-ring-buzz relative mt-14 flex h-32 w-32 items-center justify-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-white/15" />
             <img
-              src={caller.photo || '/placeholder.svg'}
+              src={caller.photo || withBasePath('/placeholder.svg')}
               alt={`${caller.name} 프로필 사진`}
               className="relative h-32 w-32 rounded-full object-cover ring-2 ring-white/30"
             />
