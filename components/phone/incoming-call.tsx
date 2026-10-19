@@ -63,7 +63,10 @@ export function IncomingCall() {
 
   if (state === 'idle') return null
 
-  const decline = () => setState('idle')
+  const decline = () => {
+    stopSound('ringtone')
+    setState('idle')
+  }
 
   const answer = () => {
     stopSound('ringtone')
@@ -73,6 +76,7 @@ export function IncomingCall() {
   }
 
   const endCall = () => {
+    stopSound('ringtone')
     stopSound('yhCall')
     setState('idle')
     endYhCall()

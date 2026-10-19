@@ -9,6 +9,9 @@ const SOURCES: Record<SoundId, string> = {
 }
 
 const cache: Partial<Record<SoundId, HTMLAudioElement>> = {}
+// play() resolves asynchronously, so a stop can arrive before playback actually starts.
+// This flag records whether each sound should currently be audible.
+const wanted: Partial<Record<SoundId, boolean>> = {}
 let unlocked = false
 
 function get(id: SoundId): HTMLAudioElement | null {
@@ -30,17 +33,19 @@ export function unlockSounds() {
   if (unlocked || typeof window === 'undefined') return
   unlocked = true
   for (const id of Object.keys(SOURCES) as SoundId[]) {
+    if (wanted[id]) continue
     const audio = get(id)
     if (!audio) continue
     audio.muted = true
     audio
       .play()
       .then(() => {
+        if (wanted[id]) return
         audio.pause()
         audio.currentTime = 0
-        audio.muted = false
       })
-      .catch(() => {
+      .catch(() => {})
+      .finally(() => {
         audio.muted = false
       })
   }
@@ -49,18 +54,28 @@ export function unlockSounds() {
 export function playSound(id: SoundId, { loop = false }: { loop?: boolean } = {}) {
   const audio = get(id)
   if (!audio) return
+  wanted[id] = true
   audio.loop = loop
   audio.muted = false
   audio.currentTime = 0
-  audio.play().catch(() => {
-    // Autoplay can still be blocked (no prior gesture); the story continues silently.
-  })
+  audio
+    .play()
+    .then(() => {
+      if (!wanted[id]) {
+        audio.pause()
+        audio.currentTime = 0
+      }
+    })
+    .catch(() => {
+      // Autoplay can still be blocked (no prior gesture); the story continues silently.
+    })
 }
 
 export function stopSound(id: SoundId) {
+  wanted[id] = false
   const audio = cache[id]
   if (!audio) return
+  audio.loop = false
   audio.pause()
   audio.currentTime = 0
-  audio.loop = false
 }
