@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { AppShell, Avatar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
+import { useBackHandler } from '@/lib/story/back-nav'
 import { smsThreads, type SmsThread } from '@/lib/story/sms'
 import { formatIosListDate, formatIosStamp, toTime } from '@/lib/story/time'
 
@@ -14,6 +15,7 @@ const sortedThreads = [...smsThreads].sort(
 export function MessagesApp() {
   const [openId, setOpenId] = useState<string | null>(null)
   const thread = sortedThreads.find((t) => t.id === openId)
+  useBackHandler(!!thread, () => setOpenId(null))
   if (thread) return <Thread thread={thread} onBack={() => setOpenId(null)} />
 
   return (

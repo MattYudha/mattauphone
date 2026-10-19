@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useBackHandler } from '@/lib/story/back-nav'
 import { ChevronLeft, ChevronRight, Ellipsis, Heart, Info, Search, Share, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
@@ -18,6 +19,7 @@ function formatPhotoTime(iso: string) {
 
 export function PhotosApp() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  useBackHandler(openIndex !== null, () => setOpenIndex(null))
   const gridRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { BookOpen, ChevronLeft, ChevronRight, Clock, Copy, Lock, RotateCw, Search, Share, X } from 'lucide-react'
 import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { recentSearches } from '@/lib/story/search'
+import { useBackHandler } from '@/lib/story/back-nav'
 
 type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string }
 
@@ -14,6 +15,7 @@ export function SafariApp() {
   const view = stack[stack.length - 1]
   const push = (v: View) => setStack((s) => [...s, v])
   const back = () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s))
+  useBackHandler(stack.length > 1, back)
 
   const address =
     view.kind === 'preview' ? `m.search.naver.com` : 'm.naver.com'

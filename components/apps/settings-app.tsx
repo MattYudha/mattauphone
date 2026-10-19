@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AppShell, Avatar } from '@/components/phone/chrome'
+import { useBackHandler } from '@/lib/story/back-nav'
 import { OWNER } from '@/lib/story/contacts'
 import { useStory } from '@/lib/story/store'
 
@@ -58,6 +59,7 @@ export function SettingsApp() {
     autoBright: true,
   })
   const flip = (k: keyof Toggles) => setToggles((t) => ({ ...t, [k]: !t[k] }))
+  useBackHandler(!!page, () => setPage(null))
 
   if (page) {
     const item = ITEMS.find((i) => i.id === page)

@@ -5,12 +5,14 @@ import { ChevronLeft, Info, PhoneOutgoing } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AppShell, Avatar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
+import { useBackHandler } from '@/lib/story/back-nav'
 import { calls, callTypeLabel, type CallRecord } from '@/lib/story/calls'
 import { formatDuration, formatFullDate, formatIosListDate, formatTime } from '@/lib/story/time'
 
 export function PhoneApp() {
   const [filter, setFilter] = useState<'all' | 'missed'>('all')
   const [selected, setSelected] = useState<CallRecord | null>(null)
+  useBackHandler(!!selected, () => setSelected(null))
 
   if (selected) return <CallDetail call={selected} onBack={() => setSelected(null)} />
 

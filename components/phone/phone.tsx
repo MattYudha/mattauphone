@@ -13,6 +13,8 @@ import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
 import { NotificationBanner } from './notification-banner'
 import { IncomingCall } from './incoming-call'
+import { TopNav } from './top-nav'
+import { BackNavProvider } from '@/lib/story/back-nav'
 
 const APPS: Record<AppId, () => React.ReactNode> = {
   kakao: () => <KakaoApp />,
@@ -36,6 +38,7 @@ function Screens() {
           {APPS[screen.app]()}
         </div>
       )}
+      <TopNav />
       <NotificationBanner />
       <IncomingCall />
     </div>
@@ -46,7 +49,9 @@ export function Phone() {
   return (
     <StoryProvider>
       <div className="relative h-dvh w-full overflow-hidden bg-black sm:h-[min(844px,calc(100dvh-2rem))] sm:w-[390px] sm:rounded-[48px] sm:shadow-[0_0_0_10px_#0b0b0c,0_0_0_12px_#3a3a3c,0_30px_80px_rgba(0,0,0,0.6)]">
-        <Screens />
+        <BackNavProvider>
+          <Screens />
+        </BackNavProvider>
       </div>
     </StoryProvider>
   )
