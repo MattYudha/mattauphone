@@ -88,7 +88,7 @@ function CallDetail({ call, onBack }: { call: CallRecord; onBack: () => void }) 
       }
     >
       <div className="flex flex-col items-center px-4 pb-6">
-        <Avatar initial={c.initial} color="#a7adb7" size={88} />
+        <Avatar initial={c.initial} color="#a7adb7" size={88} src={c.photo} />
         <h2 className="mt-3 text-[26px] font-semibold">{c.name}</h2>
         <section className="mt-6 w-full rounded-xl bg-white px-4 py-3">
           <p className="text-[15px] font-semibold">{formatFullDate(call.at)}</p>

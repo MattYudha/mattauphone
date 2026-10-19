@@ -6,7 +6,7 @@ import { EVENT_JY_MESSAGES, EVENT_YH_MESSAGES } from './events'
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
 import { toTime } from './time'
 
-export type AppId = 'kakao' | 'messages' | 'phone' | 'photos' | 'settings' | 'safari'
+export type AppId = 'kakao' | 'messages' | 'phone' | 'photos' | 'settings' | 'safari' | 'anyai'
 export type Screen = { kind: 'lock' } | { kind: 'passcode' } | { kind: 'home' } | { kind: 'app'; app: AppId }
 
 type StoryProgress = {

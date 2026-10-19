@@ -35,7 +35,7 @@ export function MessagesApp() {
                 onClick={() => setOpenId(t.id)}
                 className="flex w-full items-center gap-3 pl-4 text-left active:bg-black/5"
               >
-                <Avatar initial={c.initial} color="#a7adb7" size={44} />
+                <Avatar initial={c.initial} color="#a7adb7" size={44} src={c.photo} />
                 <span className="flex min-w-0 flex-1 flex-col border-b border-black/10 py-2.5 pr-4">
                   <span className="flex items-center gap-2">
                     <span className="flex-1 truncate text-[16px] font-semibold">{c.name}</span>
@@ -70,7 +70,7 @@ function Thread({ thread, onBack }: { thread: SmsThread; onBack: () => void }) {
           <button type="button" onClick={onBack} aria-label="메시지 목록으로" className="absolute left-1 top-2 flex items-center text-[#007aff]">
             <ChevronLeft className="size-8" />
           </button>
-          <Avatar initial={c.initial} color="#a7adb7" size={46} />
+          <Avatar initial={c.initial} color="#a7adb7" size={46} src={c.photo} />
           <h2 className="mt-1 text-[12px]">{c.name}</h2>
         </header>
       }

@@ -1,43 +1,175 @@
 'use client'
 
-import { useState } from 'react'
-import { ImageOff } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight, Ellipsis, Heart, Info, Search, Share, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { AppShell } from '@/components/phone/chrome'
+import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
+import { photos } from '@/lib/story/photos'
+
+function formatPhotoDate(iso: string) {
+  const d = new Date(iso)
+  const parts = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric' }).format(d)
+  return parts
+}
+
+function formatPhotoTime(iso: string) {
+  return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso))
+}
 
 export function PhotosApp() {
-  const [tab, setTab] = useState<'library' | 'albums'>('library')
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const el = gridRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
+
   return (
-    <AppShell
-      header={
-        <header className="shrink-0 px-4 pb-2">
-          <h2 className="text-[32px] font-bold">{tab === 'library' ? '보관함' : '앨범'}</h2>
+    <div className="relative flex h-full flex-col bg-white text-black">
+      <StatusBar />
+      <div ref={gridRef} className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <header className="flex items-end justify-between px-4 pb-3 pt-2">
+          <div>
+            <h2 className="text-[32px] font-bold leading-tight tracking-tight">보관함</h2>
+            <p className="text-[13px] text-black/50">{`2025년 9월 - 11월 · 사진 ${photos.length}장`}</p>
+          </div>
+          <span className="flex items-center gap-2" aria-hidden>
+            <span className="flex size-9 items-center justify-center rounded-full bg-black/[0.06]">
+              <Search className="size-[18px]" />
+            </span>
+            <span className="rounded-full bg-black/[0.06] px-3.5 py-2 text-[14px] font-semibold">선택</span>
+          </span>
         </header>
-      }
-      footer={
-        <nav aria-label="사진 탭" className="mx-auto mb-1 flex w-56 shrink-0 rounded-full bg-black/5 p-1 text-[13px] font-medium">
-          {(['library', 'albums'] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              aria-current={tab === t ? 'page' : undefined}
-              className={cn('flex-1 rounded-full py-1.5', tab === t ? 'bg-white text-[#007aff] shadow-sm' : 'text-black/50')}
-            >
-              {t === 'library' ? '보관함' : '앨범'}
-            </button>
+        <ul className="grid grid-cols-3 gap-[2px]">
+          {photos.map((p, i) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(i)}
+                aria-label={`${formatPhotoDate(p.at)} 사진 크게 보기`}
+                className="block aspect-square w-full overflow-hidden bg-[#eee] active:opacity-80"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.src} alt={p.alt} className="size-full object-cover" loading="lazy" />
+              </button>
+            </li>
           ))}
-        </nav>
-      }
-      bodyClassName="flex"
-    >
-      <div className="m-auto flex flex-col items-center px-8 text-center">
-        <ImageOff className="size-12 text-black/25" aria-hidden />
-        <p className="mt-3 text-xl font-semibold">사진 없음</p>
-        <p className="mt-1 text-sm text-black/45">
-          {tab === 'library' ? '사진이나 동영상이 없습니다.' : '앨범이 없습니다.'}
-        </p>
+        </ul>
+        <p className="py-6 text-center text-[13px] text-black/45">{`사진 ${photos.length}장`}</p>
       </div>
-    </AppShell>
+      <nav aria-hidden className="mx-auto mb-1 flex shrink-0 rounded-full bg-black/[0.06] p-1 text-[13px] font-semibold backdrop-blur">
+        {['연', '월', '모든 사진'].map((t) => (
+          <span key={t} className={cn('rounded-full px-4 py-1.5', t === '모든 사진' ? 'bg-white shadow-sm' : 'text-black/60')}>
+            {t}
+          </span>
+        ))}
+      </nav>
+      <HomeIndicator />
+      {openIndex !== null && <Viewer index={openIndex} onChange={setOpenIndex} onClose={() => setOpenIndex(null)} />}
+    </div>
+  )
+}
+
+function Viewer({ index, onChange, onClose }: { index: number; onChange: (i: number) => void; onClose: () => void }) {
+  const photo = photos[index]
+  const startX = useRef<number | null>(null)
+  const [chrome, setChrome] = useState(true)
+  const hasPrev = index > 0
+  const hasNext = index < photos.length - 1
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft' && index > 0) onChange(index - 1)
+      if (e.key === 'ArrowRight' && index < photos.length - 1) onChange(index + 1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [index, onChange, onClose])
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="사진 보기"
+      className={cn('animate-screen-in absolute inset-0 z-20 flex flex-col transition-colors', chrome ? 'bg-white text-black' : 'bg-black text-white')}
+    >
+      <StatusBar tone={chrome ? 'dark' : 'light'} className={cn('transition-opacity', !chrome && 'opacity-0')} />
+      <header className={cn('flex h-12 shrink-0 items-center px-2 transition-opacity', !chrome && 'pointer-events-none opacity-0')}>
+        <button type="button" onClick={onClose} aria-label="보관함으로" className="flex size-10 items-center justify-center rounded-full bg-black/[0.06]">
+          <ChevronLeft className="size-6" />
+        </button>
+        <div className="flex-1 text-center leading-tight">
+          <p className="text-[15px] font-semibold">{formatPhotoDate(photo.at)}</p>
+          <p className="text-[12px] text-black/50">{formatPhotoTime(photo.at)}</p>
+        </div>
+        <span className="flex size-10 items-center justify-center rounded-full bg-black/[0.06]" aria-hidden>
+          <Ellipsis className="size-5" />
+        </span>
+      </header>
+      <div
+        className="relative flex min-h-0 flex-1 touch-pan-y items-center justify-center overflow-hidden"
+        onPointerDown={(e) => (startX.current = e.clientX)}
+        onPointerUp={(e) => {
+          if (startX.current === null) return
+          const dx = e.clientX - startX.current
+          startX.current = null
+          if (dx > 50 && hasPrev) onChange(index - 1)
+          else if (dx < -50 && hasNext) onChange(index + 1)
+          else if (Math.abs(dx) < 6) setChrome((c) => !c)
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img key={photo.id} src={photo.src} alt={photo.alt} draggable={false} className="animate-screen-in max-h-full max-w-full select-none object-contain" />
+        {hasPrev && (
+          <button
+            type="button"
+            onPointerUp={(e) => e.stopPropagation()}
+            onClick={() => onChange(index - 1)}
+            aria-label="이전 사진"
+            className={cn('absolute left-2 hidden size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur sm:flex', !chrome && 'sm:hidden')}
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+        )}
+        {hasNext && (
+          <button
+            type="button"
+            onPointerUp={(e) => e.stopPropagation()}
+            onClick={() => onChange(index + 1)}
+            aria-label="다음 사진"
+            className={cn('absolute right-2 hidden size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur sm:flex', !chrome && 'sm:hidden')}
+          >
+            <ChevronRight className="size-5" />
+          </button>
+        )}
+      </div>
+      <div className={cn('shrink-0 transition-opacity', !chrome && 'pointer-events-none opacity-0')}>
+        <ul className="no-scrollbar flex justify-center gap-[2px] overflow-x-auto px-4 py-2">
+          {photos.map((p, i) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => onChange(i)}
+                aria-label={`${i + 1}번째 사진`}
+                aria-current={i === index ? 'true' : undefined}
+                className={cn('block h-9 overflow-hidden transition-all', i === index ? 'mx-1 w-7' : 'w-5 opacity-80')}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.src} alt="" className="size-full object-cover" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="flex items-center justify-between px-6 pb-1 pt-1 text-[#007aff]" aria-hidden>
+          <Share className="size-6" strokeWidth={1.7} />
+          <Heart className="size-6" strokeWidth={1.7} />
+          <Info className="size-6" strokeWidth={1.7} />
+          <Trash2 className="size-6" strokeWidth={1.7} />
+        </div>
+        <HomeIndicator tone={chrome ? 'dark' : 'light'} onActivate={onClose} label="사진 닫기" />
+      </div>
+    </div>
   )
 }

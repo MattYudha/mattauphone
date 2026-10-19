@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { ChevronLeft, MapPin } from 'lucide-react'
+import { ChevronLeft, Hash, Menu, Plus, Search, Smile, MapPin } from 'lucide-react'
 import { Avatar, HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
 import type { KakaoMessage, KakaoRoomId } from '@/lib/story/kakao'
@@ -9,12 +9,15 @@ import { useStory } from '@/lib/story/store'
 import { dayKey, formatFullDate, formatTime } from '@/lib/story/time'
 import { Sticker } from './sticker'
 
+const ROOM_BG = '#bacee0'
+
 export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
-  const { rooms, closeKakaoRoom, markRoomRead, onYhRoomShown } = useStory()
+  const { rooms, closeKakaoRoom, markRoomRead, onYhRoomShown, totalUnread, unreadByRoom } = useStory()
   const room = rooms.find((r) => r.id === roomId)!
   const contact = contacts[room.contactId]
   const scrollRef = useRef<HTMLDivElement>(null)
   const count = room.messages.length
+  const otherUnread = totalUnread - (unreadByRoom[roomId] ?? 0)
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -30,19 +33,30 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
   }, [roomId, onYhRoomShown])
 
   return (
-    <div className="animate-push-in flex h-full flex-col bg-[#b2c7d9] text-black">
+    <div className="animate-push-in flex h-full flex-col text-black" style={{ backgroundColor: ROOM_BG }}>
       <StatusBar />
-      <header className="flex h-11 shrink-0 items-center gap-1 px-2">
-        <button type="button" onClick={closeKakaoRoom} aria-label="채팅 목록으로" className="p-1.5">
-          <ChevronLeft className="size-7" />
+      <header className="relative flex h-12 shrink-0 items-center px-1.5">
+        <button type="button" onClick={closeKakaoRoom} aria-label="채팅 목록으로" className="flex items-center p-1.5">
+          <ChevronLeft className="size-7" strokeWidth={1.8} />
+          {otherUnread > 0 && <span className="text-[15px] font-medium">{otherUnread}</span>}
         </button>
-        <h2 className="truncate text-[17px] font-semibold">{contact.name}</h2>
+        <h2 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate text-[17px] font-semibold">{contact.name}</h2>
+        <span className="ml-auto flex items-center gap-4 pr-3" aria-hidden>
+          <Search className="size-[22px]" strokeWidth={1.8} />
+          <Menu className="size-[22px]" strokeWidth={1.8} />
+        </span>
       </header>
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 pb-3">
-        <MessageList messages={room.messages} contactName={contact.name} initial={contact.initial} color={contact.color} />
+      <div ref={scrollRef} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2.5 pb-3">
+        <MessageList messages={room.messages} contactName={contact.name} initial={contact.initial} color={contact.color} photo={contact.photo} />
       </div>
-      <div className="shrink-0 bg-white px-3 py-2">
-        <p className="rounded-full bg-[#f2f2f2] px-4 py-2 text-[13px] text-black/35">메시지를 보낼 수 없는 기록 보기 화면입니다</p>
+      <div className="flex shrink-0 items-center gap-2 bg-white px-2.5 py-2" aria-hidden>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#f2f2f2]">
+          <Plus className="size-5 text-[#6b6b6b]" strokeWidth={1.8} />
+        </span>
+        <span className="flex h-9 min-w-0 flex-1 items-center justify-end rounded-full bg-[#f2f2f2] px-3">
+          <Smile className="size-[22px] text-[#6b6b6b]" strokeWidth={1.6} />
+        </span>
+        <Hash className="size-6 shrink-0 text-[#6b6b6b]" strokeWidth={1.7} />
       </div>
       <HomeIndicator className="bg-white" />
     </div>
@@ -54,36 +68,43 @@ function MessageList({
   contactName,
   initial,
   color,
+  photo,
 }: {
   messages: KakaoMessage[]
   contactName: string
   initial: string
   color: string
+  photo?: string
 }) {
   return (
     <ol className="flex flex-col">
       {messages.map((m, i) => {
         const prev = messages[i - 1]
+        const next = messages[i + 1]
         const newDay = !prev || dayKey(prev.at) !== dayKey(m.at)
         const startsGroup = newDay || prev.from !== m.from || formatTime(prev.at) !== formatTime(m.at)
+        const endsGroup = !next || next.from !== m.from || formatTime(next.at) !== formatTime(m.at) || dayKey(next.at) !== dayKey(m.at)
+        const time = endsGroup ? <time className="shrink-0 pb-[1px] text-[10.5px] text-[#556677]">{formatTime(m.at)}</time> : null
         return (
           <li key={m.id} className="flex flex-col">
             {newDay && (
-              <p className="mx-auto my-4 rounded-full bg-black/15 px-3 py-1 text-[11px] text-white">{formatFullDate(m.at)}</p>
+              <p className="mx-auto my-4 rounded-full bg-[#9fb3c6]/80 px-3.5 py-[5px] text-[11.5px] text-white">{formatFullDate(m.at)}</p>
             )}
             {m.from === 'me' ? (
-              <div className={`flex items-end justify-end gap-1 ${startsGroup ? 'mt-2' : 'mt-1'}`}>
-                <time className="shrink-0 text-[10px] text-black/45">{formatTime(m.at)}</time>
-                <Bubble message={m} mine />
+              <div className={`flex items-end justify-end gap-[5px] pr-1.5 ${startsGroup ? 'mt-2.5' : 'mt-[5px]'}`}>
+                {time}
+                <Bubble message={m} mine tail={startsGroup} />
               </div>
             ) : (
-              <div className={`flex gap-2 ${startsGroup ? 'mt-2' : 'mt-1'}`}>
-                <span className="w-10 shrink-0">{startsGroup && <Avatar initial={initial} color={color} size={40} shape="squircle" />}</span>
-                <div className="min-w-0 flex-1">
-                  {startsGroup && <p className="mb-1 text-xs text-black/70">{contactName}</p>}
-                  <div className="flex items-end gap-1">
-                    <Bubble message={m} />
-                    <time className="shrink-0 text-[10px] text-black/45">{formatTime(m.at)}</time>
+              <div className={`flex gap-2 ${startsGroup ? 'mt-2.5' : 'mt-[5px]'}`}>
+                <span className="w-10 shrink-0">
+                  {startsGroup && <Avatar initial={initial} color={color} size={40} shape="squircle" src={photo} />}
+                </span>
+                <div className="min-w-0 flex-1 pl-1.5">
+                  {startsGroup && <p className="mb-[5px] text-[12.5px] text-[#4a5561]">{contactName}</p>}
+                  <div className="flex items-end gap-[5px]">
+                    <Bubble message={m} tail={startsGroup} />
+                    {time}
                   </div>
                 </div>
               </div>
@@ -95,28 +116,35 @@ function MessageList({
   )
 }
 
-function Bubble({ message, mine = false }: { message: KakaoMessage; mine?: boolean }) {
+function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?: boolean; tail: boolean }) {
   const c = message.content
   if (c.type === 'sticker') return <Sticker kind={c.sticker} />
   if (c.type === 'location') {
     return (
-      <div className="w-52 overflow-hidden rounded-xl bg-white shadow-sm">
-        <div className="flex h-20 items-center justify-center bg-[#e8eef3]">
+      <div className="w-52 overflow-hidden rounded-[14px] bg-white">
+        <div className="flex h-24 items-center justify-center bg-[#e8eef3]">
           <MapPin className="size-8 fill-[#ff5a4f] text-white" aria-hidden />
         </div>
-        <div className="px-3 py-2">
-          <p className="text-sm font-semibold">{c.title}</p>
-          <p className="text-xs text-black/45">위치 공유</p>
+        <div className="px-3 py-2.5">
+          <p className="text-[14px] font-semibold">{c.title}</p>
+          <p className="text-[12px] text-black/45">위치 공유</p>
         </div>
       </div>
     )
   }
+  const bg = mine ? '#fee500' : '#ffffff'
   return (
     <p
-      className={`max-w-[230px] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[14px] leading-snug ${
-        mine ? 'rounded-tr-sm bg-[#fee500]' : 'rounded-tl-sm bg-white'
-      }`}
+      className="relative max-w-[232px] whitespace-pre-wrap break-words rounded-[15px] px-[11px] py-[7px] text-[14.5px] leading-[1.4]"
+      style={{ backgroundColor: bg }}
     >
+      {tail && (
+        <span
+          aria-hidden
+          className={`absolute top-[6px] size-0 border-y-[5px] border-y-transparent ${mine ? '-right-[6px] border-l-[8px]' : '-left-[6px] border-r-[8px]'}`}
+          style={mine ? { borderLeftColor: bg } : { borderRightColor: bg }}
+        />
+      )}
       {c.text}
     </p>
   )

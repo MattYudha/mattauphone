@@ -80,8 +80,8 @@ export function SettingsApp() {
       }
     >
       <div className="flex flex-col gap-6 px-4 pb-6">
-        <section className="flex items-center gap-3 rounded-xl bg-white px-4 py-3">
-          <Avatar initial="원" color="#9aa3ad" size={56} />
+        <section className="flex items-center gap-3 rounded-[20px] bg-white px-4 py-3">
+          <Avatar initial="원" color="#9aa3ad" size={56} src={OWNER.photo} />
           <div>
             <p className="text-[19px] font-semibold">{OWNER.deviceName}</p>
             <p className="text-[13px] text-black/45">Apple 계정, iCloud 등</p>
@@ -234,18 +234,16 @@ function PageBody({ page, toggles, flip }: { page: PageId; toggles: Toggles; fli
       )
     case 'about':
       return (
-        <section className="rounded-xl bg-white px-4 py-4 text-[15px] leading-relaxed">
-          <p>이 웹사이트는 가상의 휴대폰 기록을 둘러보는 체험용 화면입니다.</p>
-          <p className="mt-2">모든 등장인물과 사건은 가상이며, 실존 인물·장소·기관과 관계가 없습니다.</p>
-          <p className="mt-2">화면의 시각은 실제 기기 시간과 상관없이 2025년 11월 19일 수요일 18:57(한국 시간)로 고정되어 있습니다.</p>
-          <p className="mt-2 text-black/45">잠금 화면 암호는 이야기 속 장치이며 실제 인증 기능이 아닙니다.</p>
+        <section className="rounded-[20px] bg-white px-4 py-4 text-[15px] leading-relaxed">
+          <p>{"이 웹사이트는 '영필' 씨피의 가상의 핸드폰 구성입니다."}</p>
+          <p className="mt-2">{"'나의 무심한 다정에게' 포스타입 작품 스토리를 기반으로 구성되었습니다."}</p>
         </section>
       )
   }
 }
 
 function Group({ children }: { children: React.ReactNode }) {
-  return <ul className="overflow-hidden rounded-xl bg-white">{children}</ul>
+  return <ul className="overflow-hidden rounded-[20px] bg-white">{children}</ul>
 }
 
 function Row({

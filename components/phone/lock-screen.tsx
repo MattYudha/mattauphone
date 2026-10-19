@@ -19,24 +19,28 @@ export function LockScreen() {
         startY.current = null
       }}
     >
-      <div className="absolute inset-0 bg-black/15" aria-hidden />
       <div className="relative flex h-full flex-col">
         <StatusBar tone="light" />
-        <div className="mt-2 flex flex-col items-center">
-          <Lock className="size-5 opacity-90" aria-hidden />
-          <p className="mt-3 text-lg font-medium tracking-wide">11월 19일 수요일</p>
-          <p className="text-[88px] font-bold leading-none tracking-tight tabular-nums drop-shadow-sm">18:57</p>
+        <div className="flex flex-col items-center">
+          <Lock className="size-[18px]" strokeWidth={2.5} aria-hidden />
+          <p className="mt-2 text-[20px] font-semibold text-white/90">11월 19일 수요일</p>
+          <p
+            className="-mt-1 text-[104px] font-semibold leading-[1.05] tracking-[-0.03em] tabular-nums text-white/90"
+            style={{ fontFamily: 'ui-rounded, "SF Pro Rounded", -apple-system, var(--font-noto), sans-serif' }}
+          >
+            18:57
+          </p>
         </div>
         <div className="flex-1" />
-        <div className="flex items-end justify-between px-11 pb-3">
-          <span className="flex size-12 items-center justify-center rounded-full bg-black/30 backdrop-blur-md" aria-hidden>
-            <Flashlight className="size-5" />
+        <div className="flex items-end justify-between px-12 pb-5">
+          <span className="flex size-[50px] items-center justify-center rounded-full bg-black/25 backdrop-blur-xl" aria-hidden>
+            <Flashlight className="size-[22px]" />
           </span>
-          <span className="flex size-12 items-center justify-center rounded-full bg-black/30 backdrop-blur-md" aria-hidden>
-            <Camera className="size-5" />
+          <span className="flex size-[50px] items-center justify-center rounded-full bg-black/25 backdrop-blur-xl" aria-hidden>
+            <Camera className="size-[22px]" />
           </span>
         </div>
-        <p className="pb-1 text-center text-sm text-white/85">위로 쓸어올려 잠금 해제</p>
+        <p className="pb-2 text-center text-[13px] font-medium text-white/80">쓸어올려서 열기</p>
         <HomeIndicator tone="light" onActivate={openPasscode} label="잠금 해제" />
       </div>
     </div>
