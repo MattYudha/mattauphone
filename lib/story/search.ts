@@ -1,5 +1,6 @@
 /** 원본 데이터: 위에서부터 오래된 순서 */
 export const searchHistoryOldestFirst: string[] = [
+  '배경 원작',
   '캐나다에서 한국 비행시간',
   '대한항공',
   '챗지피티',

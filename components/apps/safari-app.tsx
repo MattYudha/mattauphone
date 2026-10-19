@@ -9,6 +9,7 @@ import { withBasePath } from '@/lib/base-path'
 import { KinPost } from './naver/kin-post'
 import { DepressionResults } from './naver/depression-results'
 import { FlightResults } from './naver/flight-results'
+import { OriginalWorkResults } from './naver/original-work-results'
 
 type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string }
 
@@ -240,6 +241,8 @@ function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
         <DepressionResults />
       ) : query === '캐나다에서 한국 비행시간' ? (
         <FlightResults />
+      ) : query === '배경 원작' ? (
+        <OriginalWorkResults />
       ) : (
         <NoResults query={query} />
       )}

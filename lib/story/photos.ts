@@ -10,4 +10,7 @@ export const photos: Photo[] = [
   { id: 'p5', src: withBasePath('/images/photos/5.jpeg'), at: '2025-10-26T16:48:00+09:00', alt: '베네치아 운하 다리 위에서 눈을 감은 사진' },
   { id: 'p6', src: withBasePath('/images/photos/6.jpeg'), at: '2025-11-08T09:12:00+09:00', alt: '이불을 덮고 브이를 한 아침 셀카' },
   { id: 'p7', src: withBasePath('/images/photos/7.jpeg'), at: '2025-11-16T19:30:00+09:00', alt: '검은 재킷을 입고 브이를 한 셀카' },
+  { id: 'p8', src: withBasePath('/images/photos/8.jpeg'), at: '2025-11-18T22:14:00+09:00', alt: '어두운 배경에서 손을 뻗은 채 찍힌 사진' },
+  { id: 'p9', src: withBasePath('/images/photos/9.jpeg'), at: '2025-11-21T21:03:00+09:00', alt: '밤에 벤치에 앉아 브이를 한 흰 티셔츠 사진' },
+  { id: 'p10', src: withBasePath('/images/photos/10.jpeg'), at: '2025-11-24T08:47:00+09:00', alt: '검은 패딩을 입고 엘리베이터에서 찍은 셀카' },
 ]
