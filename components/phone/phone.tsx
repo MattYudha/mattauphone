@@ -12,6 +12,7 @@ import { LockScreen } from './lock-screen'
 import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
 import { NotificationBanner } from './notification-banner'
+import { IncomingCall } from './incoming-call'
 
 const APPS: Record<AppId, () => React.ReactNode> = {
   kakao: () => <KakaoApp />,
@@ -36,6 +37,7 @@ function Screens() {
         </div>
       )}
       <NotificationBanner />
+      <IncomingCall />
     </div>
   )
 }

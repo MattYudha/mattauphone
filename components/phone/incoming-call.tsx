@@ -1,0 +1,150 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Phone, PhoneOff, Mic, MicOff, Grid3x3, Volume2, Plus, Video, UserRound } from 'lucide-react'
+import { contacts } from '@/lib/story/contacts'
+
+const RING_DELAY_MS = 30_000
+
+type CallState = 'idle' | 'ringing' | 'connected'
+
+function formatDuration(totalSeconds: number) {
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+export function IncomingCall() {
+  const [state, setState] = useState<CallState>('idle')
+  const [seconds, setSeconds] = useState(0)
+  const [muted, setMuted] = useState(false)
+  const [speaker, setSpeaker] = useState(false)
+  const caller = contacts.yh
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setState('ringing'), RING_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (state !== 'connected') return
+    const interval = window.setInterval(() => setSeconds((s) => s + 1), 1000)
+    return () => window.clearInterval(interval)
+  }, [state])
+
+  if (state === 'idle') return null
+
+  const hangUp = () => setState('idle')
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={state === 'ringing' ? `${caller.name}에게서 걸려온 전화` : `${caller.name}와 통화 중`}
+      className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden text-white"
+    >
+      <img src={caller.photo || '/placeholder.svg'} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl" />
+      <div className="absolute inset-0 bg-black/55" />
+
+      <div className="relative flex flex-1 flex-col items-center px-8 pt-24">
+        <p className="text-[15px] text-white/70">{state === 'ringing' ? '휴대전화' : formatDuration(seconds)}</p>
+        <h2 className="mt-2 text-balance text-center text-[34px] font-normal tracking-tight">{caller.name}</h2>
+        {state === 'ringing' && (
+          <div className="relative mt-14 flex h-32 w-32 items-center justify-center">
+            <span className="absolute inset-0 animate-ping rounded-full bg-white/15" />
+            <img
+              src={caller.photo || '/placeholder.svg'}
+              alt={`${caller.name} 프로필 사진`}
+              className="relative h-32 w-32 rounded-full object-cover ring-2 ring-white/30"
+            />
+          </div>
+        )}
+      </div>
+
+      {state === 'ringing' ? (
+        <div className="relative flex items-end justify-between px-14 pb-20">
+          <CallButton label="거절" onClick={hangUp} className="bg-[#ff3b30]">
+            <PhoneOff className="h-8 w-8" aria-hidden="true" />
+          </CallButton>
+          <CallButton label="응답" onClick={() => setState('connected')} className="animate-bounce bg-[#34c759]">
+            <Phone className="h-8 w-8" aria-hidden="true" />
+          </CallButton>
+        </div>
+      ) : (
+        <div className="relative flex flex-col items-center gap-14 px-10 pb-20">
+          <div className="grid w-full grid-cols-3 gap-x-6 gap-y-6">
+            <Control text="소리 끔" active={muted} onClick={() => setMuted((v) => !v)}>
+              {muted ? <MicOff className="h-7 w-7" aria-hidden="true" /> : <Mic className="h-7 w-7" aria-hidden="true" />}
+            </Control>
+            <Control text="키패드">
+              <Grid3x3 className="h-7 w-7" aria-hidden="true" />
+            </Control>
+            <Control text="스피커" active={speaker} onClick={() => setSpeaker((v) => !v)}>
+              <Volume2 className="h-7 w-7" aria-hidden="true" />
+            </Control>
+            <Control text="통화 추가">
+              <Plus className="h-7 w-7" aria-hidden="true" />
+            </Control>
+            <Control text="FaceTime">
+              <Video className="h-7 w-7" aria-hidden="true" />
+            </Control>
+            <Control text="연락처">
+              <UserRound className="h-7 w-7" aria-hidden="true" />
+            </Control>
+          </div>
+          <CallButton label="통화 종료" onClick={hangUp} className="bg-[#ff3b30]" hideText>
+            <PhoneOff className="h-8 w-8" aria-hidden="true" />
+          </CallButton>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CallButton({
+  label,
+  onClick,
+  className,
+  hideText,
+  children,
+}: {
+  label: string
+  onClick: () => void
+  className: string
+  hideText?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <button type="button" onClick={onClick} aria-label={label} className="flex flex-col items-center gap-2">
+      <span className={`flex h-[74px] w-[74px] items-center justify-center rounded-full shadow-lg active:opacity-80 ${className}`}>
+        {children}
+      </span>
+      {!hideText && <span className="text-[14px] text-white/90">{label}</span>}
+    </button>
+  )
+}
+
+function Control({
+  text,
+  active,
+  onClick,
+  children,
+}: {
+  text: string
+  active?: boolean
+  onClick?: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={onClick ? !!active : undefined} className="flex flex-col items-center gap-2">
+      <span
+        className={`flex h-[72px] w-[72px] items-center justify-center rounded-full backdrop-blur-md transition-colors ${
+          active ? 'bg-white text-black' : 'bg-white/20 text-white'
+        }`}
+      >
+        {children}
+      </span>
+      <span className="text-[13px] text-white/90">{text}</span>
+    </button>
+  )
+}
