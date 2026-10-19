@@ -27,6 +27,17 @@ export function IncomingCall() {
   }, [])
 
   useEffect(() => {
+    if (state !== 'ringing' || typeof navigator.vibrate !== 'function') return
+    const buzz = () => navigator.vibrate([400, 200, 400, 1000])
+    buzz()
+    const interval = window.setInterval(buzz, 2000)
+    return () => {
+      window.clearInterval(interval)
+      navigator.vibrate(0)
+    }
+  }, [state])
+
+  useEffect(() => {
     if (state !== 'connected') return
     const interval = window.setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => window.clearInterval(interval)
@@ -48,7 +59,7 @@ export function IncomingCall() {
         <p className="text-[15px] text-white/70">{state === 'ringing' ? '휴대전화' : formatDuration(seconds)}</p>
         <h2 className="mt-2 text-balance text-center text-[34px] font-normal tracking-tight">{caller.name}</h2>
         {state === 'ringing' && (
-          <div className="relative mt-14 flex h-32 w-32 items-center justify-center">
+          <div className="animate-ring-buzz relative mt-14 flex h-32 w-32 items-center justify-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-white/15" />
             <img
               src={caller.photo || '/placeholder.svg'}

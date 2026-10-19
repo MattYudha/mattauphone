@@ -190,9 +190,23 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-.animate-screen-in {
+  .animate-screen-in {
   animation: screen-in 0.28s ease-out;
-}
+  }
+
+  @keyframes ring-buzz {
+  0%, 40%, 100% { transform: translateX(0) rotate(0); }
+  4%, 12%, 20%, 28% { transform: translateX(-3px) rotate(-1.5deg); }
+  8%, 16%, 24%, 32% { transform: translateX(3px) rotate(1.5deg); }
+  }
+
+  .animate-ring-buzz {
+  animation: ring-buzz 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+  .animate-ring-buzz { animation: none; }
+  }
 
 @keyframes push-in {
   from { transform: translateX(30%); opacity: 0.4; }
