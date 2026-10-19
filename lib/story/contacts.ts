@@ -13,6 +13,8 @@ export type ContactId =
   | 'jihoo'
   | 'hyundai'
   | 'cj'
+  | 'kakaopay'
+  | 'supreme'
 
 export type Contact = {
   id: ContactId
@@ -46,4 +48,6 @@ export const contacts: Record<ContactId, Contact> = {
   jihoo: { id: 'jihoo', name: '오후반 지후', initial: '지', color: '#86a8d8', label: '휴대전화' },
   hyundai: { id: 'hyundai', name: '현대카드', initial: '현', color: '#3a3a3c' },
   cj: { id: 'cj', name: '대한통운 배송', initial: '대', color: '#d94b3b' },
+  kakaopay: { id: 'kakaopay', name: '카카오페이', initial: '카', color: '#ffeb00', photo: withBasePath('/images/profiles/kakaopay.png') },
+  supreme: { id: 'supreme', name: 'Supreme', initial: 'S', color: '#e1251b', photo: withBasePath('/images/profiles/supreme.jpeg') },
 }

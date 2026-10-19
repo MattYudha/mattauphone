@@ -9,6 +9,10 @@ import { SettingsApp } from '@/components/apps/settings-app'
 import { SafariApp } from '@/components/apps/safari-app'
 import { AnyAiApp } from '@/components/apps/anyai-app'
 import { NotesApp } from '@/components/apps/notes-app'
+import { CameraApp } from '@/components/apps/camera-app'
+import { VoiceMemosApp } from '@/components/apps/voice-memos-app'
+import { CalendarApp } from '@/components/apps/calendar-app'
+import { ClockApp } from '@/components/apps/clock-app'
 import { LockScreen } from './lock-screen'
 import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
@@ -27,6 +31,10 @@ const APPS: Record<AppId, () => React.ReactNode> = {
   safari: () => <SafariApp />,
   anyai: () => <AnyAiApp />,
   notes: () => <NotesApp />,
+  camera: () => <CameraApp />,
+  voicememos: () => <VoiceMemosApp />,
+  calendar: () => <CalendarApp />,
+  clock: () => <ClockApp />,
 }
 
 function Screens() {

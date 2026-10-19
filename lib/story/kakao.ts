@@ -1,12 +1,22 @@
 import type { ContactId } from './contacts'
 import { kst } from './time'
 
+export type KakaoReply = { to: string; text: string }
+
+export type KakaoCard = {
+  title: string
+  body: string
+  button: string
+  footer?: string
+}
+
 export type KakaoContent =
-  | { type: 'text'; text: string }
+  | { type: 'text'; text: string; reply?: KakaoReply }
   | { type: 'sticker'; sticker: 'pout' | 'teary' }
   | { type: 'location'; title: string }
+  | { type: 'card'; card: KakaoCard }
 
-export type KakaoRoomId = 'yh' | 'hs' | 'jy' | 'wa' | 'unknown' | 'pres'
+export type KakaoRoomId = 'yh' | 'hs' | 'jy' | 'wa' | 'unknown' | 'pres' | 'kakaopay' | 'supreme'
 
 export type KakaoMessage = {
   id: string
@@ -22,26 +32,40 @@ export type KakaoRoom = {
   id: KakaoRoomId
   contactId: ContactId
   messages: KakaoMessage[]
+  /** 처음 열기 전까지 읽지 않음으로 표시할 마지막 메시지 수 */
+  initialUnread?: number
 }
 
-type Entry = [string, 'me' | 'them', string | { sticker: 'pout' | 'teary' } | { location: string }]
+type Entry = [
+  string,
+  'me' | 'them',
+  | string
+  | { sticker: 'pout' | 'teary' }
+  | { location: string }
+  | { text: string; reply: KakaoReply }
+  | { card: KakaoCard },
+]
 
-function room(id: KakaoRoomId, contactId: ContactId, entries: Entry[]): KakaoRoom {
+function toContent(c: Entry[2]): KakaoContent {
+  if (typeof c === 'string') return { type: 'text', text: c }
+  if ('sticker' in c) return { type: 'sticker', sticker: c.sticker }
+  if ('location' in c) return { type: 'location', title: c.location }
+  if ('card' in c) return { type: 'card', card: c.card }
+  return { type: 'text', text: c.text, reply: c.reply }
+}
+
+function room(id: KakaoRoomId, contactId: ContactId, entries: Entry[], initialUnread?: number): KakaoRoom {
   return {
     id,
     contactId,
+    initialUnread,
     messages: entries.map(([at, from, c], i) => ({
       id: `${id}-${i}`,
       roomId: id,
       from,
       at: kst(at),
       seq: 0,
-      content:
-        typeof c === 'string'
-          ? { type: 'text', text: c }
-          : 'sticker' in c
-            ? { type: 'sticker', sticker: c.sticker }
-            : { type: 'location', title: c.location },
+      content: toContent(c),
     })),
   }
 }
@@ -70,29 +94,32 @@ export const kakaoRooms: KakaoRoom[] = [
     ['2025-11-05 17:40', ME, '나 오늘 애기가 사탕 줬당ㅎㅎ'],
     ['2025-11-05 17:40', ME, '레슨 끝나구 선생님 주려구 아껴놨대'],
     ['2025-11-05 17:41', ME, '완전 귀엽지 않아??'],
-    ['2025-11-05 17:42', T, '귀엽네'],
-    ['2025-11-05 17:43', ME, '형은 반응이 왜 이래ㅋㅋㅋ'],
-    ['2025-11-05 17:44', T, '귀엽다고'],
+    ['2025-11-05 17:42', T, '애기들 귀엽네'],
+    ['2025-11-05 17:43', ME, '나는?'],
+    ['2025-11-05 17:44', T, '너도 애긴 하지'],
+    ['2025-11-05 17:44', ME, { text: 'ㅎㅎㅎㅎ', reply: { to: '영현이형❤️', text: '너도 애긴 하지' } }],
 
     ['2025-11-07 22:15', ME, '형 자?'],
     ['2025-11-07 22:16', T, '아니'],
     ['2025-11-07 22:16', ME, '나 오늘 레슨만 여섯 개 했어ㅠㅠ'],
     ['2025-11-07 22:16', ME, '손가락 아파'],
     ['2025-11-07 22:17', ME, '형은 내 얘기 듣고 있는 거 맞지ㅡㅡ'],
-    ['2025-11-07 22:18', T, '듣고 있어'],
-    ['2025-11-07 22:18', T, '찜질해'],
+    ['2025-11-07 22:18', T, '일이 밀려서 정신이 없네'],
+    ['2025-11-07 22:18', T, '병원 가 봐야 되는 거 아냐?'],
+    ['2025-11-07 22:18', T, '약이라도 처방받지'],
 
     ['2025-11-08 13:05', ME, '형 주말인데 뭐해??'],
     ['2025-11-08 13:06', T, '집'],
     ['2025-11-08 13:06', ME, '나 제본집에서 악보 왔는데 내일 정리해야 돼ㅠ'],
     ['2025-11-08 13:07', ME, '도와줄 사람~~'],
-    ['2025-11-08 13:08', T, '바빠'],
+    ['2025-11-08 13:08', T, '혼자 해야지 학원 원장인데'],
     ['2025-11-08 13:08', ME, '치사해ㅠㅠ'],
 
     ['2025-11-09 19:20', ME, '형 저녁 머거써?'],
-    ['2025-11-09 19:22', T, '먹었어'],
+    ['2025-11-09 19:22', T, '쌀국수 먹었어'],
+    ['2025-11-09 19:22', T, '너는?'],
     ['2025-11-09 19:22', ME, '나 오늘 밤샐 듯...ㅠ 제본할 게 너무 많아'],
-    ['2025-11-09 19:23', T, '적당히 해'],
+    ['2025-11-09 19:23', T, '적당히 하고 쉬어'],
 
     ['2025-11-10 16:02', ME, '형 나 지금 일어났어'],
     ['2025-11-10 16:02', ME, '어제 악보 제본하다가 완전 늦게 자써ㅠㅠ'],
@@ -187,7 +214,7 @@ export const kakaoRooms: KakaoRoom[] = [
     ['2025-10-30 22:42', T, '고생한당'],
     ['2025-10-30 22:43', ME, '영현이형은 이런 거 보면 맨날 대충 하라구 하는데ㅋㅋ'],
     ['2025-10-30 22:46', T, 'ㅎㅎ'],
-    ['2025-10-30 22:46', T, '주말에 뭐 먹을지나 생각해놔'],
+    ['2025-10-30 22:46', T, '주말�� 뭐 먹을지나 생각해놔'],
     ['2025-10-30 22:47', ME, '웅 알겠오'],
 
     ['2025-11-02 11:20', T, '자기 일어났오?'],
@@ -261,7 +288,102 @@ export const kakaoRooms: KakaoRoom[] = [
     ['2025-10-01 13:05', T, '추석 때 언제 와'],
     ['2025-10-01 14:30', ME, '5일 저녁에'],
     ['2025-10-01 14:31', T, 'ㅇㅋ 엄마한테 말해놓을게'],
-  ]),
+
+      ['2025-11-10 18:02', T, '근데 너 아까 어디서 튀어나온 거냐?'],
+      ['2025-11-10 18:02', T, '강영현이랑 아직도 연락하는 줄 몰랐네'],
+      ['2025-11-10 18:02', T, '지금도 강영현이랑 있냐?'],
+      ['2025-11-10 18:03', T, '아주 그냥 소울메이트 납셨어 둘이'],
+    ],
+    4,
+  ),
+
+  room(
+    'kakaopay',
+    'kakaopay',
+    [
+      [
+        '2025-11-03 11:00',
+        T,
+        {
+          card: {
+            title: '(광고) 11월 페이머니 혜택 도착',
+            body: '편의점·카페에서 카카오페이머니로 결제하면\n최대 3,000원 즉시 할인!\n\n행사 기간: 11/3(월) ~ 11/30(일)\n※ 1인 1회, 예산 소진 시 조기 종료',
+            button: '혜택 받으러 가기',
+            footer: '수신거부 : 홈 > 설정 > 알림 설정',
+          },
+        },
+      ],
+      [
+        '2025-11-07 12:30',
+        T,
+        {
+          card: {
+            title: '(광고) 오늘의 행운퀴즈 오픈',
+            body: '퀴즈 풀고 포인트 받아가세요!\n정답을 맞히면 최대 1,000 포인트 적립\n\n매일 낮 12시 30분 새로운 퀴즈가 열려요.',
+            button: '퀴즈 풀기',
+            footer: '수신거부 : 홈 > 설정 > 알림 설정',
+          },
+        },
+      ],
+      [
+        '2025-11-12 18:00',
+        T,
+        {
+          card: {
+            title: '(광고) 내 신용점수 확인하셨나요?',
+            body: '원필님의 신용점수가 업데이트되었어요.\n지금 바로 무료로 확인하고\n점수 올리는 꿀팁도 받아보세요.\n\n※ 신용점수 조회는 점수에 영향이 없어요.',
+            button: '신용점수 보기',
+            footer: '수신거부 : 홈 > 설정 > 알림 설정',
+          },
+        },
+      ],
+      [
+        '2025-11-17 10:00',
+        T,
+        {
+          card: {
+            title: '(광고) 블랙프라이데이 최대 50% 캐시백',
+            body: '카카오페이로 결제하면 브랜드별 최대 50% 캐시백!\n올리브영, 무신사, 배달의민족 등 인기 브랜드 총집합\n\n행사 기간: 11/17(월) ~ 11/30(일)',
+            button: '캐시백 브랜드 보기',
+            footer: '수신거부 : 홈 > 설정 > 알림 설정',
+          },
+        },
+      ],
+    ],
+    4,
+  ),
+
+  room(
+    'supreme',
+    'supreme',
+    [
+      [
+        '2025-11-16 14:21',
+        T,
+        {
+          card: {
+            title: '[Supreme] 광고성 정보 수신 동의 안내',
+            body: '안녕하세요, 김원필 고객님.\nSupreme 카카오톡 채널을 추가해 주셔서 감사합니다.\n\n고객님께서는 2025년 11월 16일 Supreme의 광고성 정보(신제품 드롭, 이벤트, 할인 혜택) 수신에 동의하셨습니다.\n\n■ 수신 동의 일시: 2025.11.16 14:21\n■ 수신 채널: 카카오톡\n■ 처리 내용: 수신 동의\n\n본 안내는 정보통신망법 제50조에 따라 발송되었습니다.',
+            button: '수신 설정 변경',
+            footer: '수신거부 : 채널 차단 또는 채팅방 > 설정 > 광고 메시지 수신 거부',
+          },
+        },
+      ],
+      [
+        '2025-11-16 14:21',
+        T,
+        {
+          card: {
+            title: '(광고) Supreme Fall/Winter 2025',
+            body: 'Week 12 드롭이 이번 주 목요일 오전 11시 공개됩니다.\n지금 바로 룩북을 확인해 보세요.',
+            button: '룩북 보기',
+            footer: '수신거부 : 채널 차단',
+          },
+        },
+      ],
+    ],
+    2,
+  ),
 
   room('unknown', 'unknown', [
     ['2024-05-12 14:03', T, '원필씨 이번 주에 커피 한잔 어때요?'],

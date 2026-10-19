@@ -27,6 +27,7 @@ type Tab = 'friends' | 'chats'
 export function previewText(m: KakaoMessage) {
   if (m.content.type === 'text') return m.content.text.replace(/\n+/g, ' ')
   if (m.content.type === 'sticker') return '이모티콘을 보냈습니다.'
+  if (m.content.type === 'card') return m.content.card.title
   return '위치를 공유했습니다.'
 }
 

@@ -10,6 +10,9 @@ import { KinPost } from './naver/kin-post'
 import { DepressionResults } from './naver/depression-results'
 import { FlightResults } from './naver/flight-results'
 import { OriginalWorkResults } from './naver/original-work-results'
+import { HansungResults } from './naver/hansung-results'
+import { ChatGptResults } from './naver/chatgpt-results'
+import { useStory } from '@/lib/story/store'
 
 type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string }
 
@@ -216,6 +219,8 @@ function SearchPanel({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (
 }
 
 function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
+  const { openApp } = useStory()
+  const normalized = query.replace(/\s+/g, '').toLowerCase()
   return (
     <div className="pb-6">
       <div className="flex items-center gap-2 border-b border-black/10 px-3 py-2">
@@ -243,6 +248,10 @@ function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
         <FlightResults />
       ) : query === '배경 원작' ? (
         <OriginalWorkResults />
+      ) : normalized === '강남한성초밥영업시간' || normalized === '한성초밥영업시간' || normalized === '강남한성초밥' ? (
+        <HansungResults />
+      ) : ['챗지피티', '쳇지피티', 'chatgpt', '챗gpt'].includes(normalized) ? (
+        <ChatGptResults onOpenAnyAi={() => openApp('anyai')} />
       ) : (
         <NoResults query={query} />
       )}

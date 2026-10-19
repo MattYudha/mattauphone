@@ -132,9 +132,22 @@ function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?:
       </div>
     )
   }
+  if (c.type === 'card') {
+    const { title, body, button, footer } = c.card
+    return (
+      <div className="w-[236px] overflow-hidden rounded-[14px] bg-white">
+        <p className="bg-[#f7f7f7] px-3.5 py-2.5 text-[14px] font-semibold leading-snug">{title}</p>
+        <p className="whitespace-pre-wrap break-words px-3.5 pb-3 pt-2.5 text-[13.5px] leading-[1.5]">{body}</p>
+        <div className="px-3 pb-3">
+          <span className="block rounded-md bg-[#f2f2f2] py-2 text-center text-[13.5px] font-medium">{button}</span>
+          {footer && <p className="mt-2 text-[11px] leading-snug text-black/40">{footer}</p>}
+        </div>
+      </div>
+    )
+  }
   const bg = mine ? '#fee500' : '#ffffff'
   return (
-    <p
+    <div
       className="relative max-w-[232px] whitespace-pre-wrap break-words rounded-[15px] px-[11px] py-[7px] text-[14.5px] leading-[1.4]"
       style={{ backgroundColor: bg }}
     >
@@ -145,7 +158,13 @@ function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?:
           style={mine ? { borderLeftColor: bg } : { borderRightColor: bg }}
         />
       )}
+      {c.reply && (
+        <span className="mb-1.5 block border-b border-black/10 pb-1.5">
+          <span className="block text-[12.5px] font-semibold text-black/80">{`${c.reply.to}에게 답장`}</span>
+          <span className="block truncate text-[12.5px] text-black/50">{c.reply.text}</span>
+        </span>
+      )}
       {c.text}
-    </p>
+    </div>
   )
 }

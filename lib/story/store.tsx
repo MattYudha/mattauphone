@@ -7,7 +7,19 @@ import { AFTER_CALL_BANNER_MESSAGES, AFTER_CALL_ROOM_MESSAGES, EVENT_JY_MESSAGES
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
 import { toTime } from './time'
 
-export type AppId = 'kakao' | 'messages' | 'phone' | 'photos' | 'settings' | 'safari' | 'anyai' | 'notes'
+export type AppId =
+  | 'kakao'
+  | 'messages'
+  | 'phone'
+  | 'photos'
+  | 'settings'
+  | 'safari'
+  | 'anyai'
+  | 'notes'
+  | 'camera'
+  | 'voicememos'
+  | 'calendar'
+  | 'clock'
 export type Screen = { kind: 'lock' } | { kind: 'passcode' } | { kind: 'home' } | { kind: 'app'; app: AppId }
 
 type StoryProgress = {
@@ -17,6 +29,9 @@ type StoryProgress = {
   yhCallEnded: boolean
   addedMessages: KakaoMessage[]
   readMessageIds: string[]
+  /** 처음부터 읽지 않음 상태였던 방 중 사용자가 열어본 방 */
+  readRooms: KakaoRoomId[]
+  cameraUsed: boolean
 }
 
 const BANNER_GAP_MS = 1800
@@ -37,6 +52,8 @@ const INITIAL: StoryProgress = {
   yhCallEnded: false,
   addedMessages: [],
   readMessageIds: [],
+  readRooms: [],
+  cameraUsed: false,
 }
 
 function loadProgress(): StoryProgress {
@@ -46,7 +63,8 @@ function loadProgress(): StoryProgress {
     if (!raw) return INITIAL
     const parsed = JSON.parse(raw) as StoryProgress
     if (!Array.isArray(parsed.addedMessages) || !Array.isArray(parsed.readMessageIds)) return INITIAL
-    return { ...INITIAL, ...parsed }
+    const merged = { ...INITIAL, ...parsed }
+    return Array.isArray(merged.readRooms) ? merged : { ...merged, readRooms: [] }
   } catch {
     return INITIAL
   }
@@ -78,6 +96,8 @@ type StoryContext = {
   dismissBanner: () => void
   openBanner: (banner: Banner) => void
   resetStory: () => void
+  cameraUsed: boolean
+  markCameraUsed: () => void
 }
 
 const Ctx = createContext<StoryContext | null>(null)
@@ -214,8 +234,13 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     const unreadIds = p.addedMessages
       .filter((m) => m.roomId === id && !p.readMessageIds.includes(m.id))
       .map((m) => m.id)
-    if (unreadIds.length === 0) return
-    const next = { ...p, readMessageIds: [...p.readMessageIds, ...unreadIds] }
+    const staticUnread = Boolean(kakaoRooms.find((r) => r.id === id)?.initialUnread) && !p.readRooms.includes(id)
+    if (unreadIds.length === 0 && !staticUnread) return
+    const next = {
+      ...p,
+      readMessageIds: [...p.readMessageIds, ...unreadIds],
+      readRooms: staticUnread ? [...p.readRooms, id] : p.readRooms,
+    }
     progressRef.current = next
     setProgress(next)
   }, [])
@@ -235,6 +260,9 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
 
   const unreadByRoom = useMemo(() => {
     const result: Partial<Record<KakaoRoomId, number>> = {}
+    for (const r of kakaoRooms) {
+      if (r.initialUnread && !progress.readRooms.includes(r.id)) result[r.id] = r.initialUnread
+    }
     for (const m of progress.addedMessages) {
       if (!progress.readMessageIds.includes(m.id)) result[m.roomId] = (result[m.roomId] ?? 0) + 1
     }
@@ -283,6 +311,13 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       setBanner(null)
       setKakaoRoomId(null)
       setScreen({ kind: 'lock' })
+    },
+    cameraUsed: progress.cameraUsed,
+    markCameraUsed: () => {
+      if (progressRef.current.cameraUsed) return
+      const next = { ...progressRef.current, cameraUsed: true }
+      progressRef.current = next
+      setProgress(next)
     },
   }
 

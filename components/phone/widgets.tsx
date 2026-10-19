@@ -5,7 +5,7 @@ export function WeatherWidget() {
   return (
     <section
       aria-label="서울 날씨 8도 맑음"
-      className="flex aspect-square flex-col justify-between rounded-[22px] p-3.5 text-white shadow-lg"
+      className="flex aspect-square flex-col justify-between rounded-[22px] p-3.5 text-left text-white shadow-lg"
       style={{ background: 'linear-gradient(160deg, #3d7fd6 0%, #6aa8ea 100%)' }}
     >
       <div>
@@ -24,7 +24,7 @@ export function WeatherWidget() {
 
 const WEEK = ['일', '월', '화', '수', '목', '금', '토']
 
-export function CalendarWidget() {
+export function CalendarWidget({ onOpen }: { onOpen?: () => void }) {
   const year = 2025
   const monthIndex = 10
   const today = 19
@@ -33,7 +33,12 @@ export function CalendarWidget() {
   const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)]
 
   return (
-    <section aria-label="2025년 11월 달력, 오늘 19일" className="flex aspect-square flex-col rounded-[22px] bg-white p-3 text-black shadow-lg">
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label="캘린더 열기, 2025년 11월, 오늘 19일"
+      className="flex aspect-square flex-col rounded-[22px] bg-white p-3 text-left text-black shadow-lg active:scale-[0.97] transition-transform"
+    >
       <p className="text-[11px] font-bold text-[#ff3b30]">11월</p>
       <div className="mt-1 grid flex-1 grid-cols-7 content-between text-center text-[9px] leading-[1.45]">
         {WEEK.map((w, i) => (
@@ -58,6 +63,6 @@ export function CalendarWidget() {
           </span>
         ))}
       </div>
-    </section>
+    </button>
   )
 }
