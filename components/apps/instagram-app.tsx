@@ -1,13 +1,39 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Bookmark, ChevronLeft, ChevronRight, Heart, MessageCircle, MoreHorizontal, Plus, Send, X } from 'lucide-react'
+import { Bookmark, Camera, ChevronLeft, ChevronRight, Copy, Grid3x3, Heart, MessageCircle, MoreHorizontal, Plus, Send, X } from 'lucide-react'
 import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { useBackHandler } from '@/lib/story/back-nav'
 import { withBasePath } from '@/lib/base-path'
 import { cn } from '@/lib/utils'
 
 const ME = { id: 'kimwp_', name: '김원필', avatar: '/images/instagram/image-1.jpg' }
+
+type AccountId = 'wp' | 'yh'
+type Account = {
+  handle: string
+  name: string
+  avatar: string
+  avatarPosition: string
+  posts: number
+  followers: string
+  following: AccountId
+}
+
+const ACCOUNTS: Record<AccountId, Account> = {
+  wp: { handle: ME.id, name: ME.name, avatar: ME.avatar, avatarPosition: '50% 32%', posts: 3, followers: '1,264', following: 'yh' },
+  yh: {
+    handle: 'Kangyounghyun',
+    name: '강영현',
+    avatar: '/images/instagram/kangyounghyun.jpg',
+    avatarPosition: '50% 45%',
+    posts: 0,
+    followers: '1,173',
+    following: 'wp',
+  },
+}
+
+type View = { kind: 'profile'; account: AccountId } | { kind: 'following'; account: AccountId }
 
 type Comment = { id: string; user: string; text: string; time: string; replies?: Comment[] }
 type Photo = { src: string; alt: string; ratio: number }
@@ -76,13 +102,85 @@ export function InstagramApp() {
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [commentsFor, setCommentsFor] = useState<string | null>(null)
+  const [stack, setStack] = useState<View[]>([])
   const closeComments = () => setCommentsFor(null)
   useBackHandler(commentsFor !== null, closeComments)
+  const popView = () => setStack((s) => s.slice(0, -1))
+  useBackHandler(commentsFor === null && stack.length > 0, popView)
   const openPost = POSTS.find((p) => p.id === commentsFor)
+  const view = stack[stack.length - 1]
+  const pushView = (v: View) => setStack((s) => [...s, v])
 
   return (
     <div className="relative flex h-full flex-col bg-white text-black">
       <StatusBar />
+      {view ? (
+        view.kind === 'profile' ? (
+          <ProfileView
+            account={view.account}
+            canGoBack={stack.length > 1}
+            onBack={popView}
+            onOpenFollowing={() => pushView({ kind: 'following', account: view.account })}
+            onOpenPost={(id) => {
+              setStack([])
+              setCommentsFor(null)
+              requestAnimationFrame(() => document.getElementById(`ig-post-${id}`)?.scrollIntoView())
+            }}
+          />
+        ) : (
+          <FollowingView
+            account={view.account}
+            onBack={popView}
+            onOpenAccount={(id) => pushView({ kind: 'profile', account: id })}
+          />
+        )
+      ) : (
+        <FeedView
+          liked={liked}
+          saved={saved}
+          setLiked={setLiked}
+          setSaved={setSaved}
+          onOpenComments={setCommentsFor}
+        />
+      )}
+      <nav aria-label="Instagram 탭" className="flex shrink-0 justify-around border-t border-black/10 bg-white py-2.5">
+        <button type="button" onClick={() => setStack([])} aria-label="홈" aria-current={!view ? 'page' : undefined}>
+          <HomeTabIcon filled={!view} />
+        </button>
+        <span className="size-6" aria-hidden />
+        <span className="size-6" aria-hidden />
+        <span className="size-6" aria-hidden />
+        <button
+          type="button"
+          onClick={() => setStack([{ kind: 'profile', account: 'wp' }])}
+          aria-label="프로필"
+          aria-current={view ? 'page' : undefined}
+          className={cn('rounded-full', view && 'ring-2 ring-black ring-offset-1')}
+        >
+          <Avatar className="size-6" />
+        </button>
+      </nav>
+      <HomeIndicator className="bg-white" />
+      {openPost && <CommentsSheet post={openPost} onClose={closeComments} />}
+    </div>
+  )
+}
+
+function FeedView({
+  liked,
+  saved,
+  setLiked,
+  setSaved,
+  onOpenComments,
+}: {
+  liked: Record<string, boolean>
+  saved: Record<string, boolean>
+  setLiked: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  setSaved: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  onOpenComments: (id: string) => void
+}) {
+  return (
+    <>
       <header className="flex shrink-0 items-center justify-between px-4 pb-1">
         <h1
           className="text-[30px] leading-none"
@@ -115,38 +213,162 @@ export function InstagramApp() {
             saved={!!saved[p.id]}
             onLike={() => setLiked((s) => ({ ...s, [p.id]: !s[p.id] }))}
             onSave={() => setSaved((s) => ({ ...s, [p.id]: !s[p.id] }))}
-            onOpenComments={() => setCommentsFor(p.id)}
+            onOpenComments={() => onOpenComments(p.id)}
           />
         ))}
         <p className="py-8 text-center text-[13px] text-black/40">모두 확인했습니다</p>
       </div>
-      <nav aria-hidden className="flex shrink-0 justify-around border-t border-black/10 bg-white py-2.5">
-        <HomeTabIcon />
-        <span className="size-6" />
-        <span className="size-6" />
-        <span className="size-6" />
-        <Avatar className="size-6" />
-      </nav>
-      <HomeIndicator className="bg-white" />
-      {openPost && <CommentsSheet post={openPost} onClose={closeComments} />}
-    </div>
+    </>
   )
 }
 
-function Avatar({ className }: { className?: string }) {
+function ProfileView({
+  account: accountId,
+  canGoBack,
+  onBack,
+  onOpenFollowing,
+  onOpenPost,
+}: {
+  account: AccountId
+  canGoBack: boolean
+  onBack: () => void
+  onOpenFollowing: () => void
+  onOpenPost: (id: string) => void
+}) {
+  const account = ACCOUNTS[accountId]
+  const posts = accountId === 'wp' ? POSTS : []
+  const stats = [
+    { label: '게시물', value: String(account.posts) },
+    { label: '팔로워', value: account.followers },
+  ]
+  return (
+    <>
+      <header className="flex shrink-0 items-center gap-1 px-2 pb-2">
+        {canGoBack ? (
+          <button type="button" onClick={onBack} aria-label="뒤로" className="p-1">
+            <ChevronLeft className="size-7" />
+          </button>
+        ) : (
+          <span className="w-2" aria-hidden />
+        )}
+        <h1 className="flex-1 truncate text-[20px] font-bold">{account.handle}</h1>
+        <MoreHorizontal className="mr-2 size-6" aria-hidden />
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <section aria-label="프로필 정보" className="px-4 pt-1">
+          <div className="flex items-center gap-6">
+            <Avatar account={accountId} className="size-[84px]" />
+            <div className="flex flex-1 justify-around text-center">
+              {stats.map((s) => (
+                <div key={s.label} className="flex flex-col">
+                  <span className="text-[17px] font-semibold">{s.value}</span>
+                  <span className="text-[13px]">{s.label}</span>
+                </div>
+              ))}
+              <button type="button" onClick={onOpenFollowing} className="flex flex-col active:opacity-60">
+                <span className="text-[17px] font-semibold">1</span>
+                <span className="text-[13px]">팔로잉</span>
+              </button>
+            </div>
+          </div>
+          <p className="mt-3 text-[14px] font-semibold">{account.name}</p>
+          <div className="mt-3 grid grid-cols-2 gap-1.5" aria-hidden>
+            {(accountId === 'wp' ? ['프로필 편집', '프로필 공유'] : ['팔로잉', '메시지']).map((label) => (
+              <span key={label} className="rounded-lg bg-[#efefef] py-1.5 text-center text-[14px] font-semibold">
+                {label}
+              </span>
+            ))}
+          </div>
+        </section>
+        <div className="mt-4 flex justify-center border-b border-black/10" aria-hidden>
+          <span className="border-b border-black px-6 pb-2.5">
+            <Grid3x3 className="size-6" />
+          </span>
+        </div>
+        {posts.length > 0 ? (
+          <ul className="grid grid-cols-3 gap-px">
+            {posts.map((p) => (
+              <li key={p.id}>
+                <button type="button" onClick={() => onOpenPost(p.id)} className="relative block aspect-[3/4] w-full bg-black/5">
+                  <img src={withBasePath(p.photos[0].src)} alt={p.photos[0].alt} className="size-full object-cover" />
+                  {p.photos.length > 1 && <Copy className="absolute right-1.5 top-1.5 size-4 text-white drop-shadow" aria-hidden />}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex flex-col items-center px-8 pt-14 text-center">
+            <span className="flex size-16 items-center justify-center rounded-full border-2 border-black">
+              <Camera className="size-8" strokeWidth={1.5} aria-hidden />
+            </span>
+            <p className="mt-4 text-[20px] font-bold">게시물 없음</p>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+function FollowingView({
+  account: accountId,
+  onBack,
+  onOpenAccount,
+}: {
+  account: AccountId
+  onBack: () => void
+  onOpenAccount: (id: AccountId) => void
+}) {
+  const account = ACCOUNTS[accountId]
+  const target = ACCOUNTS[account.following]
+  return (
+    <>
+      <header className="flex shrink-0 items-center px-2 pb-1">
+        <button type="button" onClick={onBack} aria-label="뒤로" className="p-1">
+          <ChevronLeft className="size-7" />
+        </button>
+        <h1 className="flex-1 truncate pr-9 text-center text-[16px] font-bold">{account.handle}</h1>
+      </header>
+      <div className="flex shrink-0 border-b border-black/10 text-[14px]" aria-hidden>
+        <span className="flex-1 pb-2.5 text-center text-black/40">{`팔로워 ${account.followers}`}</span>
+        <span className="flex-1 border-b border-black pb-2.5 text-center font-semibold">팔로잉 1</span>
+      </div>
+      <ul className="min-h-0 flex-1 overflow-y-auto px-4 pt-3">
+        <li>
+          <button
+            type="button"
+            onClick={() => onOpenAccount(account.following)}
+            className="flex w-full items-center gap-3 py-2 text-left active:opacity-60"
+          >
+            <Avatar account={account.following} className="size-12" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[14px] font-semibold">{target.handle}</span>
+              <span className="block truncate text-[14px] text-black/50">{target.name}</span>
+            </span>
+            <span className="rounded-lg bg-[#efefef] px-4 py-1.5 text-[14px] font-semibold" aria-hidden>
+              팔로잉
+            </span>
+          </button>
+        </li>
+      </ul>
+    </>
+  )
+}
+
+function Avatar({ className, account = 'wp' }: { className?: string; account?: AccountId }) {
+  const a = ACCOUNTS[account]
   return (
     <img
-      src={withBasePath(ME.avatar)}
+      src={withBasePath(a.avatar)}
       alt=""
       className={cn('shrink-0 rounded-full object-cover', className)}
-      style={{ objectPosition: '50% 32%' }}
+      style={{ objectPosition: a.avatarPosition }}
     />
   )
 }
 
-function HomeTabIcon() {
+function HomeTabIcon({ filled = true }: { filled?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" className="size-6 fill-black">
+    <svg viewBox="0 0 24 24" className={cn('size-6', filled ? 'fill-black' : 'fill-none stroke-black stroke-2')}>
       <path d="M22 23h-6.001a1 1 0 0 1-1-1v-5.455a2.997 2.997 0 1 0-5.993 0V22a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V11.543a1.002 1.002 0 0 1 .31-.724l10-9.543a1.001 1.001 0 0 1 1.38 0l10 9.543a1.002 1.002 0 0 1 .31.724V22a1 1 0 0 1-1 1Z" />
     </svg>
   )
@@ -170,7 +392,7 @@ function PostCard({
   const total = countComments(post.comments)
   const first = post.comments[0]
   return (
-    <article aria-label={`${ME.id}의 게시물`} className="pb-4">
+    <article id={`ig-post-${post.id}`} aria-label={`${ME.id}의 게시물`} className="pb-4">
       <div className="flex items-center gap-2.5 px-3 py-2.5">
         <span className="rounded-full bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5] p-[2px]">
           <span className="block rounded-full bg-white p-[2px]">

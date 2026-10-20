@@ -18,13 +18,13 @@ const PAGE_ONE: HomeApp[] = [
   { kind: 'notes', app: 'notes', label: '메모' },
   { kind: 'calendar', app: 'calendar', label: '캘린더' },
   { kind: 'clock', app: 'clock', label: '시계' },
+  { kind: 'instagram', app: 'instagram', label: 'Instagram' },
 ]
 
 const PAGE_TWO: HomeApp[] = [
   { kind: 'voicememos', app: 'voicememos', label: '음성 메모' },
   { kind: 'youtube', href: 'https://youtu.be/TU0q9CW3Xmo?si=zcNEc8wU2Tr0XEja', label: 'YouTube' },
   { kind: 'catchtable', app: 'catchtable', label: '캐치테이블' },
-  { kind: 'instagram', app: 'instagram', label: 'Instagram' },
 ]
 
 const DOCK: HomeApp[] = [
@@ -35,7 +35,7 @@ const DOCK: HomeApp[] = [
 ]
 
 export function HomeScreen() {
-  const { openApp, totalUnread, cameraUsed } = useStory()
+  const { openApp, totalUnread, totalSmsUnread, cameraUsed } = useStory()
   const [page, setPage] = useState(0)
   const pagerRef = useRef<HTMLDivElement>(null)
 
@@ -91,18 +91,26 @@ export function HomeScreen() {
           </div>
         </div>
         <nav aria-label="독" className="mx-3 grid grid-cols-4 gap-5 rounded-[34px] bg-white/20 px-4 py-3.5 backdrop-blur-2xl">
-          {DOCK.map((d) => (
-            <button
-              key={d.label}
-              type="button"
-              onClick={() => d.app && launch(d.app)}
-              aria-label={d.label}
-              aria-disabled={d.app === 'camera' && cameraUsed ? true : undefined}
-              className="mx-auto block aspect-square w-full max-w-[64px] active:opacity-70"
-            >
-              <AppGlyph kind={d.kind} />
-            </button>
-          ))}
+          {DOCK.map((d) => {
+            const count = d.app === 'messages' ? totalSmsUnread : 0
+            return (
+              <button
+                key={d.label}
+                type="button"
+                onClick={() => d.app && launch(d.app)}
+                aria-label={count > 0 ? `${d.label}, 읽지 않은 메시지 ${count}개` : d.label}
+                aria-disabled={d.app === 'camera' && cameraUsed ? true : undefined}
+                className="relative mx-auto block aspect-square w-full max-w-[64px] active:opacity-70"
+              >
+                <AppGlyph kind={d.kind} />
+                {count > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-[#ff3b30] px-1.5 text-[13px] font-medium text-white">
+                    {count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </nav>
         <HomeIndicator tone="light" onActivate={() => goToPage(0)} label="홈 화면" />
       </div>

@@ -3,10 +3,36 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { contacts } from './contacts'
 import { playSound, unlockSounds } from '@/lib/sound'
-import { AFTER_CALL_BANNER_MESSAGES, AFTER_CALL_ROOM_MESSAGES, EVENT_JY_MESSAGES, EVENT_YH_MESSAGES } from './events'
+import {
+  AFTER_CALL_BANNER_MESSAGES,
+  AFTER_CALL_ISO,
+  AFTER_CALL_ROOM_MESSAGES,
+  EVENT_JY_MESSAGES,
+  EVENT_YH_MESSAGES,
+} from './events'
+import {
+  autoReplyId,
+  autoReplyLines,
+  isAutoReplyRoom,
+  matchBranch,
+  type AutoReplyRoom,
+  type AutoReplyState,
+} from './auto-reply'
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
 import { smsThreads, type SmsMessage, type SmsThread } from './sms'
-import { toTime } from './time'
+import { NOW_ISO, toTime } from './time'
+
+/** 영현이 사용자에게 확인을 요구하는 메시지. 채팅방 안에서 이 메시지를 본 뒤에만 답장할 수 있다. */
+const YH_GATE_MESSAGE_ID = AFTER_CALL_ROOM_MESSAGES[AFTER_CALL_ROOM_MESSAGES.length - 1].id
+const AUTO_READ_DELAY_MS = 700
+const AUTO_REPLY_FIRST_MS = 1700
+const AUTO_REPLY_GAP_MS = 1000
+const FIRST_SENT_SEQ = 100
+
+function senderName(roomId: KakaoRoomId) {
+  const room = kakaoRooms.find((r) => r.id === roomId)
+  return room ? contacts[room.contactId].name : ''
+}
 
 export type SmsNotification = { thread: SmsThread; unread: SmsMessage[] }
 
@@ -39,6 +65,14 @@ type StoryProgress = {
   cameraUsed: boolean
   /** 사용자가 대화방을 열어 읽음 처리한 문자 id */
   readSmsIds: string[]
+  /** 사용자가 보낸 메시지 중 상대가 읽은 id */
+  readByThemIds: string[]
+  /** 방별로 고정된 자동 답장 분기. 한 번 정해지면 바뀌지 않는다. */
+  autoReplies: Partial<Record<AutoReplyRoom, AutoReplyState>>
+  /** 영현 채팅방에서 "너 우준영 만난 건 아니지"를 실제로 확인했는지 */
+  yhQuestionSeen: boolean
+  /** 다음에 보낼(또는 도착할) 메시지의 순서 번호 */
+  nextSeq: number
 }
 
 const BANNER_GAP_MS = 1800
@@ -62,6 +96,10 @@ const INITIAL: StoryProgress = {
   readRooms: [],
   cameraUsed: false,
   readSmsIds: [],
+  readByThemIds: [],
+  autoReplies: {},
+  yhQuestionSeen: false,
+  nextSeq: FIRST_SENT_SEQ,
 }
 
 function loadProgress(): StoryProgress {
@@ -73,6 +111,9 @@ function loadProgress(): StoryProgress {
     if (!Array.isArray(parsed.addedMessages) || !Array.isArray(parsed.readMessageIds)) return INITIAL
     const merged = { ...INITIAL, ...parsed }
     if (!Array.isArray(merged.readSmsIds)) merged.readSmsIds = []
+    if (!Array.isArray(merged.readByThemIds)) merged.readByThemIds = []
+    if (!merged.autoReplies || typeof merged.autoReplies !== 'object') merged.autoReplies = {}
+    if (typeof merged.nextSeq !== 'number') merged.nextSeq = FIRST_SENT_SEQ
     return Array.isArray(merged.readRooms) ? merged : { ...merged, readRooms: [] }
   } catch {
     return INITIAL
@@ -98,6 +139,12 @@ type StoryContext = {
   totalUnread: number
   markRoomRead: (id: KakaoRoomId) => void
   onYhRoomShown: () => void
+  /** 채팅방 화면에 실제로 표시된 상대 메시지 id를 알린다 */
+  onRoomMessagesSeen: (id: KakaoRoomId, messageIds: string[]) => void
+  canSendIn: (id: KakaoRoomId) => boolean
+  sendKakaoMessage: (id: KakaoRoomId, text: string) => void
+  /** 사용자가 보낸 메시지 중 상대가 아직 읽지 않은 것 */
+  isUnreadByThem: (message: KakaoMessage) => boolean
   clock: string
   yhCallEnded: boolean
   endYhCall: () => void
@@ -191,9 +238,9 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
             setBanner({
               key: message.id,
               roomId: message.roomId,
-              sender: contacts.yh.name,
+              sender: senderName(message.roomId),
               lines: [message.content.text],
-              time: '18:58',
+              time: progressRef.current.yhCallEnded ? '18:58' : '18:57',
             })
           }
         }, firstDelayMs + i * gapMs),
@@ -259,7 +306,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const markRoomRead = useCallback((id: KakaoRoomId) => {
     const p = progressRef.current
     const unreadIds = p.addedMessages
-      .filter((m) => m.roomId === id && !p.readMessageIds.includes(m.id))
+      .filter((m) => m.roomId === id && m.from === 'them' && !p.readMessageIds.includes(m.id))
       .map((m) => m.id)
     const staticUnread = Boolean(kakaoRooms.find((r) => r.id === id)?.initialUnread) && !p.readRooms.includes(id)
     if (unreadIds.length === 0 && !staticUnread) return
@@ -271,6 +318,107 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     progressRef.current = next
     setProgress(next)
   }, [])
+
+  const commit = (next: StoryProgress) => {
+    progressRef.current = next
+    setProgress(next)
+  }
+
+  const onRoomMessagesSeen = useCallback((id: KakaoRoomId, messageIds: string[]) => {
+    const p = progressRef.current
+    if (id === 'yh' && !p.yhQuestionSeen && messageIds.includes(YH_GATE_MESSAGE_ID)) {
+      commit({ ...p, yhQuestionSeen: true })
+    }
+  }, [])
+
+  const markReadByThem = useCallback((messageId: string) => {
+    const p = progressRef.current
+    if (p.readByThemIds.includes(messageId)) return
+    commit({ ...p, readByThemIds: [...p.readByThemIds, messageId] })
+  }, [])
+
+  /** 고정된 분기의 답장 중 아직 도착하지 않은 것만 순서대로 보낸다. 새로고침·재진입 시에도 중복 없이 이어진다. */
+  const deliverAutoReplies = useCallback((room: AutoReplyRoom, firstDelayMs: number) => {
+    const state = progressRef.current.autoReplies[room]
+    if (!state) return
+    const lines = autoReplyLines(room, state.branch)
+    const pending = lines
+      .map((text, index) => ({ text, id: autoReplyId(room, state.branch, index) }))
+      .filter((r) => !progressRef.current.addedMessages.some((m) => m.id === r.id))
+    pending.forEach((reply, i) => {
+      timers.current.push(
+        window.setTimeout(() => {
+          const p = progressRef.current
+          if (p.addedMessages.some((m) => m.id === reply.id)) return
+          const message: KakaoMessage = {
+            id: reply.id,
+            roomId: room,
+            from: 'them',
+            at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
+            seq: p.nextSeq,
+            content: { type: 'text', text: reply.text },
+          }
+          commit({ ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] })
+          playSound('kakao')
+          const { screen: s, kakaoRoomId: openRoom } = viewRef.current
+          const viewingRoom = s.kind === 'app' && s.app === 'kakao' && openRoom === room
+          if (!viewingRoom) {
+            setBanner({
+              key: message.id,
+              roomId: room,
+              sender: senderName(room),
+              lines: [reply.text],
+              time: p.yhCallEnded ? '18:58' : '18:57',
+            })
+          }
+        }, firstDelayMs + i * AUTO_REPLY_GAP_MS),
+      )
+    })
+  }, [])
+
+  useEffect(() => {
+    const p = progressRef.current
+    for (const room of ['yh', 'jy'] as const) {
+      const state = p.autoReplies[room]
+      if (!state) continue
+      markReadByThem(state.triggerId)
+      deliverAutoReplies(room, 1000)
+    }
+  }, [markReadByThem, deliverAutoReplies])
+
+  const canSend = (id: KakaoRoomId, p: StoryProgress) => {
+    if (id === 'yh') return p.yhQuestionSeen
+    if (id === 'jy') return p.jyArrived
+    return false
+  }
+
+  const sendKakaoMessage = useCallback(
+    (id: KakaoRoomId, rawText: string) => {
+      const text = rawText.trim()
+      const p = progressRef.current
+      if (!text || !canSend(id, p)) return
+      const message: KakaoMessage = {
+        id: `sent-${p.nextSeq}`,
+        roomId: id,
+        from: 'me',
+        at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
+        seq: p.nextSeq,
+        content: { type: 'text', text },
+      }
+      let next: StoryProgress = { ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] }
+      const room = isAutoReplyRoom(id) && !p.autoReplies[id] ? id : null
+      const branch = room ? matchBranch(room, text) : null
+      if (room && branch) {
+        next = { ...next, autoReplies: { ...next.autoReplies, [room]: { branch, triggerId: message.id } } }
+      }
+      commit(next)
+      if (room && branch) {
+        schedule(() => markReadByThem(message.id), AUTO_READ_DELAY_MS)
+        deliverAutoReplies(room, AUTO_REPLY_FIRST_MS)
+      }
+    },
+    [markReadByThem, deliverAutoReplies],
+  )
 
   const rooms = useMemo(() => {
     return kakaoRooms
@@ -291,7 +439,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       if (r.initialUnread && !progress.readRooms.includes(r.id)) result[r.id] = r.initialUnread
     }
     for (const m of progress.addedMessages) {
-      if (!progress.readMessageIds.includes(m.id)) result[m.roomId] = (result[m.roomId] ?? 0) + 1
+      if (m.from === 'them' && !progress.readMessageIds.includes(m.id)) result[m.roomId] = (result[m.roomId] ?? 0) + 1
     }
     return result
   }, [progress])
@@ -349,6 +497,10 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     totalUnread,
     markRoomRead,
     onYhRoomShown,
+    onRoomMessagesSeen,
+    canSendIn: (id) => canSend(id, progress),
+    sendKakaoMessage,
+    isUnreadByThem: (m) => m.from === 'me' && m.id.startsWith('sent-') && !progress.readByThemIds.includes(m.id),
     clock: progress.yhCallEnded ? '18:58' : '18:57',
     yhCallEnded: progress.yhCallEnded,
     endYhCall,

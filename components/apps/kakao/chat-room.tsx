@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
-import { ChevronLeft, Hash, Menu, Plus, Search, Smile, MapPin } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ArrowUp, ChevronLeft, Hash, Menu, Plus, Search, Smile, MapPin } from 'lucide-react'
 import { Avatar, HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
 import type { KakaoMessage, KakaoRoomId } from '@/lib/story/kakao'
@@ -12,8 +12,26 @@ import { Sticker } from './sticker'
 const ROOM_BG = '#bacee0'
 
 export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
-  const { rooms, closeKakaoRoom, markRoomRead, onYhRoomShown, totalUnread, unreadByRoom } = useStory()
+  const {
+    rooms,
+    closeKakaoRoom,
+    markRoomRead,
+    onYhRoomShown,
+    onRoomMessagesSeen,
+    canSendIn,
+    sendKakaoMessage,
+    isUnreadByThem,
+    totalUnread,
+    unreadByRoom,
+  } = useStory()
+  const [draft, setDraft] = useState('')
   const room = rooms.find((r) => r.id === roomId)!
+  const canSend = canSendIn(roomId)
+  const submit = () => {
+    if (!draft.trim()) return
+    sendKakaoMessage(roomId, draft)
+    setDraft('')
+  }
   const contact = contacts[room.contactId]
   const scrollRef = useRef<HTMLDivElement>(null)
   const count = room.messages.length
@@ -26,7 +44,12 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
 
   useEffect(() => {
     markRoomRead(roomId)
-  }, [roomId, count, markRoomRead])
+    onRoomMessagesSeen(
+      roomId,
+      room.messages.filter((m) => m.from === 'them').map((m) => m.id),
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when messages arrive
+  }, [roomId, count, markRoomRead, onRoomMessagesSeen])
 
   useEffect(() => {
     if (roomId === 'yh') onYhRoomShown()
@@ -47,17 +70,54 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
         </span>
       </header>
       <div ref={scrollRef} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2.5 pb-3">
-        <MessageList messages={room.messages} contactName={contact.name} initial={contact.initial} color={contact.color} photo={contact.photo} />
+        <MessageList
+          messages={room.messages}
+          contactName={contact.name}
+          initial={contact.initial}
+          color={contact.color}
+          photo={contact.photo}
+          isUnreadByThem={isUnreadByThem}
+        />
       </div>
-      <div className="flex shrink-0 items-center gap-2 bg-white px-2.5 py-2" aria-hidden>
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#f2f2f2]">
+      <form
+        className="flex shrink-0 items-center gap-2 bg-white px-2.5 py-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          submit()
+        }}
+      >
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#f2f2f2]" aria-hidden>
           <Plus className="size-5 text-[#6b6b6b]" strokeWidth={1.8} />
         </span>
-        <span className="flex h-9 min-w-0 flex-1 items-center justify-end rounded-full bg-[#f2f2f2] px-3">
-          <Smile className="size-[22px] text-[#6b6b6b]" strokeWidth={1.6} />
+        <span className="flex h-9 min-w-0 flex-1 items-center gap-1 rounded-full bg-[#f2f2f2] pl-3.5 pr-3">
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter' || e.nativeEvent.isComposing || e.keyCode === 229) return
+              e.preventDefault()
+              submit()
+            }}
+            disabled={!canSend}
+            aria-label="메시지 입력"
+            enterKeyHint="send"
+            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-black/30 disabled:cursor-not-allowed"
+          />
+          <Smile className="size-[22px] shrink-0 text-[#6b6b6b]" strokeWidth={1.6} aria-hidden />
         </span>
-        <Hash className="size-6 shrink-0 text-[#6b6b6b]" strokeWidth={1.7} />
-      </div>
+        {draft.trim() && canSend ? (
+          <button
+            type="submit"
+            aria-label="전송"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#fee500] active:opacity-70"
+          >
+            <ArrowUp className="size-5 text-black" strokeWidth={2.2} />
+          </button>
+        ) : (
+          <Hash className="size-6 shrink-0 text-[#6b6b6b]" strokeWidth={1.7} aria-hidden />
+        )}
+      </form>
       <HomeIndicator className="bg-white" />
     </div>
   )
@@ -69,12 +129,14 @@ function MessageList({
   initial,
   color,
   photo,
+  isUnreadByThem,
 }: {
   messages: KakaoMessage[]
   contactName: string
   initial: string
   color: string
   photo?: string
+  isUnreadByThem: (m: KakaoMessage) => boolean
 }) {
   return (
     <ol className="flex flex-col">
@@ -92,7 +154,14 @@ function MessageList({
             )}
             {m.from === 'me' ? (
               <div className={`flex items-end justify-end gap-[5px] pr-1.5 ${startsGroup ? 'mt-2.5' : 'mt-[5px]'}`}>
-                {time}
+                <span className="flex shrink-0 flex-col items-end">
+                  {isUnreadByThem(m) && (
+                    <span className="text-[11px] font-semibold leading-none text-[#e6b800]">
+                      1<span className="sr-only"> 읽지 않음</span>
+                    </span>
+                  )}
+                  {time}
+                </span>
                 <Bubble message={m} mine tail={startsGroup} />
               </div>
             ) : (

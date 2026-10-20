@@ -1,7 +1,7 @@
 import type { KakaoMessage } from './kakao'
 import { NOW_ISO, kst } from './time'
 
-const AFTER_CALL_ISO = kst('2025-11-19 18:58')
+export const AFTER_CALL_ISO = kst('2025-11-19 18:58')
 
 function yhLines(prefix: string, startSeq: number, lines: string[]): KakaoMessage[] {
   return lines.map((text, i) => ({

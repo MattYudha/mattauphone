@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, Users } from 'lucide-react'
 import { HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { useBackHandler } from '@/lib/story/back-nav'
+import { withBasePath } from '@/lib/base-path'
 import { cn } from '@/lib/utils'
 
 type Reservation = {
@@ -17,7 +18,8 @@ type Reservation = {
   seat: string
   number: string
   request: string
-  accent: string
+  photo: string
+  photoAlt: string
 }
 
 const RESERVATIONS: Reservation[] = [
@@ -32,7 +34,8 @@ const RESERVATIONS: Reservation[] = [
     seat: '카운터석',
     number: 'CT2511080712',
     request: '디너 오마카세 코스',
-    accent: '#d9485f',
+    photo: '/images/catchtable/sushi-haruka.jpg',
+    photoAlt: '나무 도마 위에 놓인 연어 아보카도 롤과 간장 종지',
   },
   {
     id: 'r2',
@@ -45,7 +48,8 @@ const RESERVATIONS: Reservation[] = [
     seat: '창가 테이블',
     number: 'CT2510251834',
     request: '파스타 코스 · 와인 페어링 없음',
-    accent: '#2f855a',
+    photo: '/images/catchtable/trattoria-luce.jpg',
+    photoAlt: '와인잔과 빵 바구니가 놓인 테이블 위의 플레이팅 요리',
   },
 ]
 
@@ -98,13 +102,11 @@ export function CatchTableApp() {
                       onClick={() => setOpenId(r.id)}
                       className="flex w-full items-center gap-3 rounded-[14px] bg-white p-4 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] active:bg-black/[0.03]"
                     >
-                      <span
-                        className="flex size-14 shrink-0 items-center justify-center rounded-[12px] text-[20px] font-bold text-white"
-                        style={{ backgroundColor: r.accent }}
-                        aria-hidden
-                      >
-                        {r.name.slice(0, 1)}
-                      </span>
+                      <img
+                        src={withBasePath(r.photo)}
+                        alt=""
+                        className="size-16 shrink-0 rounded-[12px] object-cover"
+                      />
                       <span className="min-w-0 flex-1">
                         <span className="inline-block rounded-[4px] bg-black/[0.06] px-1.5 py-0.5 text-[11px] font-semibold text-black/55">
                           방문 완료
@@ -148,7 +150,8 @@ function Detail({ r, onBack }: { r: Reservation; onBack: () => void }) {
         <h1 className="flex-1 pr-9 text-center text-[17px] font-semibold">예약 상세</h1>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <section className="bg-white px-5 pb-5 pt-3">
+        <img src={withBasePath(r.photo)} alt={r.photoAlt} className="aspect-[16/10] w-full object-cover" />
+        <section className="bg-white px-5 pb-5 pt-4">
           <span className="inline-block rounded-[4px] bg-black/[0.06] px-1.5 py-0.5 text-[12px] font-semibold text-black/55">
             방문 완료
           </span>
