@@ -33,8 +33,23 @@ export function isAutoReplyRoom(id: KakaoRoomId): id is AutoReplyRoom {
   return id === 'yh' || id === 'jy'
 }
 
+const PROFANITY = [
+  '씨발', '시발', '씨벌', '시벌', '시바', '씨바', 'ㅅㅂ', 'ㅆㅂ', '시발놈', '씨발놈', '개새끼', '개새', '새끼',
+  '병신', '븅신', 'ㅂㅅ', 'ㅄ', '지랄', 'ㅈㄹ', '좆', '좃', '존나', '졸라', '꺼져', '꺼지세요', '닥쳐', '닥치세요',
+  '엿먹어', '엿같아', '좆같아', '개같아', '미친놈', '미친새끼', '개소리', '개지랄',
+].map(normalize)
+
+/** 욕설 표현을 품고 있지만 일반 단어인 경우. 판별 전에 지워서 오탐을 막는다. */
+const PROFANITY_SAFE_WORDS = ['시발점', '시바견', '시바이누', '새끼손가락', '새끼발가락'].map(normalize)
+
+function hasProfanity(n: string): boolean {
+  const cleaned = PROFANITY_SAFE_WORDS.reduce((s, w) => s.split(w).join(''), n)
+  return PROFANITY.some((p) => cleaned.includes(p))
+}
+
 export function matchBranch(room: AutoReplyRoom, text: string): AutoReplyBranch | null {
   const n = normalize(text)
+  if (room === 'jy' && hasProfanity(n)) return 'A'
   const rule = RULES[room].find((r) => r.phrases.some((p) => n.includes(normalize(p))))
   return rule?.branch ?? null
 }
