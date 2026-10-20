@@ -73,6 +73,8 @@ export function IncomingCall() {
   const decline = () => {
     stopSound('ringtone')
     setState('idle')
+    // endYhCall is idempotent, so the follow-up KakaoTalk messages arrive exactly once on any path.
+    endYhCall()
   }
 
   const answer = () => {

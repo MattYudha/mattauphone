@@ -9,10 +9,11 @@ const WEEK = ['일', '월', '화', '수', '목', '금', '토']
 const TODAY = 19
 
 const EVENTS: Record<number, { time: string; title: string; color: string }[]> = {
+  2: [{ time: '하루 종일', title: '영현이형입국❤️', color: '#ff2d55' }],
   7: [{ time: '하루 종일', title: '원장 회의', color: '#34c759' }],
   14: [{ time: '19:00', title: '학원 설명회', color: '#ff9500' }],
   19: [
-    { time: '14:00', title: '중등부 보강 수업', color: '#0a84ff' },
+    { time: '10:00', title: '유치원부 오전 수업', color: '#0a84ff' },
     { time: '19:00', title: '퇴근', color: '#af52de' },
   ],
   22: [{ time: '12:00', title: '점심 약속', color: '#ff2d55' }],

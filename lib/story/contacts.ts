@@ -15,6 +15,8 @@ export type ContactId =
   | 'cj'
   | 'kakaopay'
   | 'supreme'
+  | 'hyundaiDept'
+  | 'yhSms'
 
 export type Contact = {
   id: ContactId
@@ -50,4 +52,7 @@ export const contacts: Record<ContactId, Contact> = {
   cj: { id: 'cj', name: '대한통운 배송', initial: '대', color: '#d94b3b' },
   kakaopay: { id: 'kakaopay', name: '카카오페이', initial: '카', color: '#ffeb00', photo: withBasePath('/images/profiles/kakaopay.png') },
   supreme: { id: 'supreme', name: 'Supreme', initial: 'S', color: '#e1251b', photo: withBasePath('/images/profiles/supreme.jpeg') },
+  hyundaiDept: { id: 'hyundaiDept', name: '현대백화점', initial: '현', color: '#2f4f46' },
+  /** 문자 앱에서 01012190482 번호와 매칭되는 연락처 이름 */
+  yhSms: { id: 'yhSms', name: '강영현', initial: '강', color: '#8fa7c4', label: '휴대전화', photo: withBasePath('/images/profiles/yh.jpeg') },
 }

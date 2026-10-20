@@ -119,17 +119,19 @@ function AppGrid({
   onLaunch: (app: AppId) => void
   className?: string
 }) {
+  const { totalSmsUnread } = useStory()
   return (
     <div className={cn('grid grid-cols-4 gap-x-5 gap-y-4', className)}>
       {apps.map((a) => {
-        const badge = a.app === 'kakao' && totalUnread > 0
+        const count = a.app === 'kakao' ? totalUnread : a.app === 'messages' ? totalSmsUnread : 0
+        const badge = count > 0
         const content = (
           <>
             <span className="relative block aspect-square w-full max-w-[64px]">
               <AppGlyph kind={a.kind} />
               {badge && (
                 <span className="absolute -right-2 -top-2 flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-[#ff3b30] px-1.5 text-[13px] font-medium text-white">
-                  {totalUnread}
+                  {count}
                 </span>
               )}
             </span>
@@ -150,7 +152,7 @@ function AppGrid({
             type="button"
             onClick={() => a.app && onLaunch(a.app)}
             className={cls}
-            aria-label={badge ? `${a.label}, 읽지 않은 메시지 ${totalUnread}개` : a.label}
+            aria-label={badge ? `${a.label}, 읽지 않은 메시지 ${count}개` : a.label}
           >
             {content}
           </button>

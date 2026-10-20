@@ -26,25 +26,22 @@ export function Passcode() {
 
   const press = useCallback(
     (d: string) => {
-      if (shake) return
-      setCode((prev) => {
-        if (prev.length >= 4) return prev
-        const next = prev + d
-        if (next.length === 4) {
-          if (next === PASSCODE) {
-            window.setTimeout(unlock, 150)
-          } else {
-            window.setTimeout(() => setShake(true), 120)
-            window.setTimeout(() => {
-              setShake(false)
-              setCode('')
-            }, 560)
-          }
+      if (shake || code.length >= 4) return
+      const next = code + d
+      setCode(next)
+      if (next.length === 4) {
+        if (next === PASSCODE) {
+          window.setTimeout(unlock, 150)
+        } else {
+          window.setTimeout(() => setShake(true), 120)
+          window.setTimeout(() => {
+            setShake(false)
+            setCode('')
+          }, 560)
         }
-        return next
-      })
+      }
     },
-    [shake, unlock],
+    [code, shake, unlock],
   )
 
   const erase = useCallback(() => setCode((p) => p.slice(0, -1)), [])

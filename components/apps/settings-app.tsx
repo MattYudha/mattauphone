@@ -120,6 +120,15 @@ export function SettingsApp() {
   )
 }
 
+const BT_DEVICES = [
+  '김원필의 AirPods Pro',
+  'Kwp의 MacBook',
+  'JBL Sound Speaker',
+  "YoungHyun's BMW",
+  '거실 서라운드',
+  '원필의 BOSE 헤드셋',
+]
+
 function SubPage({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
   return (
     <AppShell
@@ -155,11 +164,23 @@ function PageBody({ page, toggles, flip }: { page: PageId; toggles: Toggles; fli
       )
     case 'bluetooth':
       return (
-        <Group>
-          <Row label="Bluetooth">
-            <Toggle label="Bluetooth" on={toggles.bluetooth} onChange={() => flip('bluetooth')} />
-          </Row>
-        </Group>
+        <>
+          <Group>
+            <Row label="Bluetooth">
+              <Toggle label="Bluetooth" on={toggles.bluetooth} onChange={() => flip('bluetooth')} />
+            </Row>
+          </Group>
+          {toggles.bluetooth && (
+            <section>
+              <h3 className="mb-1.5 px-4 text-[13px] uppercase text-black/45">나의 기기</h3>
+              <Group>
+                {BT_DEVICES.map((d) => (
+                  <Row key={d} label={d} value="연결 안 됨" />
+                ))}
+              </Group>
+            </section>
+          )}
+        </>
       )
     case 'notifications':
       return (
@@ -299,12 +320,19 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: () => void; la
       role="switch"
       aria-checked={on}
       aria-label={label}
-      onClick={onChange}
-      className={cn('relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors', on ? 'bg-[#34c759]' : 'bg-black/10')}
+      onClick={(e) => {
+        e.stopPropagation()
+        onChange()
+      }}
+      className={cn(
+        'relative block h-[31px] w-[51px] shrink-0 overflow-hidden rounded-full p-0 transition-colors',
+        on ? 'bg-[#34c759]' : 'bg-[#e9e9eb]',
+      )}
     >
       <span
+        aria-hidden
         className={cn(
-          'absolute top-[2px] size-[27px] rounded-full bg-white shadow transition-transform',
+          'pointer-events-none absolute left-0 top-[2px] block size-[27px] rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.15),0_1px_1px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out',
           on ? 'translate-x-[22px]' : 'translate-x-[2px]',
         )}
       />

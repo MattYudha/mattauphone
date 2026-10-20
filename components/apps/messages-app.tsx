@@ -1,6 +1,7 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useStory } from '@/lib/story/store'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { AppShell, Avatar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
@@ -13,10 +14,10 @@ const sortedThreads = [...smsThreads].sort(
 )
 
 export function MessagesApp() {
-  const [openId, setOpenId] = useState<string | null>(null)
-  const thread = sortedThreads.find((t) => t.id === openId)
-  useBackHandler(!!thread, () => setOpenId(null))
-  if (thread) return <Thread thread={thread} onBack={() => setOpenId(null)} />
+  const { smsThreadId, openSmsThread, closeSmsThread, smsUnreadByThread } = useStory()
+  const thread = sortedThreads.find((t) => t.id === smsThreadId)
+  useBackHandler(!!thread, closeSmsThread)
+  if (thread) return <Thread thread={thread} onBack={closeSmsThread} />
 
   return (
     <AppShell
@@ -30,13 +31,19 @@ export function MessagesApp() {
         {sortedThreads.map((t) => {
           const c = contacts[t.contactId]
           const last = t.messages[t.messages.length - 1]
+          const unread = (smsUnreadByThread[t.id] ?? 0) > 0
           return (
             <li key={t.id}>
               <button
                 type="button"
-                onClick={() => setOpenId(t.id)}
-                className="flex w-full items-center gap-3 pl-4 text-left active:bg-black/5"
+                onClick={() => openSmsThread(t.id)}
+                aria-label={unread ? `${c.name}, 읽지 않은 메시지 ${smsUnreadByThread[t.id]}개` : undefined}
+                className="flex w-full items-center gap-2 pl-2 text-left active:bg-black/5"
               >
+                <span
+                  className={`size-2.5 shrink-0 rounded-full ${unread ? 'bg-[#007aff]' : 'bg-transparent'}`}
+                  aria-hidden
+                />
                 <Avatar initial={c.initial} color="#a7adb7" size={44} src={c.photo} />
                 <span className="flex min-w-0 flex-1 flex-col border-b border-black/10 py-2.5 pr-4">
                   <span className="flex items-center gap-2">
@@ -57,10 +64,14 @@ export function MessagesApp() {
 
 function Thread({ thread, onBack }: { thread: SmsThread; onBack: () => void }) {
   const c = contacts[thread.contactId]
+  const { markSmsThreadRead } = useStory()
   const ref = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
   }, [])
+  useEffect(() => {
+    markSmsThreadRead(thread.id)
+  }, [thread.id, markSmsThreadRead])
 
   return (
     <AppShell

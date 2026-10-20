@@ -6,6 +6,8 @@ export type SmsMessage = {
   from: 'me' | 'them'
   at: string
   text: string
+  /** 스토리 시작 시점에 읽지 않은 상태인 문자 */
+  unread?: boolean
 }
 
 export type SmsThread = {
@@ -16,7 +18,7 @@ export type SmsThread = {
   messages: SmsMessage[]
 }
 
-type Entry = [string, 'me' | 'them', string]
+type Entry = [string, 'me' | 'them', string] | [string, 'me' | 'them', string, 'unread']
 
 function thread(
   id: string,
@@ -28,14 +30,20 @@ function thread(
     id,
     contactId,
     notificationOnly,
-    messages: entries.map(([at, from, text], i) => ({ id: `${id}-${i}`, from, at: kst(at), text })),
+    messages: entries.map(([at, from, text, flag], i) => ({
+      id: `${id}-${i}`,
+      from,
+      at: kst(at),
+      text,
+      ...(flag === 'unread' ? { unread: true } : {}),
+    })),
   }
 }
 
 const ME = 'me' as const
 const T = 'them' as const
 
-export type CardTransaction = { at: string; merchant: string; amount: number }
+export type CardTransaction = { at: string; merchant: string; amount: number; unread?: boolean }
 
 /** 현대카드 가상 승인 내역. 누적액은 아래 거래를 시간순으로 더해 계산한다. */
 export const cardTransactions: CardTransaction[] = [
@@ -67,6 +75,7 @@ export const cardTransactions: CardTransaction[] = [
   { at: '2025-11-18 14:10', merchant: '카페 모음', amount: 36500 },
   { at: '2025-11-18 21:00', merchant: '카카오T 택시', amount: 14600 },
   { at: '2025-11-19 12:10', merchant: 'GS25 영원점', amount: 5600 },
+  { at: '2025-11-19 12:10', merchant: '헤이브레드', amount: 7800, unread: true },
 ]
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
@@ -80,9 +89,26 @@ function cardEntries(): Entry[] {
       const [date] = t.at.split(' ')
       const [, m, d] = date.split('-')
       const text = `[Web발신]\n현대카드 승인\n김*필\n${won(t.amount)} 일시불\n${m}/${d} ${formatClock(kst(t.at))}\n${t.merchant}\n누적 ${won(total)}`
-      return [t.at, T, text] as Entry
+      return (t.unread ? [t.at, T, text, 'unread'] : [t.at, T, text]) as Entry
     })
 }
+
+const AD_FOOTER = '\n\n무료수신거부 080-850-1102'
+
+const hyundaiDeptEntries: Entry[] = (
+  [
+    ['2025-11-01 10:30', '(광고)[현대백화점] 김원필 고객님, 11월 H.Point 적립 현황 안내\n가용 포인트: 12,480P\n소멸 예정 포인트(11/30): 1,200P\n포인트는 백화점 및 H.Point 제휴처에서 사용하실 수 있습니다.'],
+    ['2025-11-03 11:00', '(광고)[현대백화점] 11월 VIP 회원 혜택 안내\n이번 달 무료 주차 3시간, 라운지 음료 1잔 혜택이 제공됩니다.\n현대백화점 앱 > 멤버십에서 확인하세요.'],
+    ['2025-11-05 10:00', '(광고)[현대백화점 무역센터점] 겨울 아우터 페어\n11/7(금)~11/16(일) 9층 행사장\n인기 브랜드 패딩·코트 최대 50% 할인'],
+    ['2025-11-07 09:30', '(광고)[현대백화점] 주말 한정 쿠폰 도착!\n5만원 이상 구매 시 5천원 할인 (11/8~11/9)\n앱 쿠폰함에서 다운로드 후 사용 가능합니다.'],
+    ['2025-11-10 10:00', '(광고)[현대백화점] 이번 주 식품관 신선 특가\n제철 과일·한우 선물세트 최대 30% 할인\n11/10(월)~11/13(목) 식품관 B1'],
+    ['2025-11-12 14:00', '[현대백화점] 영업시간 변경 안내\n11/14(금) 판교점은 시설 점검으로 오후 8시에 조기 폐점합니다.\n이용에 참고 부탁드립니다.'],
+    ['2025-11-13 18:00', '(광고)[현대백화점] H.Point 더블 적립 이벤트\n11/14~11/16 구매금액의 2% 추가 적립\n멤버십 바코드를 꼭 제시해주세요.'],
+    ['2025-11-15 10:00', '(광고)[현대백화점] 생일 축하 쿠폰을 미리 준비했어요\n뷰티 브랜드 1만원 할인 쿠폰이 발급되었습니다.\n유효기간: 12/31까지'],
+    ['2025-11-17 11:30', '(광고)[현대백화점] 윈터 홀리데이 마켓 OPEN\n11/21(금)~12/25(목) 1층 아트리움\n크리스마스 소품·디저트 팝업 오픈 기념 선착순 사은품 증정'],
+    ['2025-11-19 10:00', '(광고)[현대백화점] 블랙프라이데이 사전 안내\n11/21(금)~11/30(일) 전관 최대 70% 할인\n멤버십 회원은 11/20(목) 하루 먼저 쇼핑하실 수 있습니다.'],
+  ] as const
+).map(([at, text]) => [at, T, text.startsWith('(광고)') ? text + AD_FOOTER : text, 'unread'] as Entry)
 
 export const cardTotal = cardTransactions.reduce((sum, t) => sum + t.amount, 0)
 
@@ -113,6 +139,15 @@ export const smsThreads: SmsThread[] = [
   ]),
 
   thread('card', 'hyundai', cardEntries(), true),
+
+  thread('hyundaiDept', 'hyundaiDept', hyundaiDeptEntries, true),
+
+  thread(
+    'yhCatch',
+    'yhSms',
+    [['2025-11-19 12:16', T, '[Web발신]\n[캐치콜]\n강영현(010-1219-0482)님이 11월 19일 오후 12:16에 전화하셨습니다.']],
+    true,
+  ),
 
   thread('jihoo', 'jihoo', [
     ['2025-11-05 19:12', T, '선생님 저 지후에요'],

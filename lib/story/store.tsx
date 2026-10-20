@@ -5,7 +5,10 @@ import { contacts } from './contacts'
 import { playSound, unlockSounds } from '@/lib/sound'
 import { AFTER_CALL_BANNER_MESSAGES, AFTER_CALL_ROOM_MESSAGES, EVENT_JY_MESSAGES, EVENT_YH_MESSAGES } from './events'
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
+import { smsThreads, type SmsMessage, type SmsThread } from './sms'
 import { toTime } from './time'
+
+export type SmsNotification = { thread: SmsThread; unread: SmsMessage[] }
 
 export type AppId =
   | 'kakao'
@@ -32,6 +35,8 @@ type StoryProgress = {
   /** 처음부터 읽지 않음 상태였던 방 중 사용자가 열어본 방 */
   readRooms: KakaoRoomId[]
   cameraUsed: boolean
+  /** 사용자가 대화방을 열어 읽음 처리한 문자 id */
+  readSmsIds: string[]
 }
 
 const BANNER_GAP_MS = 1800
@@ -54,6 +59,7 @@ const INITIAL: StoryProgress = {
   readMessageIds: [],
   readRooms: [],
   cameraUsed: false,
+  readSmsIds: [],
 }
 
 function loadProgress(): StoryProgress {
@@ -64,6 +70,7 @@ function loadProgress(): StoryProgress {
     const parsed = JSON.parse(raw) as StoryProgress
     if (!Array.isArray(parsed.addedMessages) || !Array.isArray(parsed.readMessageIds)) return INITIAL
     const merged = { ...INITIAL, ...parsed }
+    if (!Array.isArray(merged.readSmsIds)) merged.readSmsIds = []
     return Array.isArray(merged.readRooms) ? merged : { ...merged, readRooms: [] }
   } catch {
     return INITIAL
@@ -98,6 +105,15 @@ type StoryContext = {
   resetStory: () => void
   cameraUsed: boolean
   markCameraUsed: () => void
+  smsThreadId: string | null
+  openSmsThread: (id: string) => void
+  closeSmsThread: () => void
+  /** 잠금화면 알림에서 진입: 암호 입력 후 해당 문자 대화로 이동 */
+  openSmsFromLock: (id: string) => void
+  markSmsThreadRead: (id: string) => void
+  smsUnreadByThread: Record<string, number>
+  totalSmsUnread: number
+  smsNotifications: SmsNotification[]
 }
 
 const Ctx = createContext<StoryContext | null>(null)
@@ -107,6 +123,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const [kakaoRoomId, setKakaoRoomId] = useState<KakaoRoomId | null>(null)
   const [progress, setProgress] = useState<StoryProgress>(loadProgress)
   const [banner, setBanner] = useState<Banner | null>(null)
+  const [smsThreadId, setSmsThreadId] = useState<string | null>(null)
+  const pendingSmsThread = useRef<string | null>(null)
   const progressRef = useRef(progress)
   progressRef.current = progress
   const timers = useRef<number[]>([])
@@ -215,7 +233,14 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const unlock = useCallback(() => {
-    setScreen({ kind: 'home' })
+    const target = pendingSmsThread.current
+    pendingSmsThread.current = null
+    if (target) {
+      setSmsThreadId(target)
+      setScreen({ kind: 'app', app: 'messages' })
+    } else {
+      setScreen({ kind: 'home' })
+    }
     if (!progressRef.current.yhArrived) schedule(triggerYh, 900)
   }, [triggerYh])
 
@@ -271,13 +296,42 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
 
   const totalUnread = Object.values(unreadByRoom).reduce((s, n) => s + (n ?? 0), 0)
 
+  const smsNotifications = useMemo<SmsNotification[]>(() => {
+    return smsThreads
+      .map((thread) => ({
+        thread,
+        unread: thread.messages.filter((m) => m.unread && !progress.readSmsIds.includes(m.id)),
+      }))
+      .filter((n) => n.unread.length > 0)
+      .sort((a, b) => toTime(b.unread[b.unread.length - 1].at) - toTime(a.unread[a.unread.length - 1].at))
+  }, [progress.readSmsIds])
+
+  const smsUnreadByThread = useMemo(
+    () => Object.fromEntries(smsNotifications.map((n) => [n.thread.id, n.unread.length])),
+    [smsNotifications],
+  )
+  const totalSmsUnread = smsNotifications.reduce((s, n) => s + n.unread.length, 0)
+
+  const markSmsThreadRead = useCallback((id: string) => {
+    const p = progressRef.current
+    const ids = (smsThreads.find((t) => t.id === id)?.messages ?? [])
+      .filter((m) => m.unread && !p.readSmsIds.includes(m.id))
+      .map((m) => m.id)
+    if (ids.length === 0) return
+    const next = { ...p, readSmsIds: [...p.readSmsIds, ...ids] }
+    progressRef.current = next
+    setProgress(next)
+  }, [])
+
   const value: StoryContext = {
     screen,
     unlock,
     openPasscode: () => setScreen({ kind: 'passcode' }),
     lock: () => {
+      pendingSmsThread.current = null
       setBanner(null)
       setKakaoRoomId(null)
+      setSmsThreadId(null)
       setScreen({ kind: 'lock' })
     },
     goHome: () => setScreen({ kind: 'home' }),
@@ -310,6 +364,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       setProgress(INITIAL)
       setBanner(null)
       setKakaoRoomId(null)
+      setSmsThreadId(null)
+      pendingSmsThread.current = null
       setScreen({ kind: 'lock' })
     },
     cameraUsed: progress.cameraUsed,
@@ -319,6 +375,20 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       progressRef.current = next
       setProgress(next)
     },
+    smsThreadId,
+    openSmsThread: (id) => {
+      setSmsThreadId(id)
+      setScreen({ kind: 'app', app: 'messages' })
+    },
+    closeSmsThread: () => setSmsThreadId(null),
+    openSmsFromLock: (id) => {
+      pendingSmsThread.current = id
+      setScreen({ kind: 'passcode' })
+    },
+    markSmsThreadRead,
+    smsUnreadByThread,
+    totalSmsUnread,
+    smsNotifications,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
