@@ -14,6 +14,8 @@ export type IconKind =
   | 'notes'
   | 'voicememos'
   | 'youtube'
+  | 'catchtable'
+  | 'instagram'
 
 const base = 'relative flex size-full items-center justify-center overflow-hidden rounded-[23%]'
 
@@ -157,6 +159,26 @@ export function AppGlyph({ kind }: { kind: IconKind }) {
               fill="#ff0000"
             />
             <path d="M11.2 14.3 18.4 10l-7.2-4.3v8.6Z" fill="#fff" />
+          </svg>
+        </span>
+      )
+    case 'catchtable':
+      return (
+        <span className={`${base} flex-col bg-[#ff4d2d] leading-[0.95] text-white`}>
+          <span className="text-[13px] font-extrabold tracking-tight">catch</span>
+          <span className="text-[13px] font-extrabold tracking-tight">table</span>
+        </span>
+      )
+    case 'instagram':
+      return (
+        <span
+          className={base}
+          style={{ background: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%)' }}
+        >
+          <svg viewBox="0 0 24 24" className="w-[62%] fill-none stroke-white" strokeWidth={2} aria-hidden>
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4.2" />
+            <circle cx="17.4" cy="6.6" r="0.6" className="fill-white" />
           </svg>
         </span>
       )

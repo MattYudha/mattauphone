@@ -13,6 +13,8 @@ import { CameraApp } from '@/components/apps/camera-app'
 import { VoiceMemosApp } from '@/components/apps/voice-memos-app'
 import { CalendarApp } from '@/components/apps/calendar-app'
 import { ClockApp } from '@/components/apps/clock-app'
+import { InstagramApp } from '@/components/apps/instagram-app'
+import { CatchTableApp } from '@/components/apps/catchtable-app'
 import { LockScreen } from './lock-screen'
 import { Passcode } from './passcode'
 import { HomeScreen } from './home-screen'
@@ -35,6 +37,8 @@ const APPS: Record<AppId, () => React.ReactNode> = {
   voicememos: () => <VoiceMemosApp />,
   calendar: () => <CalendarApp />,
   clock: () => <ClockApp />,
+  instagram: () => <InstagramApp />,
+  catchtable: () => <CatchTableApp />,
 }
 
 function Screens() {

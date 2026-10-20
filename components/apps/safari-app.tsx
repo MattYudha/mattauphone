@@ -12,9 +12,11 @@ import { FlightResults } from './naver/flight-results'
 import { OriginalWorkResults } from './naver/original-work-results'
 import { HansungResults } from './naver/hansung-results'
 import { ChatGptResults } from './naver/chatgpt-results'
+import { AkboResults, AkboSite } from './naver/akbo-results'
+import { KoreanAirResults } from './naver/koreanair-results'
 import { useStory } from '@/lib/story/store'
 
-type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string }
+type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string } | { kind: 'akbo' }
 
 const MENU = ['메일', '카페', '블로그', '쇼핑', '뉴스', '지도', '증권', '웹툰']
 
@@ -26,7 +28,7 @@ export function SafariApp() {
   useBackHandler(stack.length > 1, back)
 
   const address =
-    view.kind === 'preview' ? `m.search.naver.com` : 'm.naver.com'
+    view.kind === 'preview' ? `m.search.naver.com` : view.kind === 'akbo' ? '악보세계' : 'm.naver.com'
 
   return (
     <div className="flex h-full flex-col bg-white text-black">
@@ -36,7 +38,10 @@ export function SafariApp() {
         {view.kind === 'search' && (
           <SearchPanel onCancel={back} onSubmit={(q) => push({ kind: 'preview', query: q })} />
         )}
-        {view.kind === 'preview' && <Preview query={view.query} onSearch={() => push({ kind: 'search' })} />}
+        {view.kind === 'preview' && (
+          <Preview query={view.query} onSearch={() => push({ kind: 'search' })} onOpenAkbo={() => push({ kind: 'akbo' })} />
+        )}
+        {view.kind === 'akbo' && <AkboSite />}
       </div>
       <div className="shrink-0 border-t border-black/[0.06] bg-[#f9f9f9]/95 px-3 pb-0 pt-2 backdrop-blur">
         <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-[15px] shadow-[0_1px_6px_rgba(0,0,0,0.12)]">
@@ -218,7 +223,7 @@ function SearchPanel({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (
   )
 }
 
-function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
+function Preview({ query, onSearch, onOpenAkbo }: { query: string; onSearch: () => void; onOpenAkbo: () => void }) {
   const { openApp } = useStory()
   const normalized = query.replace(/\s+/g, '').toLowerCase()
   return (
@@ -252,6 +257,10 @@ function Preview({ query, onSearch }: { query: string; onSearch: () => void }) {
         <HansungResults />
       ) : ['챗지피티', '쳇지피티', 'chatgpt', '챗gpt'].includes(normalized) ? (
         <ChatGptResults onOpenAnyAi={() => openApp('anyai')} />
+      ) : normalized === '악보세계' ? (
+        <AkboResults onOpenSite={onOpenAkbo} />
+      ) : normalized === '대한항공' ? (
+        <KoreanAirResults />
       ) : (
         <NoResults query={query} />
       )}

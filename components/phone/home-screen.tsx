@@ -23,6 +23,8 @@ const PAGE_ONE: HomeApp[] = [
 const PAGE_TWO: HomeApp[] = [
   { kind: 'voicememos', app: 'voicememos', label: '음성 메모' },
   { kind: 'youtube', href: 'https://youtu.be/TU0q9CW3Xmo?si=zcNEc8wU2Tr0XEja', label: 'YouTube' },
+  { kind: 'catchtable', app: 'catchtable', label: '캐치테이블' },
+  { kind: 'instagram', app: 'instagram', label: 'Instagram' },
 ]
 
 const DOCK: HomeApp[] = [

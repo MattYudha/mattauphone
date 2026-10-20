@@ -23,6 +23,8 @@ export type AppId =
   | 'voicememos'
   | 'calendar'
   | 'clock'
+  | 'instagram'
+  | 'catchtable'
 export type Screen = { kind: 'lock' } | { kind: 'passcode' } | { kind: 'home' } | { kind: 'app'; app: AppId }
 
 type StoryProgress = {
