@@ -412,9 +412,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
         next = { ...next, autoReplies: { ...next.autoReplies, [room]: { branch, triggerId: message.id } } }
       }
       commit(next)
-      // 우준영은 답장 분기가 정해지기 전까지 인식 여부와 상관없이 읽는다. 분기 이후 메시지는 끝까지 읽지 않는다.
-      const readsBeforeReply = id === 'jy' && !p.autoReplies.jy
-      if ((room && branch) || readsBeforeReply) {
+      // 조건이 확인된 메시지만 읽는다. 미분류 및 분기 확정 후 메시지는 읽지 않는다.
+      if (room && branch) {
         schedule(() => markReadByThem(message.id), AUTO_READ_DELAY_MS)
       }
       if (room && branch) deliverAutoReplies(room, AUTO_REPLY_FIRST_MS)
