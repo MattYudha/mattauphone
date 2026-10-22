@@ -17,7 +17,24 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages-enabled: ${{ steps.pages.outputs.enabled }}
     steps:
+      # Deploy hanya berjalan bila GitHub Pages sudah diaktifkan (Settings → Pages → Source: GitHub Actions).
+      # Selama belum aktif, workflow tetap lolos dan hanya memastikan build statis berhasil.
+      - name: Check GitHub Pages
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}"             -H "Authorization: Bearer $GH_TOKEN"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${{ github.repository }}/pages")
+          if [ "$status" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitHub Pages belum aktif::Deploy dilewati. Aktifkan di Settings → Pages → Source: GitHub Actions."
+          fi
+
       - uses: actions/checkout@v4
 
       - name: Set up pnpm
@@ -51,12 +68,14 @@ jobs:
         run: pnpm build
 
       - name: Upload artifact
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages-enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
