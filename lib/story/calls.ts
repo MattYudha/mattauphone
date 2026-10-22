@@ -8,7 +8,7 @@ export type CallRecord = {
   contactId: ContactId
   at: string
   type: CallType
-  /** 초 단위. 부재중은 0 */
+  /** Dalam detik. 0 untuk panggilan tak terjawab */
   duration: number
 }
 
@@ -40,7 +40,7 @@ export const calls: CallRecord[] = entries
   .sort((a, b) => toTime(b.at) - toTime(a.at))
 
 export const callTypeLabel: Record<CallType, string> = {
-  incoming: '수신 전화',
-  outgoing: '발신 전화',
-  missed: '부재중 전화',
+  incoming: 'Panggilan Masuk',
+  outgoing: 'Panggilan Keluar',
+  missed: 'Panggilan Tak Terjawab',
 }

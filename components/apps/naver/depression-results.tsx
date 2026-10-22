@@ -1,63 +1,63 @@
 import { withBasePath } from '@/lib/base-path'
 
-type Result = { source: '카페' | '블로그' | '지식iN'; site: string; date: string; title: string; snippet: string; thumb?: string }
+type Result = { source: 'Kafe' | 'Blog' | 'KnowledgeiN'; site: string; date: string; title: string; snippet: string; thumb?: string }
 
 const RESULTS: Result[] = [
   {
-    source: '블로그',
-    site: '하루하루 마음일기',
-    date: '3일 전',
-    title: '갑자기 우울할 때, 제가 하는 5가지 방법',
-    snippet: '이유 없이 갑자기 마음이 가라앉는 날이 있어요. 그럴 땐 산책을 하거나 따뜻한 차를 마셔요...',
+    source: 'Blog',
+    site: 'Jurnal Hati Sehari-hari',
+    date: '3 hari lalu',
+    title: '5 hal yang aku lakukan kalau tiba-tiba depresi',
+    snippet: 'Ada hari-hari ketika hati tiba-tiba terasa berat tanpa alasan. Kalau lagi begitu, aku jalan-jalan sebentar atau minum teh hangat...',
     thumb: '/images/naver/blog-1.png',
   },
   {
-    source: '카페',
-    site: '마음쉼터 (회원 12만)',
+    source: 'Kafe',
+    site: 'Ruang Teduh Hati (120 rb anggota)',
     date: '2025.10.30',
-    title: '요즘 이유없이 우울하고 눈물이 나요',
-    snippet: '평소처럼 지내다가도 갑자기 기분이 확 다운돼요. 다들 이럴 때 어떻게 하시나요? 댓글 47',
+    title: 'Akhir-akhir ini aku sedih dan nangis terus tanpa alasan',
+    snippet: 'Lagi jalanin hari kayak biasa, tiba-tiba mood langsung anjlok. Kalian biasanya ngapain kalau lagi begini? Komentar 47',
   },
   {
-    source: '지식iN',
-    site: '정신건강의학과 전문의 답변',
+    source: 'KnowledgeiN',
+    site: 'Jawaban dokter spesialis kedokteran jiwa',
     date: '2025.08.14',
-    title: '갑자기 우울감이 몰려오는데 우울증인가요?',
-    snippet: '일시적인 기분 저하와 우울증은 구분이 필요합니다. 2주 이상 지속된다면 상담을 권해드립니다.',
+    title: 'Tiba-tiba rasa sedih datang bertubi-tubi, apakah ini depresi?',
+    snippet: 'Penurunan suasana hati sementara perlu dibedakan dari depresi. Jika berlangsung lebih dari 2 minggu, kami sarankan untuk berkonsultasi.',
   },
   {
-    source: '블로그',
-    site: '소소한 위로',
-    date: '1주 전',
-    title: '우울할 때 듣기 좋은 노래 플레이리스트',
-    snippet: '혼자 있는 밤, 마음을 조용히 다독여 주는 노래들을 모아봤어요. 1. 예뻤어 2. 한 페이지가 될 수 있게...',
+    source: 'Blog',
+    site: 'Penghiburan Kecil',
+    date: '1 minggu lalu',
+    title: 'Playlist lagu yang enak didengar saat sedih',
+    snippet: 'Aku kumpulin lagu-lagu yang pelan-pelan menenangkan hati di malam-malam sendirian. 1. You Were Beautiful 2. Time of Our Life...',
     thumb: '/images/naver/blog-2.png',
   },
   {
-    source: '카페',
-    site: '20대 고민상담소',
+    source: 'Kafe',
+    site: 'Ruang Curhat Usia 20-an',
     date: '2025.11.02',
-    title: '사람 만나는 게 지치고 갑자기 우울해질 때',
-    snippet: '연락 오는 것도 부담스럽고 그냥 다 내려놓고 싶을 때가 있어요. 저만 그런 거 아니죠? 댓글 89',
+    title: 'Saat capek ketemu orang dan tiba-tiba jadi sedih',
+    snippet: 'Ada kalanya dichat orang aja rasanya berat, pengin lepasin semuanya. Bukan cuma aku kan yang begini? Komentar 89',
   },
   {
-    source: '블로그',
-    site: '건강한 하루',
+    source: 'Blog',
+    site: 'Hari yang Sehat',
     date: '2025.09.21',
-    title: '우울증 자가진단 체크리스트 (PHQ-9)',
-    snippet: '최근 2주 동안 다음 증상을 얼마나 자주 겪었는지 체크해 보세요. 점수가 높다면 전문가와...',
+    title: 'Checklist tes mandiri depresi (PHQ-9)',
+    snippet: 'Coba cek seberapa sering kamu mengalami gejala berikut dalam 2 minggu terakhir. Kalau skornya tinggi, sebaiknya bicarakan dengan ahli...',
   },
 ]
 
-const SOURCE_COLOR: Record<Result['source'], string> = { 카페: '#03c75a', 블로그: '#20c06b', 지식iN: '#1e88e5' }
+const SOURCE_COLOR: Record<Result['source'], string> = { Kafe: '#03c75a', Blog: '#20c06b', KnowledgeiN: '#1e88e5' }
 
 export function DepressionResults() {
   return (
     <div className="bg-[#f2f4f6] pb-8">
-      <section className="bg-white px-4 py-4" aria-label="도움 안내">
-        <p className="text-[14px] font-semibold">마음이 힘드신가요?</p>
+      <section className="bg-white px-4 py-4" aria-label="Informasi bantuan">
+        <p className="text-[14px] font-semibold">Sedang merasa berat?</p>
         <p className="mt-1 text-[13px] leading-relaxed text-black/55">
-          혼자 고민하지 마세요. 정신건강 위기상담 109 · 정신건강상담 1577-0199에서 24시간 도움을 받을 수 있어요.
+          Jangan dipendam sendiri. Kamu bisa mendapat bantuan 24 jam di Layanan Krisis Kesehatan Jiwa 109 · Konseling Kesehatan Jiwa 1577-0199.
         </p>
       </section>
       <ul className="mt-2 flex flex-col gap-2">

@@ -25,39 +25,39 @@ type Reservation = {
 const RESERVATIONS: Reservation[] = [
   {
     id: 'r1',
-    name: '스시 하루카',
-    cuisine: '일식 · 스시 오마카세',
-    date: '2025년 11월 8일 (토)',
-    time: '오후 7:00',
+    name: 'Sushi Haruka',
+    cuisine: 'Jepang · Omakase Sushi',
+    date: 'Sab, 8 November 2025',
+    time: '19.00',
     party: 2,
-    area: '서울 강남구 · 신사동',
-    seat: '카운터석',
+    area: 'Seoul Gangnam-gu · Sinsa-dong',
+    seat: 'Kursi konter',
     number: 'CT2511080712',
-    request: '디너 오마카세 코스',
+    request: 'Paket omakase makan malam',
     photo: '/images/catchtable/sushi-haruka.jpg',
-    photoAlt: '나무 도마 위에 놓인 연어 아보카도 롤과 간장 종지',
+    photoAlt: 'Salmon avocado roll di atas talenan kayu dengan mangkuk kecil kecap asin',
   },
   {
     id: 'r2',
-    name: '트라토리아 루체',
-    cuisine: '양식 · 이탈리안',
-    date: '2025년 10월 25일 (토)',
-    time: '오후 6:30',
+    name: 'Trattoria Luce',
+    cuisine: 'Barat · Italia',
+    date: 'Sab, 25 Oktober 2025',
+    time: '18.30',
     party: 2,
-    area: '서울 용산구 · 한남동',
-    seat: '창가 테이블',
+    area: 'Seoul Yongsan-gu · Hannam-dong',
+    seat: 'Meja dekat jendela',
     number: 'CT2510251834',
-    request: '파스타 코스 · 와인 페어링 없음',
+    request: 'Paket pasta · Tanpa wine pairing',
     photo: '/images/catchtable/trattoria-luce.jpg',
-    photoAlt: '와인잔과 빵 바구니가 놓인 테이블 위의 플레이팅 요리',
+    photoAlt: 'Hidangan tertata di meja dengan gelas wine dan keranjang roti',
   },
 ]
 
-const TABS = ['방문예정', '방문완료', '취소/노쇼'] as const
+const TABS = ['Akan Datang', 'Selesai', 'Batal/No-show'] as const
 type Tab = (typeof TABS)[number]
 
 export function CatchTableApp() {
-  const [tab, setTab] = useState<Tab>('방문완료')
+  const [tab, setTab] = useState<Tab>('Selesai')
   const [openId, setOpenId] = useState<string | null>(null)
   useBackHandler(openId !== null, () => setOpenId(null))
   const open = RESERVATIONS.find((r) => r.id === openId)
@@ -70,10 +70,10 @@ export function CatchTableApp() {
       ) : (
         <>
           <header className="shrink-0 bg-white px-4 pb-0 pt-2">
-            <h1 className="text-[22px] font-bold">나의 예약</h1>
-            <div role="tablist" aria-label="예약 상태" className="mt-3 flex">
+            <h1 className="text-[22px] font-bold">Reservasi Saya</h1>
+            <div role="tablist" aria-label="Status reservasi" className="mt-3 flex">
               {TABS.map((t) => {
-                const count = t === '방문완료' ? RESERVATIONS.length : 0
+                const count = t === 'Selesai' ? RESERVATIONS.length : 0
                 return (
                   <button
                     key={t}
@@ -93,7 +93,7 @@ export function CatchTableApp() {
             </div>
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-            {tab === '방문완료' ? (
+            {tab === 'Selesai' ? (
               <ul className="space-y-3">
                 {RESERVATIONS.map((r) => (
                   <li key={r.id}>
@@ -109,11 +109,11 @@ export function CatchTableApp() {
                       />
                       <span className="min-w-0 flex-1">
                         <span className="inline-block rounded-[4px] bg-black/[0.06] px-1.5 py-0.5 text-[11px] font-semibold text-black/55">
-                          방문 완료
+                          Selesai
                         </span>
                         <span className="mt-1 block truncate text-[16px] font-bold">{r.name}</span>
                         <span className="block text-[13px] text-black/50">{r.cuisine}</span>
-                        <span className="mt-0.5 block text-[13px] text-black/70">{`${r.date} ${r.time} · ${r.party}명`}</span>
+                        <span className="mt-0.5 block text-[13px] text-black/70">{`${r.date} ${r.time} · ${r.party} orang`}</span>
                       </span>
                       <ChevronRight className="size-5 shrink-0 text-black/25" aria-hidden />
                     </button>
@@ -123,7 +123,7 @@ export function CatchTableApp() {
             ) : (
               <div className="flex flex-col items-center pt-24 text-center">
                 <CalendarDays className="size-10 text-black/20" aria-hidden />
-                <p className="mt-3 text-[15px] font-semibold text-black/60">{`${tab} 내역이 없어요`}</p>
+                <p className="mt-3 text-[15px] font-semibold text-black/60">{`Belum ada reservasi "${tab}"`}</p>
               </div>
             )}
           </div>
@@ -136,24 +136,24 @@ export function CatchTableApp() {
 
 function Detail({ r, onBack }: { r: Reservation; onBack: () => void }) {
   const rows: { icon: React.ReactNode; label: string; value: string }[] = [
-    { icon: <CalendarDays className="size-4" />, label: '방문 날짜', value: r.date },
-    { icon: <Clock className="size-4" />, label: '방문 시간', value: r.time },
-    { icon: <Users className="size-4" />, label: '인원', value: `${r.party}명` },
-    { icon: <MapPin className="size-4" />, label: '지역', value: r.area },
+    { icon: <CalendarDays className="size-4" />, label: 'Tanggal', value: r.date },
+    { icon: <Clock className="size-4" />, label: 'Waktu', value: r.time },
+    { icon: <Users className="size-4" />, label: 'Jumlah', value: `${r.party} orang` },
+    { icon: <MapPin className="size-4" />, label: 'Lokasi', value: r.area },
   ]
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center bg-white px-2 py-2">
-        <button type="button" onClick={onBack} aria-label="예약 내역으로" className="p-1">
+        <button type="button" onClick={onBack} aria-label="Kembali ke daftar reservasi" className="p-1">
           <ChevronLeft className="size-7" />
         </button>
-        <h1 className="flex-1 pr-9 text-center text-[17px] font-semibold">예약 상세</h1>
+        <h1 className="flex-1 pr-9 text-center text-[17px] font-semibold">Detail Reservasi</h1>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <img src={withBasePath(r.photo)} alt={r.photoAlt} className="aspect-[16/10] w-full object-cover" />
         <section className="bg-white px-5 pb-5 pt-4">
           <span className="inline-block rounded-[4px] bg-black/[0.06] px-1.5 py-0.5 text-[12px] font-semibold text-black/55">
-            방문 완료
+            Selesai
           </span>
           <h2 className="mt-2 text-[22px] font-bold">{r.name}</h2>
           <p className="text-[14px] text-black/50">{r.cuisine}</p>
@@ -170,12 +170,12 @@ function Detail({ r, onBack }: { r: Reservation; onBack: () => void }) {
           </dl>
         </section>
         <section className="mt-2 bg-white px-5 py-4">
-          <h3 className="text-[15px] font-bold">예약 정보</h3>
+          <h3 className="text-[15px] font-bold">Info Reservasi</h3>
           <dl className="mt-3 space-y-2.5 text-[14px]">
             {[
-              ['예약번호', r.number],
-              ['좌석', r.seat],
-              ['메뉴', r.request],
+              ['No. Reservasi', r.number],
+              ['Tempat Duduk', r.seat],
+              ['Menu', r.request],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4">
                 <dt className="text-black/45">{k}</dt>
@@ -184,7 +184,7 @@ function Detail({ r, onBack }: { r: Reservation; onBack: () => void }) {
             ))}
           </dl>
         </section>
-        <p className="px-5 py-4 text-[12.5px] text-black/40">방문이 완료된 예약입니다.</p>
+        <p className="px-5 py-4 text-[12.5px] text-black/40">Reservasi ini sudah selesai dikunjungi.</p>
       </div>
     </div>
   )

@@ -17,7 +17,7 @@ import { InstagramApp } from '@/components/apps/instagram-app'
 import { CatchTableApp } from '@/components/apps/catchtable-app'
 import { LockScreen } from './lock-screen'
 import { Passcode } from './passcode'
-import { HomeScreen } from './home-screen'
+import { AppStage } from './app-stage'
 import { NotificationBanner } from './notification-banner'
 import { IncomingCall } from './incoming-call'
 import { OutgoingCall } from './outgoing-call'
@@ -45,18 +45,15 @@ function Screens() {
   const { screen } = useStory()
   return (
     <div className="relative h-full w-full overflow-hidden bg-black">
-      {screen.kind === 'lock' && <LockScreen />}
-      {screen.kind === 'passcode' && <Passcode />}
-      {screen.kind === 'home' && <HomeScreen />}
-      {screen.kind === 'app' && (
-        <div key={screen.app} className="animate-screen-in absolute inset-0">
-          {APPS[screen.app]()}
-        </div>
-      )}
-      <TopNav />
-      <NotificationBanner />
-      <IncomingCall />
-      <OutgoingCall />
+      {/* Layar utama, kartu app, dan App Switcher dikelola AppStage; layar kunci & overlay di atasnya. */}
+      <AppStage apps={APPS}>
+        {screen.kind === 'lock' && <LockScreen />}
+        {screen.kind === 'passcode' && <Passcode />}
+        <TopNav />
+        <NotificationBanner />
+        <IncomingCall />
+        <OutgoingCall />
+      </AppStage>
     </div>
   )
 }

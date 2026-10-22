@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { useStory } from '@/lib/story/store'
+import { useHomeBarHandlers } from './app-stage'
 
 function SignalBars() {
   return (
@@ -52,7 +53,7 @@ export function StatusBar({ tone = 'dark', className }: { tone?: 'dark' | 'light
         className="absolute left-1/2 top-[11px] hidden h-[34px] w-[118px] -translate-x-1/2 rounded-full bg-black sm:block"
         aria-hidden
       />
-      <span className="flex items-center gap-[6px]" aria-label="신호, Wi-Fi, 배터리 85%">
+      <span className="flex items-center gap-[6px]" aria-label="Sinyal, Wi-Fi, baterai 85%">
         <SignalBars />
         <WifiGlyph />
         <BatteryGlyph />
@@ -64,7 +65,7 @@ export function StatusBar({ tone = 'dark', className }: { tone?: 'dark' | 'light
 export function HomeIndicator({
   tone = 'dark',
   onActivate,
-  label = '홈으로',
+  label = 'Ke Layar Utama',
   className,
 }: {
   tone?: 'dark' | 'light'
@@ -73,19 +74,23 @@ export function HomeIndicator({
   className?: string
 }) {
   const { goHome } = useStory()
+  const onTap = onActivate ?? goHome
+  // Di dalam app dan layar utama, home bar bisa digeser (ke Layar Utama / App Switcher); tap tetap berfungsi.
+  const gesture = useHomeBarHandlers(onTap)
   return (
     <button
       type="button"
-      onClick={onActivate ?? goHome}
+      onClick={gesture ? gesture.onClick : onTap}
+      onPointerDown={gesture?.onPointerDown}
       aria-label={label}
-      className={cn('flex h-[26px] w-full shrink-0 items-center justify-center', className)}
+      className={cn('flex h-[26px] w-full shrink-0 touch-none items-center justify-center', className)}
     >
       <span className={cn('h-[5px] w-[136px] rounded-full', tone === 'dark' ? 'bg-black' : 'bg-white')} />
     </button>
   )
 }
 
-/** 앱 공통 골격: 상태바 + 고정 헤더 + 스크롤 영역 + 고정 하단 + 홈 인디케이터 */
+/** Kerangka umum aplikasi: status bar + header tetap + area gulir + bagian bawah tetap + indikator Home */
 export function AppShell({
   header,
   footer,

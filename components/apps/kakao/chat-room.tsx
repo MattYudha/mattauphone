@@ -8,6 +8,7 @@ import type { KakaoMessage, KakaoRoomId } from '@/lib/story/kakao'
 import { useStory } from '@/lib/story/store'
 import { dayKey, formatFullDate, formatTime } from '@/lib/story/time'
 import { Sticker } from './sticker'
+import { useIsAppActive } from '@/lib/story/app-presence'
 
 const ROOM_BG = '#bacee0'
 
@@ -42,24 +43,28 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
     if (el) el.scrollTop = el.scrollHeight
   }, [count])
 
+  // Kartu pratinjau di App Switcher tidak dihitung sebagai membuka ruang chat.
+  const active = useIsAppActive()
+
   useEffect(() => {
+    if (!active) return
     markRoomRead(roomId)
     onRoomMessagesSeen(
       roomId,
       room.messages.filter((m) => m.from === 'them').map((m) => m.id),
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when messages arrive
-  }, [roomId, count, markRoomRead, onRoomMessagesSeen])
+  }, [active, roomId, count, markRoomRead, onRoomMessagesSeen])
 
   useEffect(() => {
-    if (roomId === 'yh') onYhRoomShown()
-  }, [roomId, onYhRoomShown])
+    if (active && roomId === 'yh') onYhRoomShown()
+  }, [active, roomId, onYhRoomShown])
 
   return (
     <div className="animate-push-in flex h-full flex-col text-black" style={{ backgroundColor: ROOM_BG }}>
       <StatusBar />
       <header className="relative flex h-12 shrink-0 items-center px-1.5">
-        <button type="button" onClick={closeKakaoRoom} aria-label="채팅 목록으로" className="flex items-center p-1.5">
+        <button type="button" onClick={closeKakaoRoom} aria-label="Kembali ke daftar chat" className="flex items-center p-1.5">
           <ChevronLeft className="size-7" strokeWidth={1.8} />
           {otherUnread > 0 && <span className="text-[15px] font-medium">{otherUnread}</span>}
         </button>
@@ -100,7 +105,7 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
               submit()
             }}
             disabled={!canSend}
-            aria-label="메시지 입력"
+            aria-label="Ketik pesan"
             enterKeyHint="send"
             className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-black/30 disabled:cursor-not-allowed"
           />
@@ -109,7 +114,7 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
         {draft.trim() && canSend ? (
           <button
             type="submit"
-            aria-label="전송"
+            aria-label="Kirim"
             className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#fee500] active:opacity-70"
           >
             <ArrowUp className="size-5 text-black" strokeWidth={2.2} />
@@ -157,7 +162,7 @@ function MessageList({
                 <span className="flex shrink-0 flex-col items-end">
                   {isUnreadByThem(m) && (
                     <span className="text-[11px] font-semibold leading-none text-[#e6b800]">
-                      1<span className="sr-only"> 읽지 않음</span>
+                      1<span className="sr-only"> belum dibaca</span>
                     </span>
                   )}
                   {time}
@@ -192,11 +197,11 @@ function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?:
     return (
       <div className="w-52 overflow-hidden rounded-[14px] bg-white">
         <div className="flex h-24 items-center justify-center bg-[#e8eef3]">
-          <MapPin className="size-8 fill-[#ff5a4f] text-white" aria-hidden />
+          <MapPin fill="#ff5a4f" className="size-8 fill-[#ff5a4f] text-white" aria-hidden />
         </div>
         <div className="px-3 py-2.5">
           <p className="text-[14px] font-semibold">{c.title}</p>
-          <p className="text-[12px] text-black/45">위치 공유</p>
+          <p className="text-[12px] text-black/45">Berbagi lokasi</p>
         </div>
       </div>
     )
@@ -229,7 +234,7 @@ function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?:
       )}
       {c.reply && (
         <span className="mb-1.5 block border-b border-black/10 pb-1.5">
-          <span className="block text-[12.5px] font-semibold text-black/80">{`${c.reply.to}에게 답장`}</span>
+          <span className="block text-[12.5px] font-semibold text-black/80">{`Membalas ${c.reply.to}`}</span>
           <span className="block truncate text-[12.5px] text-black/50">{c.reply.text}</span>
         </span>
       )}

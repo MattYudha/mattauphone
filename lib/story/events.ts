@@ -14,17 +14,17 @@ function yhLines(prefix: string, startSeq: number, lines: string[]): KakaoMessag
   }))
 }
 
-/** 영현과의 통화를 끊은 직후 알림 배너로 연달아 도착하는 카톡. */
+/** Pesan KakaoTalk yang beruntun masuk lewat banner notifikasi tepat setelah telepon Younghyun ditutup. */
 export const AFTER_CALL_BANNER_MESSAGES = yhLines('after-call-a', 10, [
-  '김원필',
-  '전화 왜 끊어',
-  '나 지금 너네 학원으로 가고 있어',
-  '카톡 확인해',
-  '보고 있는 거 다 알아',
+  'Kim Wonpil',
+  'Kenapa teleponnya ditutup',
+  'Aku lagi jalan ke akademimu',
+  'Cek KakaoTalk',
+  'Aku tahu kamu baca',
 ])
 
-/** 위 카톡을 받은 뒤 영현 채팅방을 열면 방 안에서 이어서 도착하는 카톡. */
-export const AFTER_CALL_ROOM_MESSAGES = yhLines('after-call-b', 20, ['김원필', '나 3분 안에 도착해', '너 우준영 만난 건 아니지'])
+/** Pesan KakaoTalk yang menyusul di dalam ruang chat Younghyun setelah pesan di atas diterima dan ruangnya dibuka. */
+export const AFTER_CALL_ROOM_MESSAGES = yhLines('after-call-b', 20, ['Kim Wonpil', 'Aku sampai 3 menit lagi', 'Kamu nggak ketemu Woo Junyoung, kan?'])
 
 export const EVENT_YH_MESSAGES: KakaoMessage[] = [
   {
@@ -33,7 +33,7 @@ export const EVENT_YH_MESSAGES: KakaoMessage[] = [
     from: 'them',
     at: NOW_ISO,
     seq: 1,
-    content: { type: 'text', text: '퇴근 안했지?' },
+    content: { type: 'text', text: 'Belum pulang kerja, kan?' },
   },
 ]
 
@@ -44,7 +44,7 @@ export const EVENT_JY_MESSAGES: KakaoMessage[] = [
     from: 'them',
     at: NOW_ISO,
     seq: 2,
-    content: { type: 'text', text: '원필씨' },
+    content: { type: 'text', text: 'Wonpil-ssi' },
   },
   {
     id: 'event-jy-2',
@@ -52,6 +52,6 @@ export const EVENT_JY_MESSAGES: KakaoMessage[] = [
     from: 'them',
     at: NOW_ISO,
     seq: 3,
-    content: { type: 'text', text: '나 학원 주차장 도착했어요~' },
+    content: { type: 'text', text: 'Aku udah sampai di parkiran akademi~' },
   },
 ]

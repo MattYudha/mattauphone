@@ -6,14 +6,14 @@ export type SmsMessage = {
   from: 'me' | 'them'
   at: string
   text: string
-  /** 스토리 시작 시점에 읽지 않은 상태인 문자 */
+  /** Pesan yang belum dibaca saat cerita dimulai */
   unread?: boolean
 }
 
 export type SmsThread = {
   id: string
   contactId: ContactId
-  /** 발신 전용 알림 스레드 (답장 불가) */
+  /** Utas notifikasi khusus kirim (tidak bisa dibalas) */
   notificationOnly?: boolean
   messages: SmsMessage[]
 }
@@ -45,40 +45,40 @@ const T = 'them' as const
 
 export type CardTransaction = { at: string; merchant: string; amount: number; unread?: boolean }
 
-/** 현대카드 가상 승인 내역. 누적액은 아래 거래를 시간순으로 더해 계산한다. */
+/** Riwayat persetujuan fiktif Hyundai Card. Total akumulasi dihitung dengan menjumlahkan transaksi di bawah secara kronologis. */
 export const cardTransactions: CardTransaction[] = [
-  { at: '2025-11-01 10:12', merchant: 'GS25 영원점', amount: 4800 },
-  { at: '2025-11-01 19:40', merchant: '한식당 소담', amount: 32000 },
-  { at: '2025-11-02 09:30', merchant: '하모니 피아노조율', amount: 150000 },
-  { at: '2025-11-03 13:20', merchant: '다이소', amount: 18500 },
-  { at: '2025-11-04 09:00', merchant: 'SKT 통신요금', amount: 89000 },
-  { at: '2025-11-04 12:30', merchant: '김밥천국', amount: 8500 },
-  { at: '2025-11-05 15:10', merchant: '알파문구', amount: 42000 },
+  { at: '2025-11-01 10:12', merchant: 'GS25 cabang Youngwon', amount: 4800 },
+  { at: '2025-11-01 19:40', merchant: 'Restoran Korea Sodam', amount: 32000 },
+  { at: '2025-11-02 09:30', merchant: 'Harmony Piano Tuning', amount: 150000 },
+  { at: '2025-11-03 13:20', merchant: 'Daiso', amount: 18500 },
+  { at: '2025-11-04 09:00', merchant: 'Tagihan SKT', amount: 89000 },
+  { at: '2025-11-04 12:30', merchant: 'Gimbap Cheonguk', amount: 8500 },
+  { at: '2025-11-05 15:10', merchant: 'Alpha Stationery', amount: 42000 },
   { at: '2025-11-06 11:05', merchant: 'anybook', amount: 126000 },
-  { at: '2025-11-06 20:15', merchant: '현대백화점', amount: 168000 },
-  { at: '2025-11-07 08:40', merchant: '스타벅스', amount: 6300 },
-  { at: '2025-11-09 15:30', merchant: '롯데백화점', amount: 176000 },
-  { at: '2025-11-09 21:10', merchant: 'CU 영원점', amount: 7200 },
-  { at: '2025-11-10 17:40', merchant: '배달의민족', amount: 23900 },
-  { at: '2025-11-11 11:00', merchant: '쿠팡', amount: 39800 },
-  { at: '2025-11-11 19:30', merchant: '코스트코', amount: 121600 },
-  { at: '2025-11-12 19:20', merchant: '이마트', amount: 86400 },
-  { at: '2025-11-13 10:00', merchant: '코웨이 정기결제', amount: 49900 },
-  { at: '2025-11-13 18:00', merchant: '교보문고', amount: 54000 },
-  { at: '2025-11-14 12:40', merchant: '현대백화점', amount: 189000 },
-  { at: '2025-11-15 14:30', merchant: '올리브영', amount: 47300 },
-  { at: '2025-11-15 19:50', merchant: '고기굽는집', amount: 96000 },
-  { at: '2025-11-16 15:20', merchant: '현대백화점', amount: 142000 },
-  { at: '2025-11-16 18:50', merchant: '레스토랑 온', amount: 128000 },
-  { at: '2025-11-17 10:05', merchant: '쿠팡', amount: 68900 },
-  { at: '2025-11-17 21:30', merchant: '무신사', amount: 112000 },
-  { at: '2025-11-18 14:10', merchant: '카페 모음', amount: 36500 },
-  { at: '2025-11-18 21:00', merchant: '카카오T 택시', amount: 14600 },
-  { at: '2025-11-19 12:10', merchant: 'GS25 영원점', amount: 5600 },
-  { at: '2025-11-19 12:10', merchant: '헤이브레드', amount: 7800, unread: true },
+  { at: '2025-11-06 20:15', merchant: 'Hyundai Department Store', amount: 168000 },
+  { at: '2025-11-07 08:40', merchant: 'Starbucks', amount: 6300 },
+  { at: '2025-11-09 15:30', merchant: 'Lotte Department Store', amount: 176000 },
+  { at: '2025-11-09 21:10', merchant: 'CU cabang Youngwon', amount: 7200 },
+  { at: '2025-11-10 17:40', merchant: 'Baemin', amount: 23900 },
+  { at: '2025-11-11 11:00', merchant: 'Coupang', amount: 39800 },
+  { at: '2025-11-11 19:30', merchant: 'Costco', amount: 121600 },
+  { at: '2025-11-12 19:20', merchant: 'Emart', amount: 86400 },
+  { at: '2025-11-13 10:00', merchant: 'Coway (langganan)', amount: 49900 },
+  { at: '2025-11-13 18:00', merchant: 'Kyobo Book Centre', amount: 54000 },
+  { at: '2025-11-14 12:40', merchant: 'Hyundai Department Store', amount: 189000 },
+  { at: '2025-11-15 14:30', merchant: 'Olive Young', amount: 47300 },
+  { at: '2025-11-15 19:50', merchant: 'Gogi Gupneun Jip', amount: 96000 },
+  { at: '2025-11-16 15:20', merchant: 'Hyundai Department Store', amount: 142000 },
+  { at: '2025-11-16 18:50', merchant: 'Restaurant On', amount: 128000 },
+  { at: '2025-11-17 10:05', merchant: 'Coupang', amount: 68900 },
+  { at: '2025-11-17 21:30', merchant: 'Musinsa', amount: 112000 },
+  { at: '2025-11-18 14:10', merchant: 'Cafe Moeum', amount: 36500 },
+  { at: '2025-11-18 21:00', merchant: 'Kakao T Taxi', amount: 14600 },
+  { at: '2025-11-19 12:10', merchant: 'GS25 cabang Youngwon', amount: 5600 },
+  { at: '2025-11-19 12:10', merchant: 'Hey Bread', amount: 7800, unread: true },
 ]
 
-const won = (n: number) => `${n.toLocaleString('ko-KR')}원`
+const won = (n: number) => `₩${n.toLocaleString('id-ID')}`
 
 function cardEntries(): Entry[] {
   let total = 0
@@ -88,54 +88,54 @@ function cardEntries(): Entry[] {
       total += t.amount
       const [date] = t.at.split(' ')
       const [, m, d] = date.split('-')
-      const text = `[Web발신]\n현대카드 승인\n김*필\n${won(t.amount)} 일시불\n${m}/${d} ${formatClock(kst(t.at))}\n${t.merchant}\n누적 ${won(total)}`
+      const text = `[Web]\nPersetujuan Hyundai Card\nKim W*npil\n${won(t.amount)} bayar penuh\n${d}/${m} ${formatClock(kst(t.at))}\n${t.merchant}\nAkumulasi ${won(total)}`
       return (t.unread ? [t.at, T, text, 'unread'] : [t.at, T, text]) as Entry
     })
 }
 
-const AD_FOOTER = '\n\n무료수신거부 080-850-1102'
+const AD_FOOTER = '\n\nBerhenti berlangganan gratis 080-850-1102'
 
 const hyundaiDeptEntries: Entry[] = (
   [
-    ['2025-11-01 10:30', '(광고)[현대백화점] 김원필 고객님, 11월 H.Point 적립 현황 안내\n가용 포인트: 12,480P\n소멸 예정 포인트(11/30): 1,200P\n포인트는 백화점 및 H.Point 제휴처에서 사용하실 수 있습니다.'],
-    ['2025-11-03 11:00', '(광고)[현대백화점] 11월 VIP 회원 혜택 안내\n이번 달 무료 주차 3시간, 라운지 음료 1잔 혜택이 제공됩니다.\n현대백화점 앱 > 멤버십에서 확인하세요.'],
-    ['2025-11-05 10:00', '(광고)[현대백화점 무역센터점] 겨울 아우터 페어\n11/7(금)~11/16(일) 9층 행사장\n인기 브랜드 패딩·코트 최대 50% 할인'],
-    ['2025-11-07 09:30', '(광고)[현대백화점] 주말 한정 쿠폰 도착!\n5만원 이상 구매 시 5천원 할인 (11/8~11/9)\n앱 쿠폰함에서 다운로드 후 사용 가능합니다.'],
-    ['2025-11-10 10:00', '(광고)[현대백화점] 이번 주 식품관 신선 특가\n제철 과일·한우 선물세트 최대 30% 할인\n11/10(월)~11/13(목) 식품관 B1'],
-    ['2025-11-12 14:00', '[현대백화점] 영업시간 변경 안내\n11/14(금) 판교점은 시설 점검으로 오후 8시에 조기 폐점합니다.\n이용에 참고 부탁드립니다.'],
-    ['2025-11-13 18:00', '(광고)[현대백화점] H.Point 더블 적립 이벤트\n11/14~11/16 구매금액의 2% 추가 적립\n멤버십 바코드를 꼭 제시해주세요.'],
-    ['2025-11-15 10:00', '(광고)[현대백화점] 생일 축하 쿠폰을 미리 준비했어요\n뷰티 브랜드 1만원 할인 쿠폰이 발급되었습니다.\n유효기간: 12/31까지'],
-    ['2025-11-17 11:30', '(광고)[현대백화점] 윈터 홀리데이 마켓 OPEN\n11/21(금)~12/25(목) 1층 아트리움\n크리스마스 소품·디저트 팝업 오픈 기념 선착순 사은품 증정'],
-    ['2025-11-19 10:00', '(광고)[현대백화점] 블랙프라이데이 사전 안내\n11/21(금)~11/30(일) 전관 최대 70% 할인\n멤버십 회원은 11/20(목) 하루 먼저 쇼핑하실 수 있습니다.'],
+    ['2025-11-01 10:30', '(Iklan)[Hyundai Department Store] Pelanggan Kim Wonpil, info saldo H.Point bulan November\nPoin tersedia: 12.480P\nPoin yang akan hangus (30/11): 1.200P\nPoin dapat digunakan di department store dan mitra H.Point.'],
+    ['2025-11-03 11:00', '(Iklan)[Hyundai Department Store] Info keuntungan member VIP bulan November\nBulan ini Anda mendapat parkir gratis 3 jam dan 1 minuman gratis di lounge.\nCek di aplikasi Hyundai Department Store > Membership.'],
+    ['2025-11-05 10:00', '(Iklan)[Hyundai Department Store cabang Trade Center] Winter Outer Fair\n7/11 (Jum)~16/11 (Min), area event lantai 9\nDiskon hingga 50% untuk padding & mantel brand populer'],
+    ['2025-11-07 09:30', '(Iklan)[Hyundai Department Store] Kupon khusus akhir pekan sudah tiba!\nPotongan ₩5.000 untuk pembelian min. ₩50.000 (8/11~9/11)\nUnduh di menu Kupon aplikasi untuk menggunakannya.'],
+    ['2025-11-10 10:00', '(Iklan)[Hyundai Department Store] Promo segar Food Hall minggu ini\nDiskon hingga 30% untuk buah musiman & paket hadiah Hanwoo\n10/11 (Sen)~13/11 (Kam), Food Hall B1'],
+    ['2025-11-12 14:00', '[Hyundai Department Store] Info perubahan jam operasional\nPada 14/11 (Jum), cabang Pangyo akan tutup lebih awal pukul 20.00 karena pemeliharaan fasilitas.\nMohon menjadi perhatian.'],
+    ['2025-11-13 18:00', '(Iklan)[Hyundai Department Store] Event poin ganda H.Point\n14/11~16/11 tambahan poin 2% dari total belanja\nJangan lupa tunjukkan barcode membership Anda.'],
+    ['2025-11-15 10:00', '(Iklan)[Hyundai Department Store] Kupon ulang tahun sudah kami siapkan lebih awal\nKupon diskon ₩10.000 untuk brand kecantikan telah diterbitkan.\nBerlaku hingga: 31/12'],
+    ['2025-11-17 11:30', '(Iklan)[Hyundai Department Store] Winter Holiday Market OPEN\n21/11 (Jum)~25/12 (Kam), Atrium lantai 1\nHadiah untuk pengunjung pertama dalam rangka pembukaan pop-up pernak-pernik & dessert Natal'],
+    ['2025-11-19 10:00', '(Iklan)[Hyundai Department Store] Info awal Black Friday\n21/11 (Jum)~30/11 (Min) diskon hingga 70% di seluruh gedung\nMember dapat berbelanja sehari lebih awal pada 20/11 (Kam).'],
   ] as const
-).map(([at, text]) => [at, T, text.startsWith('(광고)') ? text + AD_FOOTER : text, 'unread'] as Entry)
+).map(([at, text]) => [at, T, text.startsWith('(Iklan)') ? text + AD_FOOTER : text, 'unread'] as Entry)
 
 export const cardTotal = cardTransactions.reduce((sum, t) => sum + t.amount, 0)
 
 export const smsThreads: SmsThread[] = [
   thread('seunga', 'seungaMom', [
-    ['2025-10-27 18:10', T, '선생님 안녕하세요. 승아 엄마예요. 이번 주 발표회 곡 악보 받아왔는데 집에서 연습시킬 때 참고할 부분 있을까요?'],
-    ['2025-10-27 18:32', ME, '어머님 안녕하세요! 승아가 앞부분은 아주 잘하고 있어요. 중간 셈여림 표시만 한 번씩 같이 봐주시면 충분해요 :)'],
-    ['2025-10-27 18:35', T, '네 감사합니다 선생님^^'],
-    ['2025-11-11 08:40', T, '선생님 안녕하세요. 승아가 어제 저녁부터 감기 기운이 있어서 오늘 레슨은 쉬어야 할 것 같아요. 죄송합니다.'],
-    ['2025-11-11 09:05', ME, '어머님 안녕하세요. 연락 주셔서 감사합니다. 승아 푹 쉬고 얼른 낫기를 바랄게요!'],
-    ['2025-11-11 09:06', ME, '보강은 다음 주 월요일(17일) 오후 4시나 수요일(19일) 오후 5시에 가능해요. 편하신 시간 알려주세요.'],
-    ['2025-11-11 12:20', T, '월요일 4시로 부탁드려요. 배려해주셔서 감사합니다.'],
-    ['2025-11-11 12:31', ME, '네 17일 월요일 오후 4시로 잡아둘게요. 승아 몸조리 잘하라고 전해주세요 :)'],
-    ['2025-11-16 20:10', T, '선생님 승아 다 나았어요. 내일 4시에 보낼게요!'],
-    ['2025-11-16 20:24', ME, '다행이에요! 내일 뵐게요 어머님 :)'],
+    ['2025-10-27 18:10', T, 'Seonsaengnim, selamat sore. Saya mamanya Seunga. Seunga sudah bawa pulang partitur lagu untuk pentas minggu ini, ada bagian yang perlu saya perhatikan waktu dia latihan di rumah?'],
+    ['2025-10-27 18:32', ME, 'Eomeonim, selamat sore! Bagian awalnya Seunga udah bagus banget kok. Cukup bantu lihat tanda dinamika di bagian tengah sesekali aja :)'],
+    ['2025-10-27 18:35', T, 'Baik, terima kasih seonsaengnim^^'],
+    ['2025-11-11 08:40', T, 'Seonsaengnim, selamat pagi. Seunga dari semalam kayaknya mau flu, jadi sepertinya les hari ini libur dulu. Mohon maaf ya.'],
+    ['2025-11-11 09:05', ME, 'Eomeonim, selamat pagi. Terima kasih sudah mengabari. Semoga Seunga cepat sembuh ya, istirahat yang cukup!'],
+    ['2025-11-11 09:06', ME, 'Untuk les penggantinya bisa Senin depan (17) jam 16.00 atau Rabu (19) jam 17.00. Kabari aja waktu yang paling pas ya.'],
+    ['2025-11-11 12:20', T, 'Senin jam 4 saja ya. Terima kasih atas pengertiannya.'],
+    ['2025-11-11 12:31', ME, 'Oke, saya jadwalkan Senin tanggal 17 jam 16.00 ya. Salam buat Seunga, semoga cepat pulih :)'],
+    ['2025-11-16 20:10', T, 'Seonsaengnim, Seunga sudah sembuh. Besok jam 4 saya antar ya!'],
+    ['2025-11-16 20:24', ME, 'Syukurlah! Sampai ketemu besok, eomeonim :)'],
   ]),
 
   thread('yuchan', 'yuchanMom', [
-    ['2025-11-06 21:15', T, '선생님 늦은 시간에 죄송해요. 유찬이가 요즘 양손으로 치는 걸 어려워하는데 집에서 어떻게 도와주면 좋을까요?'],
-    ['2025-11-06 21:40', ME, '어머님 안녕하세요! 유찬이 요즘 오른손 멜로디는 정말 안정적으로 잘 쳐요.'],
-    ['2025-11-06 21:41', ME, '양손은 처음엔 다 어려워해요. 집에서는 왼손만 따로 세 번, 그다음 아주 천천히 양손으로 한 번 정도면 충분해요.'],
-    ['2025-11-06 21:45', T, '아 그렇군요. 메트로놈도 쓰는 게 좋을까요?'],
-    ['2025-11-06 21:52', ME, '아직은 괜찮아요! 다음 달쯤 템포 잡을 때 같이 알려드릴게요.'],
-    ['2025-11-14 19:05', T, '선생님 바이엘 하권 다 끝나가는데 다음 교재 미리 사둬야 할까요?'],
-    ['2025-11-14 19:30', ME, '유찬이 진도가 정말 빨라졌어요! 이번 주에 처음으로 양손 끝까지 안 멈추고 쳤어요 :)'],
-    ['2025-11-14 19:31', ME, '다음 교재는 체르니 100이에요. 학원에서 준비해둘 테니 따로 안 사셔도 돼요.'],
-    ['2025-11-14 19:33', T, '와 집에서도 칭찬 많이 해줄게요. 감사합니다 선생님!'],
+    ['2025-11-06 21:15', T, 'Seonsaengnim, maaf mengganggu malam-malam. Yuchan akhir-akhir ini kesulitan main pakai dua tangan, kira-kira di rumah saya bisa bantu gimana ya?'],
+    ['2025-11-06 21:40', ME, 'Eomeonim, selamat malam! Melodi tangan kanan Yuchan sekarang udah stabil banget lho.'],
+    ['2025-11-06 21:41', ME, 'Main dua tangan memang awalnya susah buat semua anak. Di rumah cukup latihan tangan kiri aja tiga kali, terus dua tangan pelan-pelan banget sekali aja.'],
+    ['2025-11-06 21:45', T, 'Oh begitu. Sebaiknya pakai metronom juga nggak?'],
+    ['2025-11-06 21:52', ME, 'Untuk sekarang belum perlu! Nanti bulan depan pas mulai atur tempo saya kasih tahu caranya.'],
+    ['2025-11-14 19:05', T, 'Seonsaengnim, buku Beyer jilid 2 udah hampir selesai, perlu beli buku berikutnya dari sekarang?'],
+    ['2025-11-14 19:30', ME, 'Progres Yuchan cepat banget sekarang! Minggu ini untuk pertama kalinya dia main dua tangan sampai akhir tanpa berhenti :)'],
+    ['2025-11-14 19:31', ME, 'Buku berikutnya Czerny 100. Nanti saya siapkan di akademi, jadi nggak perlu beli sendiri ya.'],
+    ['2025-11-14 19:33', T, 'Wah, nanti di rumah saya puji dia banyak-banyak. Terima kasih seonsaengnim!'],
   ]),
 
   thread('card', 'hyundai', cardEntries(), true),
@@ -145,36 +145,36 @@ export const smsThreads: SmsThread[] = [
   thread(
     'yhCatch',
     'yhSms',
-    [['2025-11-19 12:16', T, '[Web발신]\n[캐치콜]\n강영현(010-1219-0482)님이 11월 19일 오후 12:16에 전화하셨습니다.']],
+    [['2025-11-19 12:16', T, '[Web]\n[Catch Call]\nKang Younghyun (010-1219-0482) menelepon Anda pada 19 November pukul 12.16.']],
     true,
   ),
 
   thread('jihoo', 'jihoo', [
-    ['2025-11-05 19:12', T, '선생님 저 지후에요'],
-    ['2025-11-05 19:12', T, '엄마폰으로 보내요'],
-    ['2025-11-05 19:20', ME, '지후구나! 무슨 일이야?'],
-    ['2025-11-05 19:21', T, '내일 보드게임 또 해도 돼요?'],
-    ['2025-11-05 19:25', ME, '레슨 열심히 하면 끝나고 한 판 하자!'],
-    ['2025-11-05 19:25', T, '네!!!'],
-    ['2025-11-12 20:03', T, '선생님 저 오늘 집에서 다섯번 쳤어요'],
-    ['2025-11-12 20:03', T, '근데 왼손이 자꾸 틀려요'],
-    ['2025-11-12 20:10', ME, '다섯 번이나 연습했어? 지후 정말 열심히 했네 😊'],
-    ['2025-11-12 20:10', ME, '왼손은 천천히 해도 괜찮아. 다음 시간에 선생님이랑 같이 해보자!'],
-    ['2025-11-12 20:11', T, '그럼 스티커 두개에요?'],
-    ['2025-11-12 20:13', ME, '그럼! 스티커 두 개 줄게'],
-    ['2025-11-18 18:30', T, '선생님 새 보드게임 왔어요?'],
-    ['2025-11-18 18:31', T, '형아가 왔다고 했어요'],
-    ['2025-11-18 18:40', ME, '응 오늘 도착했어! 다음 레슨 끝나고 같이 해보자'],
-    ['2025-11-18 18:41', T, '와 진짜 조아요'],
+    ['2025-11-05 19:12', T, 'Seonsaengnim ini Jihoo'],
+    ['2025-11-05 19:12', T, 'aku kirim dari hp mama'],
+    ['2025-11-05 19:20', ME, 'Oh, Jihoo! Ada apa?'],
+    ['2025-11-05 19:21', T, 'besok boleh main board game lagi nggak?'],
+    ['2025-11-05 19:25', ME, 'Kalau lesnya rajin, habis itu kita main satu ronde!'],
+    ['2025-11-05 19:25', T, 'oke!!!'],
+    ['2025-11-12 20:03', T, 'Seonsaengnim aku hari ini latihan lima kali di rumah'],
+    ['2025-11-12 20:03', T, 'tapi tangan kiri salah terus'],
+    ['2025-11-12 20:10', ME, 'Latihan sampai lima kali? Jihoo rajin banget 😊'],
+    ['2025-11-12 20:10', ME, 'Tangan kiri pelan-pelan aja nggak apa-apa. Nanti kita coba bareng sama seonsaengnim ya!'],
+    ['2025-11-12 20:11', T, 'berarti dapat stiker dua?'],
+    ['2025-11-12 20:13', ME, 'Iya dong! Seonsaengnim kasih dua stiker'],
+    ['2025-11-18 18:30', T, 'Seonsaengnim board game barunya udah datang?'],
+    ['2025-11-18 18:31', T, 'kata kakak udah datang'],
+    ['2025-11-18 18:40', ME, 'Iya, hari ini udah sampai! Habis les berikutnya kita coba bareng ya'],
+    ['2025-11-18 18:41', T, 'asiiik seneng bangett'],
   ]),
 
   thread(
     'cj',
     'cj',
     [
-      ['2025-11-08 11:42', T, '[CJ대한통운] 고객님의 상품이 배송 완료되었습니다.\n상품명: anybook 악보제본집\n배송장소: 영원피아노 출입문 앞'],
-      ['2025-11-12 15:18', T, '[CJ대한통운] 고객님의 상품이 배송 완료되었습니다.\n상품명: 비타민씨 영양제\n배송장소: 영원피아노 출입문 앞'],
-      ['2025-11-18 14:55', T, '[CJ대한통운] 고객님의 상품이 배송 완료되었습니다.\n상품명: 어린이용보드게임세트\n배송장소: 영원피아노 출입문 앞'],
+      ['2025-11-08 11:42', T, '[CJ Logistics] Paket Anda telah berhasil dikirim.\nNama barang: anybook jilid partitur\nLokasi pengiriman: depan pintu masuk Youngwon Piano'],
+      ['2025-11-12 15:18', T, '[CJ Logistics] Paket Anda telah berhasil dikirim.\nNama barang: suplemen vitamin C\nLokasi pengiriman: depan pintu masuk Youngwon Piano'],
+      ['2025-11-18 14:55', T, '[CJ Logistics] Paket Anda telah berhasil dikirim.\nNama barang: set board game anak\nLokasi pengiriman: depan pintu masuk Youngwon Piano'],
     ],
     true,
   ),

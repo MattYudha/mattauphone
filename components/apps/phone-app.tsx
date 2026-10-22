@@ -33,11 +33,11 @@ export function PhoneApp() {
                 onClick={() => setFilter(f)}
                 className={cn('flex-1 rounded-md py-1', filter === f && 'bg-white shadow-sm')}
               >
-                {f === 'all' ? '전체' : '부재중'}
+                {f === 'all' ? 'Semua' : 'Tak Terjawab'}
               </button>
             ))}
           </div>
-          <h2 className="mt-2 text-[32px] font-bold">최근 통화</h2>
+          <h2 className="mt-2 text-[32px] font-bold">Terkini</h2>
         </header>
       }
     >
@@ -52,7 +52,7 @@ export function PhoneApp() {
                 className="flex w-full items-center gap-2 pl-4 text-left active:bg-black/5"
               >
                 <span className="w-4 shrink-0">
-                  {call.type === 'outgoing' && <PhoneOutgoing className="size-3.5 text-black/40" aria-label="발신" />}
+                  {call.type === 'outgoing' && <PhoneOutgoing className="size-3.5 text-black/40" aria-label="Panggilan keluar" />}
                 </span>
                 <span className="flex min-w-0 flex-1 items-center gap-2 border-b border-black/10 py-2 pr-4">
                   <span className="min-w-0 flex-1">
@@ -60,8 +60,8 @@ export function PhoneApp() {
                       {c.name}
                     </span>
                     <span className="block text-[13px] text-black/45">
-                      {c.label ?? '휴대전화'}
-                      {call.type === 'missed' && ' · 부재중'}
+                      {c.label ?? 'seluler'}
+                      {call.type === 'missed' && ' · Tak Terjawab'}
                     </span>
                   </span>
                   <span className="shrink-0 text-[14px] text-black/45">{formatIosListDate(call.at)}</span>
@@ -85,7 +85,7 @@ function CallDetail({ call, onBack }: { call: CallRecord; onBack: () => void }) 
         <header className="flex h-11 shrink-0 items-center px-1">
           <button type="button" onClick={onBack} className="flex items-center text-[17px] text-[#007aff]">
             <ChevronLeft className="size-7" />
-            최근 통화
+            Terkini
           </button>
         </header>
       }
@@ -96,17 +96,17 @@ function CallDetail({ call, onBack }: { call: CallRecord; onBack: () => void }) 
         <section className="mt-6 w-full rounded-xl bg-white px-4 py-3">
           <p className="text-[15px] font-semibold">{formatFullDate(call.at)}</p>
           <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[15px]">
-            <dt className="text-black/45">시각</dt>
+            <dt className="text-black/45">Waktu</dt>
             <dd>{formatTime(call.at)}</dd>
-            <dt className="text-black/45">종류</dt>
+            <dt className="text-black/45">Jenis</dt>
             <dd className={cn(call.type === 'missed' && 'text-[#ff3b30]')}>{callTypeLabel[call.type]}</dd>
-            <dt className="text-black/45">통화 시간</dt>
-            <dd>{call.type === 'missed' ? '연결되지 않음' : formatDuration(call.duration)}</dd>
+            <dt className="text-black/45">Durasi</dt>
+            <dd>{call.type === 'missed' ? 'Tidak tersambung' : formatDuration(call.duration)}</dd>
           </dl>
         </section>
         <section className="mt-3 w-full rounded-xl bg-white px-4 py-3">
-          <p className="text-[13px] text-black/45">{c.label ?? '휴대전화'}</p>
-          <p className="text-[15px] text-black/35">번호 비공개</p>
+          <p className="text-[13px] text-black/45">{c.label ?? 'seluler'}</p>
+          <p className="text-[15px] text-black/35">Nomor disembunyikan</p>
         </section>
       </div>
     </AppShell>

@@ -3,12 +3,15 @@
 import { ChevronLeft, House } from 'lucide-react'
 import { useStory } from '@/lib/story/store'
 import { usePopBack } from '@/lib/story/back-nav'
+import { useStage } from './app-stage'
 
 export function TopNav() {
   const { screen, kakaoRoomId, closeKakaoRoom, goHome } = useStory()
   const popBack = usePopBack()
+  const stage = useStage()
 
-  if (screen.kind !== 'app') return null
+  // Disembunyikan selama gesture / animasi transisi app berlangsung.
+  if (screen.kind !== 'app' || (stage && stage.phase !== 'idle')) return null
 
   const back = () => {
     if (popBack()) return
@@ -21,14 +24,14 @@ export function TopNav() {
 
   return (
     <nav
-      aria-label="화면 이동"
+      aria-label="Navigasi layar"
       className="absolute left-1/2 top-[11px] z-40 flex h-[34px] -translate-x-1/2 items-center overflow-hidden rounded-full bg-black shadow-[0_0_0_0.5px_rgba(255,255,255,0.18)]"
     >
-      <button type="button" onClick={back} aria-label="뒤로가기" className={btn}>
+      <button type="button" onClick={back} aria-label="Kembali" className={btn}>
         <ChevronLeft className="size-[18px]" strokeWidth={2.4} aria-hidden />
       </button>
       <span className="h-4 w-px bg-white/20" aria-hidden />
-      <button type="button" onClick={goHome} aria-label="홈 화면으로" className={btn}>
+      <button type="button" onClick={goHome} aria-label="Ke Layar Utama" className={btn}>
         <House className="size-[15px]" strokeWidth={2.2} aria-hidden />
       </button>
     </nav>

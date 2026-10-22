@@ -66,11 +66,11 @@ export function Passcode() {
         <StatusBar tone="light" />
         <div className="flex flex-1 flex-col items-center justify-center gap-[clamp(12px,4dvh,40px)]">
           <div className="flex flex-col items-center gap-4">
-            <p className="text-lg">암호 입력</p>
+            <p className="text-lg">Masukkan Kode Sandi</p>
             <div
               className={cn('flex gap-5', shake && 'animate-shake')}
               role="status"
-              aria-label={`${code.length}자리 입력됨`}
+              aria-label={`${code.length} digit dimasukkan`}
             >
               {[0, 1, 2, 3].map((i) => (
                 <span
@@ -91,13 +91,13 @@ export function Passcode() {
         </div>
         <div className="flex justify-between px-10 pb-2 text-base">
           <button type="button" onClick={lock} className="px-2 py-1">
-            취소
+            Batal
           </button>
           <button type="button" onClick={erase} disabled={code.length === 0} className="px-2 py-1 disabled:opacity-40">
-            지우기
+            Hapus
           </button>
         </div>
-        <HomeIndicator tone="light" onActivate={lock} label="잠금화면으로" />
+        <HomeIndicator tone="light" onActivate={lock} label="Kembali ke Layar Kunci" />
       </div>
     </div>
   )

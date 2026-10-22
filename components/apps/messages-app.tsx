@@ -8,6 +8,7 @@ import { contacts } from '@/lib/story/contacts'
 import { useBackHandler } from '@/lib/story/back-nav'
 import { smsThreads, type SmsThread } from '@/lib/story/sms'
 import { formatIosListDate, formatIosStamp, toTime } from '@/lib/story/time'
+import { useIsAppActive } from '@/lib/story/app-presence'
 
 const sortedThreads = [...smsThreads].sort(
   (a, b) => toTime(b.messages[b.messages.length - 1].at) - toTime(a.messages[a.messages.length - 1].at),
@@ -23,7 +24,7 @@ export function MessagesApp() {
     <AppShell
       header={
         <header className="shrink-0 px-4 pb-2">
-          <h2 className="text-[32px] font-bold">메시지</h2>
+          <h2 className="text-[32px] font-bold">Pesan</h2>
         </header>
       }
     >
@@ -37,7 +38,7 @@ export function MessagesApp() {
               <button
                 type="button"
                 onClick={() => openSmsThread(t.id)}
-                aria-label={unread ? `${c.name}, 읽지 않은 메시지 ${smsUnreadByThread[t.id]}개` : undefined}
+                aria-label={unread ? `${c.name}, ${smsUnreadByThread[t.id]} pesan belum dibaca` : undefined}
                 className="flex w-full items-center gap-2 pl-2 text-left active:bg-black/5"
               >
                 <span
@@ -69,9 +70,11 @@ function Thread({ thread, onBack }: { thread: SmsThread; onBack: () => void }) {
   useLayoutEffect(() => {
     if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
   }, [])
+  const active = useIsAppActive()
+
   useEffect(() => {
-    markSmsThreadRead(thread.id)
-  }, [thread.id, markSmsThreadRead])
+    if (active) markSmsThreadRead(thread.id)
+  }, [active, thread.id, markSmsThreadRead])
 
   return (
     <AppShell
@@ -80,7 +83,7 @@ function Thread({ thread, onBack }: { thread: SmsThread; onBack: () => void }) {
       bodyClassName="px-3 pb-3"
       header={
         <header className="relative flex shrink-0 flex-col items-center border-b border-black/10 bg-[#f7f7f7] pb-2">
-          <button type="button" onClick={onBack} aria-label="메시지 목록으로" className="absolute left-1 top-2 flex items-center text-[#007aff]">
+          <button type="button" onClick={onBack} aria-label="Kembali ke daftar Pesan" className="absolute left-1 top-2 flex items-center text-[#007aff]">
             <ChevronLeft className="size-8" />
           </button>
           <Avatar initial={c.initial} color="#a7adb7" size={46} src={c.photo} />
@@ -90,7 +93,7 @@ function Thread({ thread, onBack }: { thread: SmsThread; onBack: () => void }) {
       footer={
         <div className="shrink-0 border-t border-black/5 px-3 py-2">
           <p className="rounded-full border border-black/15 px-4 py-1.5 text-center text-[13px] text-black/40">
-            {thread.notificationOnly ? '이 발신자에게는 답장할 수 없습니다' : '읽기 전용 기록입니다'}
+            {thread.notificationOnly ? 'Anda tidak dapat membalas pengirim ini' : 'Riwayat ini hanya bisa dibaca'}
           </p>
         </div>
       }

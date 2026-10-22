@@ -25,7 +25,7 @@ export function NotificationBanner() {
         key={banner.key}
         role="button"
         tabIndex={0}
-        aria-label={`카카오톡 ${banner.sender}: ${banner.lines.join(' ')}. 눌러서 열기`}
+        aria-label={`KakaoTalk ${banner.sender}: ${banner.lines.join(' ')}. Ketuk untuk membuka`}
         className="animate-banner-in pointer-events-auto flex touch-none select-none gap-3 rounded-[22px] bg-white/80 p-3 text-black shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-2xl"
         style={{ transform: `translateY(${Math.min(0, dragY)}px)`, transition: startY.current === null ? 'transform 0.2s' : 'none' }}
         onPointerDown={(e) => {
@@ -56,7 +56,7 @@ export function NotificationBanner() {
           <div className="flex items-baseline justify-between gap-2">
             <p className="truncate text-[15px] font-semibold">{banner.sender}</p>
             <p className="shrink-0 text-xs text-black/50">
-              카카오톡 · {banner.time}
+              KakaoTalk · {banner.time}
             </p>
           </div>
           {banner.lines.map((line, i) => (

@@ -7,39 +7,39 @@ export type AiChat = { id: string; title: string; turns: AiTurn[] }
 export const aiChats: AiChat[] = [
   {
     id: 'forget',
-    title: '좋아하는 사람 잊는 법',
+    title: 'Cara melupakan orang yang disukai',
     turns: [
       {
         id: 't1',
-        question: '좋아하는 사람 잊는 법이 뭐야?',
+        question: 'gimana caranya ngelupain orang yang aku suka?',
         answer: [
           {
             type: 'p',
-            text: '마음이 많이 지쳐 있는 것 같아요. 좋아하는 사람을 잊는 건 억지로 지우는 일이라기보다, 시간이 지나면서 조금씩 덜 아파지는 과정에 가까워요. 도움이 될 만한 방법을 정리해 볼게요.',
+            text: 'Sepertinya hatimu sedang sangat lelah, ya. Melupakan orang yang kamu sukai bukan soal menghapusnya secara paksa, tapi lebih seperti proses di mana rasa sakitnya perlahan berkurang seiring waktu. Aku coba rangkumkan beberapa cara yang mungkin bisa membantu.',
           },
-          { type: 'h', text: '1. 흔적과 조금씩 거리 두기' },
+          { type: 'h', text: '1. Pelan-pelan menjaga jarak dari jejaknya' },
           {
             type: 'p',
-            text: '대화방을 자꾸 열어 보거나 프로필 사진을 확인하는 습관이 있다면, 알림을 잠시 꺼 두거나 대화방을 숨겨 보세요. 볼 때마다 마음이 처음 자리로 돌아가기 쉬워요.',
+            text: 'Kalau kamu punya kebiasaan terus membuka ruang obrolan atau mengecek foto profilnya, coba matikan notifikasinya sebentar atau sembunyikan ruang obrolannya. Setiap kali melihatnya, hatimu gampang kembali ke titik awal.',
           },
-          { type: 'h', text: '2. 감정을 억누르지 않기' },
+          { type: 'h', text: '2. Jangan menahan perasaan' },
           {
             type: 'p',
-            text: '"잊어야 해"라고 스스로를 다그칠수록 더 생각나기 마련이에요. 보고 싶으면 보고 싶다고, 서운하면 서운하다고 메모장에 솔직하게 적어 보세요.',
+            text: 'Semakin kamu memaksa diri dengan "aku harus lupa", biasanya justru semakin teringat. Kalau kangen, tulis saja kangen; kalau kecewa, tulis saja kecewa. Coba tuliskan dengan jujur di aplikasi catatan.',
           },
-          { type: 'h', text: '3. 그 사람을 떠올리던 시간을 다른 것으로 채우기' },
+          { type: 'h', text: '3. Isi waktu yang biasa kamu pakai untuk memikirkannya dengan hal lain' },
           {
             type: 'p',
-            text: '운동, 악기 연습, 친구와의 약속처럼 몸과 손이 바쁜 일을 일부러 넣어 보세요. 빈 시간이 줄어들수록 생각이 머무는 시간도 줄어들어요.',
+            text: 'Sengaja masukkan kegiatan yang membuat badan dan tanganmu sibuk, seperti olahraga, latihan alat musik, atau janjian dengan teman. Semakin sedikit waktu kosong, semakin sedikit juga waktu pikiranmu tertahan di sana.',
           },
-          { type: 'h', text: '4. 나를 탓하지 않기' },
+          { type: 'h', text: '4. Jangan menyalahkan diri sendiri' },
           {
             type: 'p',
-            text: '누군가를 좋아한 마음은 잘못이 아니에요. 그만큼 진심이었다는 뜻이니까요. 잊는 속도가 느리더라도 괜찮아요.',
+            text: 'Menyukai seseorang bukanlah kesalahan. Itu artinya perasaanmu tulus. Nggak apa-apa kalau prosesnya lambat.',
           },
           {
             type: 'p',
-            text: '혹시 지금 그 사람과 어떤 상황인지 이야기해 주면, 상황에 맞게 더 구체적으로 같이 생각해 볼게요.',
+            text: 'Kalau kamu mau cerita bagaimana keadaanmu dengan orang itu sekarang, kita bisa pikirkan bersama dengan lebih spesifik sesuai situasimu.',
           },
         ],
       },
@@ -47,52 +47,52 @@ export const aiChats: AiChat[] = [
   },
   {
     id: 'hetero',
-    title: '헤테로 남자 꼬시는 법',
+    title: 'Cara menggoda cowok hetero',
     turns: [
       {
         id: 'h1',
-        question: '헤테로 남자 꼬시는 법 뭐야?',
+        question: 'gimana cara ngegodain cowok hetero?',
         answer: [
           {
             type: 'p',
-            text: '솔직하게 말씀드리면, 상대의 성적 지향을 "꼬셔서" 바꾸는 방법은 없어요. 성적 지향은 노력이나 기술로 바뀌는 게 아니라서, 그 방향으로 애쓸수록 오히려 마음만 더 다칠 수 있어요.',
+            text: 'Jujur saja, tidak ada cara untuk mengubah orientasi seksual seseorang dengan "menggodanya". Orientasi seksual bukan sesuatu yang berubah karena usaha atau teknik, jadi semakin keras kamu berusaha ke arah itu, justru hatimu yang bisa makin terluka.',
           },
           {
             type: 'p',
-            text: '다만 지금 그 사람을 많이 좋아하고 있다는 마음은 충분히 느껴져요. 그 마음을 어떻게 다룰지는 같이 생각해 볼 수 있어요.',
+            text: 'Tapi aku bisa merasakan betapa kamu sangat menyukai orang itu sekarang. Bagaimana menyikapi perasaan itu, kita bisa pikirkan bersama.',
           },
-          { type: 'h', text: '1. 상대의 마음을 확인하는 것부터' },
+          { type: 'h', text: '1. Mulai dari memastikan perasaannya' },
           {
             type: 'p',
-            text: '혹시 그 사람이 정말 이성애자인지, 아니면 내가 그렇게 짐작하고 있는 건지 한번 생각해 보세요. 짐작만으로 마음을 접거나 키우기보다는, 편한 대화 속에서 조금씩 알아가는 게 좋아요.',
+            text: 'Coba pikirkan sekali lagi, apakah dia benar-benar heteroseksual, atau itu hanya dugaanmu saja? Daripada menyerah atau malah memupuk perasaan hanya berdasarkan dugaan, lebih baik mengenalnya pelan-pelan lewat obrolan yang nyaman.',
           },
-          { type: 'h', text: '2. 관계를 지키는 선 정하기' },
+          { type: 'h', text: '2. Tentukan batas untuk menjaga hubungan' },
           {
             type: 'p',
-            text: '고백을 할지, 지금처럼 좋은 형·동생으로 남을지는 내가 감당할 수 있는 범위 안에서 정하는 게 중요해요. 어느 쪽이든 나 자신이 덜 아픈 선택이 맞는 선택이에요.',
+            text: 'Mau menyatakan perasaan, atau tetap menjadi hyung dan dongsaeng yang akrab seperti sekarang, penting untuk memutuskannya dalam batas yang sanggup kamu tanggung. Apa pun pilihannya, pilihan yang paling sedikit menyakitimu adalah pilihan yang tepat.',
           },
-          { type: 'h', text: '3. 내 마음을 먼저 돌보기' },
+          { type: 'h', text: '3. Rawat hatimu lebih dulu' },
           {
             type: 'p',
-            text: '닿지 않을 것 같은 마음을 오래 품고 있으면 생각보다 많이 지쳐요. 믿을 수 있는 친구에게 털어놓거나, 마음을 기록해 보는 것도 도움이 돼요.',
+            text: 'Menyimpan perasaan yang sepertinya tidak akan sampai dalam waktu lama ternyata jauh lebih melelahkan dari yang dibayangkan. Bercerita pada teman yang kamu percaya, atau menuliskan perasaanmu, juga bisa membantu.',
           },
         ],
       },
       {
         id: 'h2',
-        question: '너 진짜 도움 안된다',
+        question: 'kamu beneran nggak membantu',
         answer: [
           {
             type: 'p',
-            text: '듣고 싶었던 답이 아니라서 더 답답하셨을 것 같아요. 미안해요.',
+            text: 'Pasti makin terasa sesak karena jawabannya bukan yang ingin kamu dengar. Maaf, ya.',
           },
           {
             type: 'p',
-            text: '그래도 "이렇게 하면 넘어온다" 같은 방법을 드리면, 잠깐은 희망이 생겨도 결국 더 크게 상처받으실까 봐 그렇게 말씀드리지 못했어요.',
+            text: 'Tapi kalau aku memberimu cara seperti "lakukan ini pasti dia luluh", mungkin kamu akan merasa punya harapan sebentar, lalu akhirnya terluka lebih dalam. Karena itu aku tidak bisa menjawab begitu.',
           },
           {
             type: 'p',
-            text: '지금 제일 힘든 게 뭔지 말해 줄래요? 그 사람이 나를 봐주지 않는 것, 다른 사람을 억지로 만나고 있는 것, 아니면 이 마음을 어디에도 말할 수 없는 것. 어느 쪽이든 판단하지 않고 들을게요.',
+            text: 'Maukah kamu cerita apa yang paling berat buatmu sekarang? Dia yang tidak melihat ke arahmu, kamu yang memaksakan diri bertemu orang lain, atau perasaan ini yang tidak bisa kamu ceritakan ke siapa pun. Yang mana pun, aku akan mendengarkan tanpa menghakimi.',
           },
         ],
       },
@@ -100,29 +100,29 @@ export const aiChats: AiChat[] = [
   },
   {
     id: 'mail',
-    title: '메일 수정',
+    title: 'Revisi email',
     turns: [
       {
         id: 'm1',
         question:
-          '서울피아노협회에서 콩쿨 컨택 문의가 들어왔어. 어떤 일정으로 어떻게 주최되는지, 어떤 곡으로 진행되는지 같은 거 물어보는 회신 메일 어떻게 써야 돼?',
+          'aku dapet tawaran kontak buat kompetisi piano dari Asosiasi Piano Seoul. gimana nulis email balasan buat nanya jadwalnya kayak apa, diselenggarakan gimana, terus lagu apa yang dibawain?',
         answer: [
           {
             type: 'p',
-            text: '좋은 소식이네요! 첫 회신이니 감사 인사로 시작하고, 궁금한 점은 번호를 매겨 정리하면 담당자분이 답하기 편해요. 아래처럼 써 보세요.',
+            text: 'Kabar baik, nih! Karena ini balasan pertama, mulailah dengan ucapan terima kasih, lalu susun pertanyaanmu dengan nomor supaya petugasnya lebih mudah menjawab. Coba tulis seperti di bawah ini.',
           },
           {
             type: 'draft',
-            text: '제목: [회신] 콩쿨 참가 관련 문의드립니다 - 김원필\n\n안녕하세요, 서울피아노협회 담당자님.\n김원필입니다.\n\n먼저 이번 콩쿨과 관련해 연락 주셔서 진심으로 감사드립니다. 제안해 주신 내용에 관심이 있어, 참여를 검토하기 위해 몇 가지 여쭙고 싶습니다.\n\n1. 일정: 예선과 본선 일정, 그리고 리허설 일정이 어떻게 되는지 궁금합니다.\n2. 주최 및 진행 방식: 주최·주관 기관과 장소, 심사 방식(현장 심사/영상 심사 등)을 알려주시면 감사하겠습니다.\n3. 연주 곡목: 지정곡과 자유곡의 구성, 곡 길이 제한이나 제출 기한이 있는지 궁금합니다.\n4. 기타: 참가 신청 절차와 제출 서류, 참가비 여부도 함께 안내해 주시면 준비에 큰 도움이 될 것 같습니다.\n\n관련 요강이나 안내 자료가 있다면 첨부해 주셔도 좋습니다.\n바쁘신 와중에 확인 부탁드리며, 좋은 기회 주셔서 다시 한번 감사드립니다.\n\n김원필 드림\n연락처: 010-XXXX-XXXX',
+            text: 'Subjek: [Balasan] Pertanyaan Terkait Partisipasi Kompetisi Piano - Kim Wonpil\n\nYth. Bapak/Ibu Panitia Asosiasi Piano Seoul,\nDengan hormat, saya Kim Wonpil.\n\nPertama-tama, saya mengucapkan terima kasih yang sebesar-besarnya atas kesediaan Bapak/Ibu menghubungi saya terkait kompetisi piano kali ini. Saya tertarik dengan tawaran yang disampaikan, dan untuk mempertimbangkan keikutsertaan saya, izinkan saya menanyakan beberapa hal berikut.\n\n1. Jadwal: Saya ingin mengetahui jadwal babak penyisihan dan babak final, serta jadwal gladi resiknya.\n2. Penyelenggara dan teknis pelaksanaan: Mohon informasi mengenai lembaga penyelenggara dan pelaksana, lokasi, serta metode penjurian (penilaian langsung/penilaian melalui video, dan sebagainya).\n3. Repertoar: Saya ingin mengetahui susunan lagu wajib dan lagu pilihan, serta apakah terdapat batasan durasi lagu atau tenggat pengumpulan.\n4. Lain-lain: Informasi mengenai prosedur pendaftaran, dokumen yang perlu diserahkan, dan ada tidaknya biaya pendaftaran juga akan sangat membantu persiapan saya.\n\nApabila terdapat ketentuan atau materi panduan terkait, Bapak/Ibu dapat melampirkannya.\nSaya mohon kesediaan Bapak/Ibu untuk meninjaunya di tengah kesibukan, dan sekali lagi saya ucapkan terima kasih atas kesempatan yang baik ini.\n\nHormat saya,\nKim Wonpil\nKontak: 010-XXXX-XXXX',
           },
-          { type: 'h', text: '보내기 전에 체크하면 좋은 점' },
+          { type: 'h', text: 'Hal yang sebaiknya dicek sebelum mengirim' },
           {
             type: 'p',
-            text: '받은 메일에 이미 적힌 내용은 질문에서 빼 주세요. 같은 걸 다시 물으면 꼼꼼히 안 읽은 인상을 줄 수 있어요. 그리고 가능한 연습 일정이나 참여가 어려운 날짜가 있다면 미리 함께 적어 두는 것도 좋아요.',
+            text: 'Hapus dari daftar pertanyaan hal-hal yang sudah tertulis di email yang kamu terima. Menanyakan hal yang sama bisa memberi kesan kamu tidak membacanya dengan teliti. Selain itu, kalau ada jadwal latihan yang memungkinkan atau tanggal yang sulit untuk ikut, ada baiknya dituliskan sekalian dari awal.',
           },
           {
             type: 'p',
-            text: '말투를 더 격식 있게 바꾸거나 짧게 줄인 버전이 필요하면 말해 주세요.',
+            text: 'Kalau kamu butuh versi dengan nada yang lebih formal atau versi yang lebih singkat, bilang saja, ya.',
           },
         ],
       },

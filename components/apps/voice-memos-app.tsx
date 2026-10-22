@@ -9,9 +9,9 @@ import { withBasePath } from '@/lib/base-path'
 type Memo = { id: string; title: string; date: string; duration: number; src: string; left: string }
 
 const TRASHED: Memo[] = [
-  { id: 'm3', title: '음성메모_3', date: '2025. 11. 14.', duration: 15, src: '/sounds/memos/memo-3.mp3', left: '25일 남음' },
-  { id: 'm2', title: '음성메모_2', date: '2025. 11. 9.', duration: 4, src: '/sounds/memos/memo-2.mp3', left: '20일 남음' },
-  { id: 'm1', title: '음성메모_1', date: '2025. 11. 2.', duration: 2, src: '/sounds/memos/memo-1.mp3', left: '13일 남음' },
+  { id: 'm3', title: 'Memo Suara_3', date: '14 Nov 2025', duration: 15, src: '/sounds/memos/memo-3.mp3', left: '25 hari lagi' },
+  { id: 'm2', title: 'Memo Suara_2', date: '9 Nov 2025', duration: 4, src: '/sounds/memos/memo-2.mp3', left: '20 hari lagi' },
+  { id: 'm1', title: 'Memo Suara_1', date: '2 Nov 2025', duration: 2, src: '/sounds/memos/memo-1.mp3', left: '13 hari lagi' },
 ]
 
 type Folder = 'root' | 'all' | 'trash'
@@ -37,15 +37,15 @@ export function VoiceMemosApp() {
 
 function FolderList({ onOpen }: { onOpen: (f: Folder) => void }) {
   const rows: { id: Folder; label: string; count: number; icon: React.ReactNode }[] = [
-    { id: 'all', label: '모든 녹음 항목', count: 0, icon: <Waves className="size-[22px] text-[#0a84ff]" /> },
-    { id: 'trash', label: '최근 삭제된 항목', count: TRASHED.length, icon: <Trash2 className="size-[22px] text-[#0a84ff]" /> },
+    { id: 'all', label: 'Semua Rekaman', count: 0, icon: <Waves className="size-[22px] text-[#0a84ff]" /> },
+    { id: 'trash', label: 'Baru Dihapus', count: TRASHED.length, icon: <Trash2 className="size-[22px] text-[#0a84ff]" /> },
   ]
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-4">
       <div className="flex justify-end py-2 text-[17px] text-[#0a84ff]" aria-hidden>
-        편집
+        Edit
       </div>
-      <h1 className="pb-4 text-[34px] font-bold tracking-tight">음성 메모</h1>
+      <h1 className="pb-4 text-[34px] font-bold tracking-tight">Memo Suara</h1>
       <ul className="overflow-hidden rounded-[12px] bg-[#1c1c1e]">
         {rows.map((r, i) => (
           <li key={r.id}>
@@ -56,7 +56,7 @@ function FolderList({ onOpen }: { onOpen: (f: Folder) => void }) {
             >
               <span aria-hidden>{r.icon}</span>
               <span className={`flex flex-1 items-center gap-2 py-3 pr-3 ${i > 0 ? 'border-t border-white/10' : ''}`}>
-                <span className="flex-1 text-[17px]">{r.id === 'trash' ? '휴지통' : r.label}</span>
+                <span className="flex-1 text-[17px]">{r.id === 'trash' ? 'Sampah' : r.label}</span>
                 <span className="text-[17px] text-white/45">{r.count}</span>
                 <ChevronRight className="size-5 text-white/30" aria-hidden />
               </span>
@@ -66,7 +66,7 @@ function FolderList({ onOpen }: { onOpen: (f: Folder) => void }) {
       </ul>
       <p className="mt-6 flex items-center gap-2 px-1 text-[13px] text-white/40">
         <Folder className="size-4" aria-hidden />
-        나의 폴더 없음
+        Tidak ada folder saya
       </p>
     </div>
   )
@@ -81,21 +81,21 @@ function FolderView({ folder, onBack }: { folder: Exclude<Folder, 'root'>; onBac
       <div className="flex items-center justify-between px-2 py-2 text-[17px] text-[#0a84ff]">
         <button type="button" onClick={onBack} className="flex items-center">
           <ChevronLeft className="size-7" aria-hidden />
-          음성 메모
+          Memo Suara
         </button>
         <span className="px-2" aria-hidden>
-          편집
+          Edit
         </span>
       </div>
-      <h1 className="px-4 pb-2 text-[34px] font-bold tracking-tight">{folder === 'trash' ? '휴지통' : '모든 녹음 항목'}</h1>
+      <h1 className="px-4 pb-2 text-[34px] font-bold tracking-tight">{folder === 'trash' ? 'Sampah' : 'Semua Rekaman'}</h1>
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center pb-24 text-center">
-          <p className="text-[22px] font-bold">녹음 항목 없음</p>
-          <p className="mt-1 text-[15px] text-white/50">녹음된 음성 메모가 여기에 표시됩니다.</p>
+          <p className="text-[22px] font-bold">Tidak Ada Rekaman</p>
+          <p className="mt-1 text-[15px] text-white/50">Memo suara yang Anda rekam akan muncul di sini.</p>
         </div>
       ) : (
         <>
-          <p className="px-4 pb-2 text-[13px] text-white/45">항목은 삭제되기 전 30일 동안 표시됩니다.</p>
+          <p className="px-4 pb-2 text-[13px] text-white/45">Item ditampilkan selama 30 hari sebelum dihapus.</p>
           <ul className="min-h-0 flex-1 overflow-y-auto px-4">
             {items.map((m) => (
               <MemoRow key={m.id} memo={m} open={openId === m.id} onToggle={() => setOpenId((id) => (id === m.id ? null : m.id))} />
@@ -159,18 +159,18 @@ function MemoRow({ memo, open, onToggle }: { memo: Memo; open: boolean; onToggle
           <div className="mt-2 flex items-center justify-between">
             <span className="w-16" aria-hidden />
             <div className="flex items-center gap-9">
-              <button type="button" onClick={() => skip(-15)} aria-label="15초 뒤로">
+              <button type="button" onClick={() => skip(-15)} aria-label="Mundur 15 detik">
                 <RotateCcw className="size-6" />
               </button>
-              <button type="button" onClick={toggle} aria-label={playing ? '일시정지' : '재생'}>
-                {playing ? <Pause className="size-9 fill-white" /> : <Play className="size-9 fill-white" />}
+              <button type="button" onClick={toggle} aria-label={playing ? 'Jeda' : 'Putar'}>
+                {playing ? <Pause fill="currentColor" className="size-9 fill-white" /> : <Play fill="currentColor" className="size-9 fill-white" />}
               </button>
-              <button type="button" onClick={() => skip(15)} aria-label="15초 앞으로">
+              <button type="button" onClick={() => skip(15)} aria-label="Maju 15 detik">
                 <RotateCw className="size-6" />
               </button>
             </div>
             <span className="w-16 text-right text-[15px] text-[#0a84ff]" aria-hidden>
-              복구
+              Pulihkan
             </span>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { useBackHandler } from '@/lib/story/back-nav'
 import { withBasePath } from '@/lib/base-path'
 import { cn } from '@/lib/utils'
 
-const ME = { id: 'kimwp_', name: '김원필', avatar: '/images/instagram/image-1.jpg' }
+const ME = { id: 'kimwp_', name: 'Kim Wonpil', avatar: '/images/instagram/image-1.jpg' }
 
 type AccountId = 'wp' | 'yh'
 type Account = {
@@ -24,7 +24,7 @@ const ACCOUNTS: Record<AccountId, Account> = {
   wp: { handle: ME.id, name: ME.name, avatar: ME.avatar, avatarPosition: '50% 32%', posts: 3, followers: '1,264', following: 'yh' },
   yh: {
     handle: 'Kangyounghyun',
-    name: '강영현',
+    name: 'Kang Younghyun',
     avatar: '/images/instagram/kangyounghyun.jpg',
     avatarPosition: '50% 45%',
     posts: 0,
@@ -51,47 +51,47 @@ const POSTS: Post[] = [
   {
     id: 'p1',
     photos: [
-      { src: '/images/instagram/image-3.jpg', alt: '체크 셔츠를 입고 소파에 기대 찍은 셀카', ratio: 1206 / 1297 },
-      { src: '/images/instagram/image-4.jpg', alt: '체크 셔츠를 입고 미소 짓는 가까운 셀카', ratio: 1186 / 1258 },
+      { src: '/images/instagram/image-3.jpg', alt: 'Selfie memakai kemeja kotak-kotak sambil bersandar di sofa', ratio: 1206 / 1297 },
+      { src: '/images/instagram/image-4.jpg', alt: 'Selfie close-up memakai kemeja kotak-kotak sambil tersenyum', ratio: 1186 / 1258 },
     ],
-    caption: '심심행',
+    caption: 'Bosennn',
     likedBy: 'Kangyounghyun',
     othersCount: 106,
-    time: '2일 전',
+    time: '2 hari yang lalu',
     comments: [
-      { id: 'c1', user: 'sunny_day.92', text: '원필아 뭐하고 지내?', time: '2일' },
-      { id: 'c2', user: 'jjun_hee', text: '여전히 잘생겼다ㅋㅋ', time: '2일' },
-      { id: 'c3', user: 'mint_choco.ya', text: '나랑 만나진 않으면서 심심하다고 하네', time: '1일' },
-      { id: 'c4', user: 'dawn.0812', text: '점점 더 잘생쁨되네', time: '1일' },
+      { id: 'c1', user: 'sunny_day.92', text: 'Wonpil, lagi sibuk apa sekarang?', time: '2 hr' },
+      { id: 'c2', user: 'jjun_hee', text: 'Masih ganteng aja ㅋㅋ', time: '2 hr' },
+      { id: 'c3', user: 'mint_choco.ya', text: 'Diajak ketemu nggak mau, tapi bilangnya bosen', time: '1 hr' },
+      { id: 'c4', user: 'dawn.0812', text: 'Makin lama makin ganteng sekaligus cantik', time: '1 hr' },
     ],
   },
   {
     id: 'p2',
-    photos: [{ src: '/images/instagram/image-2.jpg', alt: '셔츠와 넥타이를 입은 위장무늬 원숭이 인형', ratio: 1206 / 1307 }],
+    photos: [{ src: '/images/instagram/image-2.jpg', alt: 'Boneka monyet bermotif loreng memakai kemeja dan dasi', ratio: 1206 / 1307 }],
 
-    caption: '헤헤 캐나다물 먹은 원숭이ㅎㅎ',
+    caption: 'Hehe monyet rasa Kanadaㅎㅎ',
     likedBy: 'Kangyounghyun',
     othersCount: 153,
-    time: '1주 전',
+    time: '1 minggu yang lalu',
     comments: [
       {
         id: 'c5',
         user: 'hoon.daily',
-        text: '누가사줌?',
-        time: '1주',
-        replies: [{ id: 'c5r', user: ME.id, text: '비밀이야', time: '1주' }],
+        text: 'Siapa yg beliin?',
+        time: '1 mgg',
+        replies: [{ id: 'c5r', user: ME.id, text: 'Rahasia dong', time: '1 mgg' }],
       },
-      { id: 'c6', user: 'seo_dodo', text: '오 근데 형이 더 귀여움', time: '6일' },
-      { id: 'c7', user: 'choi.minseo_', text: '오빠 잘 지내요? 추천에 떠서 보는데 미모는 여전하시네요ㅎㅎ', time: '5일' },
+      { id: 'c6', user: 'seo_dodo', text: 'Oh tapi hyung lebih imut', time: '6 hr' },
+      { id: 'c7', user: 'choi.minseo_', text: 'Oppa apa kabar? Muncul di rekomendasi jadi aku lihat, ternyata masih cakep kayak dulu ya ㅎㅎ', time: '5 hr' },
     ],
   },
   {
     id: 'p3',
-    photos: [{ src: '/images/instagram/image-5.jpg', alt: '뚜껑이 열린 그랜드 피아노 위에 놓인 빨간 스테이지 키보드', ratio: 1206 / 1163 }],
-    caption: '화이팅! 잘할 수 있다',
+    photos: [{ src: '/images/instagram/image-5.jpg', alt: 'Keyboard panggung merah di atas grand piano yang tutupnya terbuka', ratio: 1206 / 1163 }],
+    caption: 'Hwaiting! Pasti bisa',
     likedBy: 'Kangyounghyun',
     othersCount: 243,
-    time: '3주 전',
+    time: '3 minggu yang lalu',
     comments: [],
   },
 ]
@@ -143,8 +143,8 @@ export function InstagramApp() {
           onOpenComments={setCommentsFor}
         />
       )}
-      <nav aria-label="Instagram 탭" className="flex shrink-0 justify-around border-t border-black/10 bg-white py-2.5">
-        <button type="button" onClick={() => setStack([])} aria-label="홈" aria-current={!view ? 'page' : undefined}>
+      <nav aria-label="Tab Instagram" className="flex shrink-0 justify-around border-t border-black/10 bg-white py-2.5">
+        <button type="button" onClick={() => setStack([])} aria-label="Beranda" aria-current={!view ? 'page' : undefined}>
           <HomeTabIcon filled={!view} />
         </button>
         <span className="size-6" aria-hidden />
@@ -153,7 +153,7 @@ export function InstagramApp() {
         <button
           type="button"
           onClick={() => setStack([{ kind: 'profile', account: 'wp' }])}
-          aria-label="프로필"
+          aria-label="Profil"
           aria-current={view ? 'page' : undefined}
           className={cn('rounded-full', view && 'ring-2 ring-black ring-offset-1')}
         >
@@ -194,7 +194,7 @@ function FeedView({
         </span>
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <section aria-label="스토리" className="flex gap-4 border-b border-black/10 px-4 py-3">
+        <section aria-label="Cerita" className="flex gap-4 border-b border-black/10 px-4 py-3">
           <div className="flex w-[72px] flex-col items-center gap-1">
             <span className="relative block size-[66px]">
               <Avatar className="size-full" />
@@ -202,7 +202,7 @@ function FeedView({
                 <Plus className="size-3.5 text-white" strokeWidth={3} aria-hidden />
               </span>
             </span>
-            <span className="text-[12px] text-black/70">내 스토리</span>
+            <span className="text-[12px] text-black/70">Cerita Anda</span>
           </div>
         </section>
         {POSTS.map((p) => (
@@ -216,7 +216,7 @@ function FeedView({
             onOpenComments={() => onOpenComments(p.id)}
           />
         ))}
-        <p className="py-8 text-center text-[13px] text-black/40">모두 확인했습니다</p>
+        <p className="py-8 text-center text-[13px] text-black/40">Anda sudah melihat semuanya</p>
       </div>
     </>
   )
@@ -238,14 +238,14 @@ function ProfileView({
   const account = ACCOUNTS[accountId]
   const posts = accountId === 'wp' ? POSTS : []
   const stats = [
-    { label: '게시물', value: String(account.posts) },
-    { label: '팔로워', value: account.followers },
+    { label: 'Postingan', value: String(account.posts) },
+    { label: 'Pengikut', value: account.followers },
   ]
   return (
     <>
       <header className="flex shrink-0 items-center gap-1 px-2 pb-2">
         {canGoBack ? (
-          <button type="button" onClick={onBack} aria-label="뒤로" className="p-1">
+          <button type="button" onClick={onBack} aria-label="Kembali" className="p-1">
             <ChevronLeft className="size-7" />
           </button>
         ) : (
@@ -255,7 +255,7 @@ function ProfileView({
         <MoreHorizontal className="mr-2 size-6" aria-hidden />
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <section aria-label="프로필 정보" className="px-4 pt-1">
+        <section aria-label="Info profil" className="px-4 pt-1">
           <div className="flex items-center gap-6">
             <Avatar account={accountId} className="size-[84px]" />
             <div className="flex flex-1 justify-around text-center">
@@ -267,13 +267,13 @@ function ProfileView({
               ))}
               <button type="button" onClick={onOpenFollowing} className="flex flex-col active:opacity-60">
                 <span className="text-[17px] font-semibold">1</span>
-                <span className="text-[13px]">팔로잉</span>
+                <span className="text-[13px]">Mengikuti</span>
               </button>
             </div>
           </div>
           <p className="mt-3 text-[14px] font-semibold">{account.name}</p>
           <div className="mt-3 grid grid-cols-2 gap-1.5" aria-hidden>
-            {(accountId === 'wp' ? ['프로필 편집', '프로필 공유'] : ['팔로잉', '메시지']).map((label) => (
+            {(accountId === 'wp' ? ['Edit Profil', 'Bagikan Profil'] : ['Mengikuti', 'Kirim Pesan']).map((label) => (
               <span key={label} className="rounded-lg bg-[#efefef] py-1.5 text-center text-[14px] font-semibold">
                 {label}
               </span>
@@ -301,7 +301,7 @@ function ProfileView({
             <span className="flex size-16 items-center justify-center rounded-full border-2 border-black">
               <Camera className="size-8" strokeWidth={1.5} aria-hidden />
             </span>
-            <p className="mt-4 text-[20px] font-bold">게시물 없음</p>
+            <p className="mt-4 text-[20px] font-bold">Belum Ada Postingan</p>
           </div>
         )}
       </div>
@@ -323,14 +323,14 @@ function FollowingView({
   return (
     <>
       <header className="flex shrink-0 items-center px-2 pb-1">
-        <button type="button" onClick={onBack} aria-label="뒤로" className="p-1">
+        <button type="button" onClick={onBack} aria-label="Kembali" className="p-1">
           <ChevronLeft className="size-7" />
         </button>
         <h1 className="flex-1 truncate pr-9 text-center text-[16px] font-bold">{account.handle}</h1>
       </header>
       <div className="flex shrink-0 border-b border-black/10 text-[14px]" aria-hidden>
-        <span className="flex-1 pb-2.5 text-center text-black/40">{`팔로워 ${account.followers}`}</span>
-        <span className="flex-1 border-b border-black pb-2.5 text-center font-semibold">팔로잉 1</span>
+        <span className="flex-1 pb-2.5 text-center text-black/40">{`${account.followers} Pengikut`}</span>
+        <span className="flex-1 border-b border-black pb-2.5 text-center font-semibold">1 Mengikuti</span>
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto px-4 pt-3">
         <li>
@@ -345,7 +345,7 @@ function FollowingView({
               <span className="block truncate text-[14px] text-black/50">{target.name}</span>
             </span>
             <span className="rounded-lg bg-[#efefef] px-4 py-1.5 text-[14px] font-semibold" aria-hidden>
-              팔로잉
+              Mengikuti
             </span>
           </button>
         </li>
@@ -392,7 +392,7 @@ function PostCard({
   const total = countComments(post.comments)
   const first = post.comments[0]
   return (
-    <article id={`ig-post-${post.id}`} aria-label={`${ME.id}의 게시물`} className="pb-4">
+    <article id={`ig-post-${post.id}`} aria-label={`Postingan ${ME.id}`} className="pb-4">
       <div className="flex items-center gap-2.5 px-3 py-2.5">
         <span className="rounded-full bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5] p-[2px]">
           <span className="block rounded-full bg-white p-[2px]">
@@ -404,21 +404,21 @@ function PostCard({
       </div>
       <Carousel photos={post.photos} />
       <div className="flex items-center gap-4 px-3 pt-2.5">
-        <button type="button" onClick={onLike} aria-pressed={liked} aria-label={liked ? '좋아요 취소' : '좋아요'}>
-          <Heart className={cn('size-[26px]', liked && 'fill-[#ff3040] text-[#ff3040]')} />
+        <button type="button" onClick={onLike} aria-pressed={liked} aria-label={liked ? 'Batal suka' : 'Suka'}>
+          <Heart fill={liked ? 'currentColor' : 'none'} className={cn('size-[26px]', liked && 'fill-[#ff3040] text-[#ff3040]')} />
         </button>
-        <button type="button" onClick={onOpenComments} aria-label="댓글 보기">
+        <button type="button" onClick={onOpenComments} aria-label="Lihat komentar">
           <MessageCircle className="size-[26px] -scale-x-100" />
         </button>
         <Send className="size-[24px]" aria-hidden />
-        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? '저장 취소' : '저장'} className="ml-auto">
-          <Bookmark className={cn('size-[26px]', saved && 'fill-black')} />
+        <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? 'Batal simpan' : 'Simpan'} className="ml-auto">
+          <Bookmark fill={saved ? 'currentColor' : 'none'} className={cn('size-[26px]', saved && 'fill-black')} />
         </button>
       </div>
       <div className="space-y-1 px-3 pt-2 text-[14px] leading-snug">
         <p>
-          <span className="font-semibold">{post.likedBy}</span>님 외{' '}
-          <span className="font-semibold">{post.othersCount + (liked ? 1 : 0)}개</span>
+          Disukai oleh <span className="font-semibold">{post.likedBy}</span> dan{' '}
+          <span className="font-semibold">{post.othersCount + (liked ? 1 : 0)} lainnya</span>
         </p>
         <p>
           <span className="mr-1.5 font-semibold">{ME.id}</span>
@@ -426,7 +426,7 @@ function PostCard({
         </p>
         {total > 0 && (
           <button type="button" onClick={onOpenComments} className="block text-black/45">
-            {`댓글 ${total}개 모두 보기`}
+            {`Lihat semua ${total} komentar`}
           </button>
         )}
         {first && post.id === 'p1' && (
@@ -460,7 +460,7 @@ function Carousel({ photos }: { photos: Photo[] }) {
         }}
         className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto bg-black"
         style={{ aspectRatio: String(photos[0].ratio) }}
-        aria-roledescription={multi ? '슬라이드' : undefined}
+        aria-roledescription={multi ? 'Slide' : undefined}
       >
         {photos.map((ph, i) => (
           <img
@@ -481,7 +481,7 @@ function Carousel({ photos }: { photos: Photo[] }) {
             <button
               type="button"
               onClick={() => go(index - 1)}
-              aria-label="이전 사진"
+              aria-label="Foto sebelumnya"
               className="absolute left-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80"
             >
               <ChevronLeft className="size-4" />
@@ -491,7 +491,7 @@ function Carousel({ photos }: { photos: Photo[] }) {
             <button
               type="button"
               onClick={() => go(index + 1)}
-              aria-label="다음 사진"
+              aria-label="Foto berikutnya"
               className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80"
             >
               <ChevronRight className="size-4" />
@@ -514,14 +514,14 @@ function CommentsSheet({ post, onClose }: { post: Post; onClose: () => void }) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="댓글"
+        aria-label="Komentar"
         onClick={(e) => e.stopPropagation()}
         className="flex max-h-[78%] min-h-[50%] flex-col rounded-t-[16px] bg-white pb-6"
       >
         <div className="relative flex shrink-0 items-center justify-center border-b border-black/10 py-3">
           <span className="absolute top-1.5 h-1 w-9 rounded-full bg-black/20" aria-hidden />
-          <h2 className="pt-1 text-[16px] font-semibold">댓글</h2>
-          <button type="button" onClick={onClose} aria-label="댓글 닫기" className="absolute right-3 top-3 p-1">
+          <h2 className="pt-1 text-[16px] font-semibold">Komentar</h2>
+          <button type="button" onClick={onClose} aria-label="Tutup komentar" className="absolute right-3 top-3 p-1">
             <X className="size-5" />
           </button>
         </div>
@@ -574,7 +574,7 @@ function CommentRow({ comment }: { comment: Comment }) {
           <span className="text-[12px] text-black/40">{comment.time}</span>
         </p>
         <p className="mt-0.5 break-words">{comment.text}</p>
-        <p className="mt-1 text-[12px] font-medium text-black/40">답글 달기</p>
+        <p className="mt-1 text-[12px] font-medium text-black/40">Balas</p>
       </div>
     </div>
   )

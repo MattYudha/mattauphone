@@ -2,7 +2,7 @@ export const NOW_ISO = '2025-11-19T18:57:00+09:00'
 export const NOW = new Date(NOW_ISO)
 const TZ = 'Asia/Seoul'
 
-/** "2025-11-03 03:20" (KST) -> ISO string with +09:00 offset */
+/** "2025-11-03 03:20" (KST) -> string ISO dengan offset +09:00 */
 export function kst(dateTime: string): string {
   const [date, time] = dateTime.split(' ')
   return `${date}T${time}:00+09:00`
@@ -28,11 +28,18 @@ function parts(d: Date) {
   }
 }
 
-const WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+const WEEKDAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+const WEEKDAYS_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+
+function weekdayIndex(d: Date): number {
+  const { year, month, day } = parts(d)
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+}
 
 export function weekday(d: Date): string {
-  const { year, month, day } = parts(d)
-  return WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]
+  return WEEKDAYS[weekdayIndex(d)]
 }
 
 export function dayKey(iso: string): string {
@@ -40,25 +47,22 @@ export function dayKey(iso: string): string {
   return `${year}-${month}-${day}`
 }
 
-/** 오후 4:08 */
+/** 16.08 */
 export function formatTime(iso: string): string {
-  const { hour, minute } = parts(new Date(iso))
-  const ampm = hour < 12 ? '오전' : '오후'
-  const h = hour % 12 === 0 ? 12 : hour % 12
-  return `${ampm} ${h}:${String(minute).padStart(2, '0')}`
+  return formatClock(iso)
 }
 
-/** 18:57 */
+/** 18.57 */
 export function formatClock(iso: string): string {
   const { hour, minute } = parts(new Date(iso))
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+  return `${String(hour).padStart(2, '0')}.${String(minute).padStart(2, '0')}`
 }
 
-/** 2025년 11월 2일 일요일 */
+/** Minggu, 2 November 2025 */
 export function formatFullDate(iso: string): string {
   const d = new Date(iso)
   const { year, month, day } = parts(d)
-  return `${year}년 ${month}월 ${day}일 ${weekday(d)}`
+  return `${weekday(d)}, ${day} ${MONTHS[month - 1]} ${year}`
 }
 
 function dayDiffFromNow(iso: string): number {
@@ -69,44 +73,43 @@ function dayDiffFromNow(iso: string): number {
   return Math.round((ub - ua) / 86400000)
 }
 
-/** 카카오톡 채팅 목록용 날짜 */
+/** Tanggal untuk daftar chat KakaoTalk */
 export function formatListDate(iso: string): string {
   const diff = dayDiffFromNow(iso)
   if (diff === 0) return formatTime(iso)
-  if (diff === 1) return '어제'
+  if (diff === 1) return 'Kemarin'
   const { year, month, day } = parts(new Date(iso))
-  if (year === parts(NOW).year) return `${month}월 ${day}일`
-  return `${year}. ${month}. ${day}.`
+  if (year === parts(NOW).year) return `${day} ${MONTHS_SHORT[month - 1]}`
+  return `${day}/${month}/${year}`
 }
 
-/** iOS 메시지/전화 목록용 날짜 */
+/** Tanggal untuk daftar Pesan/Telepon iOS */
 export function formatIosListDate(iso: string): string {
   const diff = dayDiffFromNow(iso)
   if (diff === 0) return formatTime(iso)
-  if (diff === 1) return '어제'
+  if (diff === 1) return 'Kemarin'
   if (diff < 7) return weekday(new Date(iso))
   const { year, month, day } = parts(new Date(iso))
-  return `${String(year).slice(2)}. ${month}. ${day}.`
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${String(year).slice(2)}`
 }
 
-/** iOS 메시지 스레드 내 구분용: "11월 11일 (화) 오전 8:40" */
+/** Pemisah di dalam utas Pesan iOS: "Sel, 11 Nov 08.40" */
 export function formatIosStamp(iso: string): string {
   const d = new Date(iso)
   const diff = dayDiffFromNow(iso)
   const time = formatTime(iso)
-  if (diff === 0) return `오늘 ${time}`
-  if (diff === 1) return `어제 ${time}`
+  if (diff === 0) return `Hari ini ${time}`
+  if (diff === 1) return `Kemarin ${time}`
   const { year, month, day } = parts(d)
-  const wd = weekday(d).slice(0, 1)
-  const prefix = year === parts(NOW).year ? '' : `${year}년 `
-  return `${prefix}${month}월 ${day}일 (${wd}) ${time}`
+  const suffix = year === parts(NOW).year ? '' : ` ${year}`
+  return `${WEEKDAYS_SHORT[weekdayIndex(d)]}, ${day} ${MONTHS_SHORT[month - 1]}${suffix} ${time}`
 }
 
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
-  if (m === 0) return `${s}초`
-  return `${m}분 ${String(s).padStart(2, '0')}초`
+  if (m === 0) return `${s} detik`
+  return `${m} menit ${String(s).padStart(2, '0')} detik`
 }
 
 export function toTime(iso: string): number {

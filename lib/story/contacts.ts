@@ -30,29 +30,29 @@ export type Contact = {
 const DEFAULT_PHOTO = withBasePath('/images/profiles/default.jpeg')
 
 export const OWNER = {
-  name: '김원필',
-  friendListName: '나',
-  deviceName: '김원필의 iphone',
-  status: '영원피아노',
+  name: 'Kim Wonpil',
+  friendListName: 'Aku',
+  deviceName: 'iphone Kim Wonpil',
+  status: 'Youngwon Piano',
   photo: withBasePath('/images/profiles/me.jpeg'),
 }
 
 export const contacts: Record<ContactId, Contact> = {
-  yh: { id: 'yh', name: '영현이형❤️', initial: '영', color: '#8fa7c4', label: '휴대전화', photo: withBasePath('/images/profiles/yh.jpeg') },
-  hs: { id: 'hs', name: '개똥차ㅗ', initial: '개', color: '#b9a99a', label: '휴대전화', photo: DEFAULT_PHOTO },
-  jy: { id: 'jy', name: '우준영', initial: '우', color: '#9cb59a', label: '휴대전화', photo: DEFAULT_PHOTO },
-  wa: { id: 'wa', name: '김원아', initial: '원', color: '#c8a2a8', label: '휴대전화', photo: withBasePath('/images/profiles/wa.png') },
-  unknown: { id: 'unknown', name: '(알 수 없음)', initial: '', color: '#c5ccd4' },
-  pres: { id: 'pres', name: '사과대 회장', initial: '사', color: '#a9a3c6', label: '휴대전화', photo: DEFAULT_PHOTO },
-  seungaMom: { id: 'seungaMom', name: '승아 어머님', initial: '승', color: '#e0a77a', label: '휴대전화' },
-  yuchanMom: { id: 'yuchanMom', name: '유찬이 어머님', initial: '유', color: '#7fb3b0', label: '휴대전화' },
-  jihooMom: { id: 'jihooMom', name: '지후 어머님', initial: '지', color: '#d4b26a', label: '휴대전화' },
-  jihoo: { id: 'jihoo', name: '오후반 지후', initial: '지', color: '#86a8d8', label: '휴대전화' },
-  hyundai: { id: 'hyundai', name: '현대카드', initial: '현', color: '#3a3a3c' },
-  cj: { id: 'cj', name: '대한통운 배송', initial: '대', color: '#d94b3b' },
-  kakaopay: { id: 'kakaopay', name: '카카오페이', initial: '카', color: '#ffeb00', photo: withBasePath('/images/profiles/kakaopay.png') },
+  yh: { id: 'yh', name: 'Younghyun hyung❤️', initial: 'Y', color: '#8fa7c4', label: 'seluler', photo: withBasePath('/images/profiles/yh.jpeg') },
+  hs: { id: 'hs', name: 'Si Brengsekㅗ', initial: 'S', color: '#b9a99a', label: 'seluler', photo: DEFAULT_PHOTO },
+  jy: { id: 'jy', name: 'Woo Junyoung', initial: 'W', color: '#9cb59a', label: 'seluler', photo: DEFAULT_PHOTO },
+  wa: { id: 'wa', name: 'Kim Wona', initial: 'W', color: '#c8a2a8', label: 'seluler', photo: withBasePath('/images/profiles/wa.png') },
+  unknown: { id: 'unknown', name: '(Tidak Dikenal)', initial: '', color: '#c5ccd4' },
+  pres: { id: 'pres', name: 'Ketua Fakultas Ilmu Sosial', initial: 'K', color: '#a9a3c6', label: 'seluler', photo: DEFAULT_PHOTO },
+  seungaMom: { id: 'seungaMom', name: 'Seunga eomeonim', initial: 'S', color: '#e0a77a', label: 'seluler' },
+  yuchanMom: { id: 'yuchanMom', name: 'Yuchan eomeonim', initial: 'Y', color: '#7fb3b0', label: 'seluler' },
+  jihooMom: { id: 'jihooMom', name: 'Jihoo eomeonim', initial: 'J', color: '#d4b26a', label: 'seluler' },
+  jihoo: { id: 'jihoo', name: 'Jihoo (kelas sore)', initial: 'J', color: '#86a8d8', label: 'seluler' },
+  hyundai: { id: 'hyundai', name: 'Hyundai Card', initial: 'H', color: '#3a3a3c' },
+  cj: { id: 'cj', name: 'CJ Logistics', initial: 'C', color: '#d94b3b' },
+  kakaopay: { id: 'kakaopay', name: 'KakaoPay', initial: 'K', color: '#ffeb00', photo: withBasePath('/images/profiles/kakaopay.png') },
   supreme: { id: 'supreme', name: 'Supreme', initial: 'S', color: '#e1251b', photo: withBasePath('/images/profiles/supreme.jpeg') },
-  hyundaiDept: { id: 'hyundaiDept', name: '현대백화점', initial: '현', color: '#2f4f46' },
-  /** 문자 앱에서 01012190482 번호와 매칭되는 연락처 이름 */
-  yhSms: { id: 'yhSms', name: '강영현', initial: '강', color: '#8fa7c4', label: '휴대전화', photo: withBasePath('/images/profiles/yh.jpeg') },
+  hyundaiDept: { id: 'hyundaiDept', name: 'Hyundai Department Store', initial: 'H', color: '#2f4f46' },
+  /** Nama kontak yang cocok dengan nomor 01012190482 di app Pesan */
+  yhSms: { id: 'yhSms', name: 'Kang Younghyun', initial: 'K', color: '#8fa7c4', label: 'seluler', photo: withBasePath('/images/profiles/yh.jpeg') },
 }

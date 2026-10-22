@@ -3,16 +3,16 @@ import { ChevronRight, ExternalLink, Plane, Search, Ticket } from 'lucide-react'
 const HOME = 'https://www.koreanair.com'
 
 const GUIDES = [
-  { label: '항공권 예약', desc: '국내선·국제선 항공권 검색 및 예약', icon: Plane },
-  { label: '예약 조회', desc: '예약 번호로 여정 확인 및 변경', icon: Search },
-  { label: '체크인', desc: '온라인·모바일 체크인 및 탑승권 발급', icon: Ticket },
+  { label: 'Pesan Tiket', desc: 'Cari dan pesan tiket penerbangan domestik & internasional', icon: Plane },
+  { label: 'Cek Pemesanan', desc: 'Lihat dan ubah perjalanan dengan nomor pemesanan', icon: Search },
+  { label: 'Check-in', desc: 'Check-in online & mobile serta terbitkan boarding pass', icon: Ticket },
 ]
 
 export function KoreanAirResults() {
   return (
     <div className="bg-[#f1f3f5] pb-4">
       <section className="bg-white px-4 py-4" aria-labelledby="ke-result">
-        <p className="text-[12px] text-black/45">공식 홈페이지</p>
+        <p className="text-[12px] text-black/45">Situs resmi</p>
         <a href={HOME} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-3">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#00256c]" aria-hidden>
             <svg viewBox="0 0 24 24" className="size-7">
@@ -23,15 +23,15 @@ export function KoreanAirResults() {
           </span>
           <span className="min-w-0 flex-1">
             <span id="ke-result" className="flex items-center gap-1 text-[18px] font-bold text-[#0068c3]">
-              대한항공
+              Korean Air
               <ExternalLink className="size-3.5" aria-hidden />
-              <span className="sr-only">(새 창)</span>
+              <span className="sr-only">(jendela baru)</span>
             </span>
             <span className="block truncate text-[13px] text-[#00a33b]">{HOME}</span>
           </span>
         </a>
         <p className="mt-2 text-[13.5px] leading-snug text-black/60">
-          대한민국 국적 항공사 대한항공 공식 홈페이지. 항공권 예약부터 예약 조회, 체크인, 스카이패스 마일리지까지 이용할 수 있습니다.
+          Situs resmi Korean Air, maskapai nasional Korea Selatan. Pesan tiket, cek pemesanan, check-in, hingga kelola mil SKYPASS di sini.
         </p>
         <ul className="mt-3 divide-y divide-black/[0.06] rounded-[10px] border border-black/[0.08]">
           {GUIDES.map(({ label, desc, icon: Icon }) => (
@@ -56,9 +56,9 @@ export function KoreanAirResults() {
         </ul>
       </section>
       <section className="mt-2 bg-white px-4 py-4">
-        <h2 className="text-[17px] font-bold">관련 검색어</h2>
+        <h2 className="text-[17px] font-bold">Pencarian terkait</h2>
         <ul className="mt-2 flex flex-wrap gap-2 text-[13px] text-black/70">
-          {['대한항공 체크인', '대한항공 예약 조회', '대한항공 마일리지', '대한항공 고객센터'].map((t) => (
+          {['check-in Korean Air', 'cek pemesanan Korean Air', 'mil Korean Air', 'customer service Korean Air'].map((t) => (
             <li key={t} className="rounded-full bg-[#f1f3f5] px-3 py-1.5">
               {t}
             </li>

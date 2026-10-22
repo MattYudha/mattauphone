@@ -10,27 +10,27 @@ type Note = { id: string; title: string; date: string; body: string }
 const NOTES: Note[] = [
   {
     id: 'n1',
-    title: '나보고 뭐 어떡하라는 건지',
-    date: '오후 5:42',
-    body: '나보고 뭐 어떡하라는 건지\n\n나보고 뭐 어떡하라는 건지 모르겠다. 내가 어떤 식으로 더 엇나가야지 나를 봐줄 거냐고. 좋아하지도 않는 사람이랑 억지로 만나는 것도 이제 한계인 거 같은데. 김원필 너는 뭐가 그렇게 부족해서 너 좋아해주지도 않는 남자를 여태 좋아하고 있는 거야. 강영현은 어차피 너 안 좋아해. 너랑 안 만나고 싶어한다고. 무슨 부귀영화를 누리겠다고..........',
+    title: 'Terus aku harus gimana sih',
+    date: '17.42',
+    body: 'Terus aku harus gimana sih\n\nAku nggak ngerti lagi aku harus gimana. Aku harus melenceng kayak apa lagi biar dia mau ngelihat aku? Maksa ketemuan sama orang yang bahkan nggak aku suka juga kayaknya udah sampai batasnya. Kim Wonpil, kamu kurang apa sih sampai masih aja suka sama cowok yang bahkan nggak suka balik sama kamu. Kang Younghyun toh nggak suka sama kamu. Dia nggak mau sama kamu. Emangnya mau dapet apa sih dari semua ini..........',
   },
   {
     id: 'n2',
-    title: '가사 메모',
-    date: '어제',
-    body: '가사 메모\n\n괜찮다고 말하면\n정말 괜찮아질까\n\n아무렇지 않은 척\n오늘도 웃어 보였어\n\n→ 후렴 멜로디 다시 잡기',
+    title: 'Catatan lirik',
+    date: 'Kemarin',
+    body: 'Catatan lirik\n\nKalau aku bilang aku baik-baik saja\napa aku akan benar-benar baik-baik saja\n\nPura-pura tak terjadi apa-apa\nhari ini pun aku tetap tersenyum\n\n→ benerin lagi melodi reff',
   },
   {
     id: 'n3',
-    title: '할일',
-    date: '어제',
-    body: '할일\n박현성 속옷 다 버리기\n박현성이 사준 선물도 다 버리기\n카톡 문자 정리좀 해 김원필 ㅜㅜ',
+    title: 'To-do',
+    date: 'Kemarin',
+    body: 'To-do\nBuang semua celana dalam Park Hyunseong\nBuang juga semua hadiah dari Park Hyunseong\nBeresin chat KakaoTalk sama SMS dong Kim Wonpil ㅜㅜ',
   },
   {
     id: 'n5',
-    title: '보고 싶은 영화',
-    date: '2025. 10. 02.',
-    body: '보고 싶은 영화\n\n1. 비긴 어게인 (다시)\n2. 원스\n3. 어바웃 타임 (영현이형이랑 보고싶음)\n\n혼자 보러 가도 괜찮아',
+    title: 'Film yang pengin ditonton',
+    date: '02/10/25',
+    body: 'Film yang pengin ditonton\n\n1. Begin Again (lagi)\n2. Once\n3. About Time (pengin nonton bareng Younghyun hyung)\n\nNonton sendirian juga nggak apa-apa',
   },
 ]
 
@@ -52,10 +52,10 @@ function NoteList({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <>
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-        <h1 className="pt-10 text-[32px] font-bold tracking-tight">메모</h1>
+        <h1 className="pt-10 text-[32px] font-bold tracking-tight">Catatan</h1>
         <div className="mt-2 flex items-center gap-2 rounded-[10px] bg-black/[0.06] px-2.5 py-2 text-[16px] text-black/40" aria-hidden>
           <Search className="size-4" />
-          검색
+          Cari
         </div>
         <ul className="mt-5 overflow-hidden rounded-[12px] bg-white">
           {NOTES.map((n, i) => {
@@ -78,7 +78,7 @@ function NoteList({ onOpen }: { onOpen: (id: string) => void }) {
       </div>
       <div className="flex shrink-0 items-center justify-between px-5 py-2">
         <span className="w-6" />
-        <span className="text-[12px] text-black/60">{`${NOTES.length}개의 메모`}</span>
+        <span className="text-[12px] text-black/60">{`${NOTES.length} Catatan`}</span>
         <SquarePen className="size-6 text-[#e5a500]" aria-hidden />
       </div>
     </>
@@ -92,7 +92,7 @@ function NoteDetail({ note, onBack }: { note: Note; onBack: () => void }) {
       <div className="flex items-center px-2 py-2">
         <button type="button" onClick={onBack} className="flex items-center text-[17px] text-[#e5a500]">
           <ChevronLeft className="size-7" aria-hidden />
-          메모
+          Catatan
         </button>
       </div>
       <article className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-5 pb-6">

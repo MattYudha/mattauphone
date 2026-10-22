@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react'
+import { useIsAppActive } from './app-presence'
 
 type BackStack = { current: Array<() => void> }
 
@@ -12,24 +13,27 @@ export function BackNavProvider({ children }: { children: React.ReactNode }) {
   return <BackNavContext.Provider value={value}>{children}</BackNavContext.Provider>
 }
 
-/** 앱 내부 하위 화면(대화방, 상세 페이지 등)이 열려 있을 때 상단 뒤로가기 버튼이 처리할 동작을 등록한다. */
+/** Mendaftarkan aksi yang dijalankan tombol Kembali di atas saat sub-layar di dalam aplikasi (ruang chat, halaman detail, dll.) sedang terbuka. */
 export function useBackHandler(active: boolean, handler: () => void) {
   const stack = useContext(BackNavContext)
   const latest = useRef(handler)
+  // App yang hanya tampil sebagai pratinjau tidak boleh menangkap tombol Kembali.
+  const appActive = useIsAppActive()
+  const enabled = active && appActive
   useEffect(() => {
     latest.current = handler
   })
   useEffect(() => {
-    if (!active || !stack) return
+    if (!enabled || !stack) return
     const entry = () => latest.current()
     stack.current.push(entry)
     return () => {
       stack.current = stack.current.filter((e) => e !== entry)
     }
-  }, [active, stack])
+  }, [enabled, stack])
 }
 
-/** 등록된 가장 최근 하위 화면을 닫는다. 처리할 화면이 없으면 false. */
+/** Menutup sub-layar terdaftar yang paling baru. Mengembalikan false jika tidak ada layar yang perlu ditangani. */
 export function usePopBack() {
   const stack = useContext(BackNavContext)
   return useCallback(() => {

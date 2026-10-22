@@ -18,7 +18,7 @@ import { useStory } from '@/lib/story/store'
 
 type View = { kind: 'portal' } | { kind: 'search' } | { kind: 'preview'; query: string } | { kind: 'akbo' }
 
-const MENU = ['메일', '카페', '블로그', '쇼핑', '뉴스', '지도', '증권', '웹툰']
+const MENU = ['Email', 'Kafe', 'Blog', 'Belanja', 'Berita', 'Peta', 'Saham', 'Webtoon']
 
 export function SafariApp() {
   const [stack, setStack] = useState<View[]>([{ kind: 'portal' }])
@@ -28,7 +28,7 @@ export function SafariApp() {
   useBackHandler(stack.length > 1, back)
 
   const address =
-    view.kind === 'preview' ? `m.search.naver.com` : view.kind === 'akbo' ? '악보세계' : 'm.naver.com'
+    view.kind === 'preview' ? `m.search.naver.com` : view.kind === 'akbo' ? 'Akbo Segye' : 'm.naver.com'
 
   return (
     <div className="flex h-full flex-col bg-white text-black">
@@ -46,7 +46,7 @@ export function SafariApp() {
       <div className="shrink-0 border-t border-black/[0.06] bg-[#f9f9f9]/95 px-3 pb-0 pt-2 backdrop-blur">
         <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-[15px] shadow-[0_1px_6px_rgba(0,0,0,0.12)]">
           <span className="text-[13px] font-semibold" aria-hidden>
-            가가
+            AA
           </span>
           <span className="flex flex-1 items-center justify-center gap-1">
             <Lock className="size-3 text-black/50" aria-hidden />
@@ -54,8 +54,8 @@ export function SafariApp() {
           </span>
           <RotateCw className="size-4" aria-hidden />
         </div>
-        <nav aria-label="Safari 도구" className="flex items-center justify-between px-3 py-2 text-[#007aff]">
-          <button type="button" onClick={back} disabled={stack.length === 1} aria-label="뒤로" className="p-1 disabled:text-black/20">
+        <nav aria-label="Alat Safari" className="flex items-center justify-between px-3 py-2 text-[#007aff]">
+          <button type="button" onClick={back} disabled={stack.length === 1} aria-label="Kembali" className="p-1 disabled:text-black/20">
             <ChevronLeft className="size-6" />
           </button>
           <span aria-hidden className="p-1 text-black/20">
@@ -88,17 +88,17 @@ function NaverN({ className = 'size-7' }: { className?: string }) {
 }
 
 const MENU_COLORS: Record<string, string> = {
-  메일: '#03c75a',
-  카페: '#03c75a',
-  블로그: '#03c75a',
-  쇼핑: '#00b843',
-  뉴스: '#2d7cf6',
-  지도: '#00c4b4',
-  증권: '#f04f4f',
-  웹툰: '#00dc64',
+  Email: '#03c75a',
+  Kafe: '#03c75a',
+  Blog: '#03c75a',
+  Belanja: '#00b843',
+  Berita: '#2d7cf6',
+  Peta: '#00c4b4',
+  Saham: '#f04f4f',
+  Webtoon: '#00dc64',
 }
 
-const FEED_TABS = ['홈', '쇼핑', '뉴스', '경제', '엔터', '스포츠', '웹툰']
+const FEED_TABS = ['Beranda', 'Belanja', 'Berita', 'Ekonomi', 'Hiburan', 'Olahraga', 'Webtoon']
 
 function Portal({ onSearch }: { onSearch: () => void }) {
   return (
@@ -110,7 +110,7 @@ function Portal({ onSearch }: { onSearch: () => void }) {
           className="flex w-full items-center gap-2.5 rounded-[12px] border-[2px] border-[#03c75a] py-2 pl-2 pr-3 text-left shadow-[0_2px_8px_rgba(3,199,90,0.12)]"
         >
           <NaverN />
-          <span className="flex-1 text-[16px] text-black/35">검색어를 입력해 주세요.</span>
+          <span className="flex-1 text-[16px] text-black/35">Masukkan kata kunci pencarian.</span>
           <Search className="size-[22px] text-[#03c75a]" strokeWidth={2.4} aria-hidden />
         </button>
         <ul className="mt-5 grid grid-cols-4 gap-y-4 text-center text-[12px] text-[#404040]">
@@ -137,28 +137,28 @@ function Portal({ onSearch }: { onSearch: () => void }) {
         ))}
       </nav>
       <section className="mx-4 mt-4 rounded-[14px] border border-black/[0.06] px-4 py-4">
-        <p className="text-[13px] text-[#777]">서울시 성동구</p>
+        <p className="text-[13px] text-[#777]">Seongdong-gu, Seoul</p>
         <div className="mt-1 flex items-end justify-between">
           <p className="text-[32px] font-semibold leading-none tracking-tight">8°</p>
           <p className="text-right text-[13px] leading-snug text-[#555]">
-            맑음 · 어제보다 2° 낮아요
+            Cerah · 2° lebih rendah dari kemarin
             <br />
-            미세먼지 좋음 · 초미세먼지 보통
+            Debu halus baik · Debu ultrahalus sedang
           </p>
         </div>
       </section>
       <section className="mx-4 mt-3 overflow-hidden rounded-[14px] border border-black/[0.06]" aria-labelledby="portal-news">
-        <p className="px-4 pt-3 text-[13px] font-bold text-[#2d7cf6]">뉴스</p>
+        <p className="px-4 pt-3 text-[13px] font-bold text-[#2d7cf6]">Berita</p>
         <img
           src={withBasePath('/images/naver/concert-news.png')}
-          alt="콘서트장을 가득 채운 관객과 무대 조명"
+          alt="Penonton memenuhi venue konser dan lampu panggung"
           className="mt-2 aspect-[16/9] w-full object-cover"
         />
         <div className="px-4 py-3">
           <h2 id="portal-news" className="text-[16px] font-bold leading-snug">
-            {"한국 대표 밴드 '데이식스', 이번 콘서트도 전석 매진..."}
+            {"Band andalan Korea 'DAY6', konser kali ini juga ludes terjual..."}
           </h2>
-          <p className="mt-1 text-[12.5px] text-black/45">스타뉴스 · 32분 전</p>
+          <p className="mt-1 text-[12.5px] text-black/45">Star News · 32 menit lalu</p>
         </div>
       </section>
     </div>
@@ -182,7 +182,7 @@ function SearchPanel({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (
         }}
       >
         <label className="flex flex-1 items-center gap-2 rounded-full border-2 border-[#03c75a] px-3 py-2">
-          <span className="sr-only">검색어</span>
+          <span className="sr-only">Kata kunci</span>
           <input
             ref={inputRef}
             value={query}
@@ -191,20 +191,20 @@ function SearchPanel({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (
               if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault()
             }}
             enterKeyHint="search"
-            placeholder="검색어를 입력해 주세요."
+            placeholder="Masukkan kata kunci pencarian."
             className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-black/30"
           />
           {query && (
-            <button type="button" onClick={() => setQuery('')} aria-label="검색어 지우기">
+            <button type="button" onClick={() => setQuery('')} aria-label="Hapus kata kunci">
               <X className="size-4 text-black/40" />
             </button>
           )}
         </label>
         <button type="button" onClick={onCancel} className="text-[15px] text-black/60">
-          취소
+          Batal
         </button>
       </form>
-      <p className="px-4 pb-1 pt-4 text-[13px] font-semibold text-black/50">최근 검색어</p>
+      <p className="px-4 pb-1 pt-4 text-[13px] font-semibold text-black/50">Pencarian terkini</p>
       <ul>
         {recentSearches.map((q) => (
           <li key={q}>
@@ -223,9 +223,50 @@ function SearchPanel({ onCancel, onSubmit }: { onCancel: () => void; onSubmit: (
   )
 }
 
+/** Alias kueri per halaman hasil. Dicocokkan dalam bentuk ternormalisasi (huruf kecil, tanpa spasi).
+ *  Alias Korea asli dipertahankan sebagai cadangan. */
+const KIN_QUERIES = [
+  'cara blokir cowok yang ngechat nyebelin banget',
+  'cara blokir cowok yang ngechat nyebelin',
+  'cara blokir cowok nyebelin',
+  'cara blokir cowok',
+  '개짜증나게 연락하는 남자 차단법',
+]
+const DEPRESSION_QUERIES = [
+  'kalau tiba-tiba ngerasa depresi',
+  'kalau tiba-tiba depresi',
+  'tiba-tiba ngerasa depresi',
+  'tiba-tiba depresi',
+  'tiba tiba depresi',
+  '갑자기 우울할때',
+]
+const FLIGHT_QUERIES = [
+  'lama penerbangan kanada ke korea',
+  'lama penerbangan canada ke korea',
+  'penerbangan kanada ke korea',
+  'kanada ke korea berapa jam',
+  '캐나다에서 한국 비행시간',
+]
+const ORIGINAL_WORK_QUERIES = ['karya asli latar cerita', 'latar cerita karya asli', 'karya asli', '배경 원작']
+const HANSUNG_QUERIES = [
+  'jam buka hansung sushi gangnam',
+  'jam buka hansung sushi',
+  'hansung sushi gangnam',
+  'hansung sushi',
+  '강남 한성초밥 영업시간',
+  '한성초밥 영업시간',
+  '강남 한성초밥',
+]
+const CHATGPT_QUERIES = ['chatgpt', 'chat gpt', 'cetgpt', '챗지피티', '쳇지피티', '챗gpt']
+const AKBO_QUERIES = ['Akbo Segye', 'akbo', '악보세계']
+const KOREANAIR_QUERIES = ['Korean Air', '대한항공']
+
+const normalizeQuery = (q: string) => q.replace(/\s+/g, '').toLowerCase()
+const matches = (normalized: string, aliases: string[]) => aliases.some((a) => normalizeQuery(a) === normalized)
+
 function Preview({ query, onSearch, onOpenAkbo }: { query: string; onSearch: () => void; onOpenAkbo: () => void }) {
   const { openApp } = useStory()
-  const normalized = query.replace(/\s+/g, '').toLowerCase()
+  const normalized = normalizeQuery(query)
   return (
     <div className="pb-6">
       <div className="flex items-center gap-2 border-b border-black/10 px-3 py-2">
@@ -240,26 +281,26 @@ function Preview({ query, onSearch, onOpenAkbo }: { query: string; onSearch: () 
         </button>
       </div>
       <div className="flex gap-4 border-b border-black/10 px-4 py-2 text-[14px] text-black/40" aria-hidden>
-        <span className="border-b-2 border-black pb-1 font-semibold text-black">통합</span>
-        <span>이미지</span>
+        <span className="border-b-2 border-black pb-1 font-semibold text-black">Semua</span>
+        <span>Gambar</span>
         <span>VIEW</span>
-        <span>지식iN</span>
+        <span>KnowledgeiN</span>
       </div>
-      {query === '개짜증나게 연락하는 남자 차단법' ? (
+      {matches(normalized, KIN_QUERIES) ? (
         <KinPost />
-      ) : query === '갑자기 우울할때' ? (
+      ) : matches(normalized, DEPRESSION_QUERIES) ? (
         <DepressionResults />
-      ) : query === '캐나다에서 한국 비행시간' ? (
+      ) : matches(normalized, FLIGHT_QUERIES) ? (
         <FlightResults />
-      ) : query === '배경 원작' ? (
+      ) : matches(normalized, ORIGINAL_WORK_QUERIES) ? (
         <OriginalWorkResults />
-      ) : normalized === '강남한성초밥영업시간' || normalized === '한성초밥영업시간' || normalized === '강남한성초밥' ? (
+      ) : matches(normalized, HANSUNG_QUERIES) ? (
         <HansungResults />
-      ) : ['챗지피티', '쳇지피티', 'chatgpt', '챗gpt'].includes(normalized) ? (
+      ) : matches(normalized, CHATGPT_QUERIES) ? (
         <ChatGptResults onOpenAnyAi={() => openApp('anyai')} />
-      ) : normalized === '악보세계' ? (
+      ) : matches(normalized, AKBO_QUERIES) ? (
         <AkboResults onOpenSite={onOpenAkbo} />
-      ) : normalized === '대한항공' ? (
+      ) : matches(normalized, KOREANAIR_QUERIES) ? (
         <KoreanAirResults />
       ) : (
         <NoResults query={query} />
@@ -272,12 +313,12 @@ function NoResults({ query }: { query: string }) {
   return (
       <div className="px-5 pt-10">
         <p className="text-[16px] font-semibold leading-snug">
-          <span className="text-[#03c75a]">{`'${query}'`}</span>에 대한 검색결과가 없습니다.
+          Tidak ada hasil pencarian untuk <span className="text-[#03c75a]">{`'${query}'`}</span>.
         </p>
         <ul className="mt-4 list-disc space-y-1.5 pl-5 text-[13.5px] text-[#666]">
-          <li>단어의 철자가 정확한지 확인해 보세요.</li>
-          <li>검색어의 단어 수를 줄이거나, 보다 일반적인 검색어로 다시 검색해 보세요.</li>
-          <li>두 단어 이상의 검색어인 경우, 띄어쓰기를 확인해 보세요.</li>
+          <li>Pastikan ejaan kata yang kamu masukkan sudah benar.</li>
+          <li>Coba kurangi jumlah kata, atau cari lagi dengan kata kunci yang lebih umum.</li>
+          <li>Kalau kata kuncinya terdiri dari dua kata atau lebih, periksa lagi spasinya.</li>
         </ul>
       </div>
   )

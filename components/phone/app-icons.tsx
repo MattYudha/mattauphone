@@ -67,13 +67,13 @@ export function AppGlyph({ kind }: { kind: IconKind }) {
     case 'phone':
       return (
         <span className={base} style={{ background: 'linear-gradient(#5ff777, #0abc3a)' }}>
-          <Phone className="size-[50%] fill-white text-white" strokeWidth={0} />
+          <Phone fill="currentColor" className="size-[50%] fill-white text-white" strokeWidth={0} />
         </span>
       )
     case 'messages':
       return (
         <span className={base} style={{ background: 'linear-gradient(#5ff777, #0abc3a)' }}>
-          <MessageCircle className="size-[62%] fill-white text-white" strokeWidth={0} />
+          <MessageCircle fill="currentColor" className="size-[62%] fill-white text-white" strokeWidth={0} />
         </span>
       )
     case 'camera':
@@ -185,7 +185,7 @@ export function AppGlyph({ kind }: { kind: IconKind }) {
     case 'calendar':
       return (
         <span className={`${base} flex-col bg-white`}>
-          <span className="mt-[8%] text-[10px] font-semibold leading-none text-[#ff3b30]">수요일</span>
+          <span className="mt-[8%] text-[10px] font-semibold leading-none text-[#ff3b30]">Rabu</span>
           <span className="text-[30px] font-light leading-none tracking-tight text-black">19</span>
         </span>
       )

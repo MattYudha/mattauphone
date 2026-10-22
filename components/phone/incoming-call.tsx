@@ -95,19 +95,19 @@ export function IncomingCall() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={state === 'ringing' ? `${caller.name}에게서 걸려온 전화` : `${caller.name}와 통화 중`}
+      aria-label={state === 'ringing' ? `Panggilan masuk dari ${caller.name}` : `Sedang menelepon ${caller.name}`}
       className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden bg-[#1c1c1e] text-white"
     >
 
       <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center px-8 pb-4 pt-10">
-        <p className="text-[15px] text-white/70">{state === 'ringing' ? '휴대전화' : formatDuration(seconds)}</p>
+        <p className="text-[15px] text-white/70">{state === 'ringing' ? 'seluler' : formatDuration(seconds)}</p>
         <h2 className="mt-2 text-balance text-center text-[30px] font-normal tracking-tight">{caller.name}</h2>
         {state === 'ringing' && (
           <div className="animate-ring-buzz relative mt-10 flex h-32 w-32 shrink-0 items-center justify-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-white/15" />
             <img
               src={caller.photo || withBasePath('/placeholder.svg')}
-              alt={`${caller.name} 프로필 사진`}
+              alt={`Foto profil ${caller.name}`}
               className="relative h-32 w-32 rounded-full object-cover ring-2 ring-white/30"
             />
           </div>
@@ -116,36 +116,36 @@ export function IncomingCall() {
 
       {state === 'ringing' ? (
         <div className="relative flex shrink-0 items-end justify-between px-14 pb-14">
-          <CallButton label="거절" onClick={decline} className="bg-[#ff3b30]">
+          <CallButton label="Tolak" onClick={decline} className="bg-[#ff3b30]">
             <PhoneOff className="h-8 w-8" aria-hidden="true" />
           </CallButton>
-          <CallButton label="응답" onClick={answer} className="animate-bounce bg-[#34c759]">
+          <CallButton label="Terima" onClick={answer} className="animate-bounce bg-[#34c759]">
             <Phone className="h-8 w-8" aria-hidden="true" />
           </CallButton>
         </div>
       ) : (
         <div className="relative flex shrink-0 flex-col items-center gap-8 px-10 pb-10">
           <div className="grid w-full grid-cols-3 gap-x-6 gap-y-5">
-            <Control text="소리 끔" active={muted} onClick={() => setMuted((v) => !v)}>
+            <Control text="Bisu" active={muted} onClick={() => setMuted((v) => !v)}>
               {muted ? <MicOff className="h-7 w-7" aria-hidden="true" /> : <Mic className="h-7 w-7" aria-hidden="true" />}
             </Control>
-            <Control text="키패드">
+            <Control text="Papan Angka">
               <Grid3x3 className="h-7 w-7" aria-hidden="true" />
             </Control>
-            <Control text="스피커" active={speaker} onClick={() => setSpeaker((v) => !v)}>
+            <Control text="Speaker" active={speaker} onClick={() => setSpeaker((v) => !v)}>
               <Volume2 className="h-7 w-7" aria-hidden="true" />
             </Control>
-            <Control text="통화 추가">
+            <Control text="Tambah Panggilan">
               <Plus className="h-7 w-7" aria-hidden="true" />
             </Control>
             <Control text="FaceTime">
               <Video className="h-7 w-7" aria-hidden="true" />
             </Control>
-            <Control text="연락처">
+            <Control text="Kontak">
               <UserRound className="h-7 w-7" aria-hidden="true" />
             </Control>
           </div>
-          <CallButton label="통화 종료" onClick={endCall} className="bg-[#ff3b30]" hideText>
+          <CallButton label="Akhiri" onClick={endCall} className="bg-[#ff3b30]" hideText>
             <PhoneOff className="h-8 w-8" aria-hidden="true" />
           </CallButton>
         </div>

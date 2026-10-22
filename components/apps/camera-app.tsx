@@ -4,14 +4,18 @@ import { useEffect, useRef } from 'react'
 import { ChevronUp, RefreshCcw, Zap, ZapOff } from 'lucide-react'
 import { useStory } from '@/lib/story/store'
 import { withBasePath } from '@/lib/base-path'
+import { useIsAppActive } from '@/lib/story/app-presence'
 
-const MODES = ['타임랩스', '슬로모', '비디오', '사진', '인물', '파노라마']
+const MODES = ['Selang Waktu', 'Lambat', 'Video', 'Foto', 'Potret', 'Pano']
 
 export function CameraApp() {
   const { goHome, markCameraUsed } = useStory()
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  const active = useIsAppActive()
+
   useEffect(() => {
+    if (!active) return
     markCameraUsed()
     const v = videoRef.current
     if (!v) return
@@ -19,9 +23,9 @@ export function CameraApp() {
       v.muted = true
       v.play().catch(() => {})
     })
-    // markCameraUsed is stable in behaviour (idempotent); run once on mount.
+    // markCameraUsed is stable in behaviour (idempotent); run once the camera is actually in use.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [active])
 
   return (
     <div className="flex h-full flex-col bg-black text-white">
@@ -47,7 +51,7 @@ export function CameraApp() {
             if (v.duration && v.currentTime >= v.duration - 0.2) goHome()
           }}
           className="absolute inset-0 size-full object-cover"
-          aria-label="카메라 화면"
+          aria-label="Layar kamera"
         />
         <div className="absolute inset-x-0 bottom-3 flex justify-center gap-2" aria-hidden>
           {['.5', '1×', '2', '3'].map((z) => (
@@ -68,7 +72,7 @@ export function CameraApp() {
       <div className="shrink-0 pb-8 pt-3">
         <ul className="flex justify-center gap-4 text-[13px] font-medium tracking-wide" aria-hidden>
           {MODES.map((m) => (
-            <li key={m} className={m === '사진' ? 'text-[#ffd60a]' : 'text-white/90'}>
+            <li key={m} className={m === 'Foto' ? 'text-[#ffd60a]' : 'text-white/90'}>
               {m}
             </li>
           ))}
@@ -78,7 +82,7 @@ export function CameraApp() {
           <button
             type="button"
             onClick={goHome}
-            aria-label="카메라 닫기"
+            aria-label="Tutup kamera"
             className="flex size-[74px] items-center justify-center rounded-full border-[4px] border-white"
           >
             <span className="size-[60px] rounded-full bg-white active:scale-90 transition-transform" />

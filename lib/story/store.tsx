@@ -22,7 +22,7 @@ import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from 
 import { smsThreads, type SmsMessage, type SmsThread } from './sms'
 import { NOW_ISO, toTime } from './time'
 
-/** 영현이 사용자에게 확인을 요구하는 메시지. 채팅방 안에서 이 메시지를 본 뒤에만 답장할 수 있다. */
+/** Pesan Younghyun yang menuntut jawaban dari pengguna. Baru bisa dibalas setelah pesan ini terlihat di dalam ruang chat. */
 const YH_GATE_MESSAGE_ID = AFTER_CALL_ROOM_MESSAGES[AFTER_CALL_ROOM_MESSAGES.length - 1].id
 const AUTO_READ_DELAY_MS = 700
 const AUTO_REPLY_FIRST_MS = 1700
@@ -51,27 +51,37 @@ export type AppId =
   | 'clock'
   | 'instagram'
   | 'catchtable'
-export type Screen = { kind: 'lock' } | { kind: 'passcode' } | { kind: 'home' } | { kind: 'app'; app: AppId }
+export type Screen =
+  | { kind: 'lock' }
+  | { kind: 'passcode' }
+  | { kind: 'home' }
+  | { kind: 'app'; app: AppId }
+  | { kind: 'switcher' }
+
+const APP_ID_LIST: AppId[] = [
+  'kakao', 'messages', 'phone', 'photos', 'settings', 'safari', 'anyai',
+  'notes', 'camera', 'voicememos', 'calendar', 'clock', 'instagram', 'catchtable',
+]
 
 type StoryProgress = {
   yhArrived: boolean
   jyArrived: boolean
-  /** 영현의 전화를 받은 뒤 직접 끊었는지. 이후 시각이 18:58로 바뀐다. */
+  /** Apakah pengguna menerima telepon Younghyun lalu menutupnya sendiri. Setelah itu jam berubah jadi 18.58. */
   yhCallEnded: boolean
   addedMessages: KakaoMessage[]
   readMessageIds: string[]
-  /** 처음부터 읽지 않음 상태였던 방 중 사용자가 열어본 방 */
+  /** Ruang yang sejak awal berstatus belum dibaca dan sudah dibuka pengguna */
   readRooms: KakaoRoomId[]
   cameraUsed: boolean
-  /** 사용자가 대화방을 열어 읽음 처리한 문자 id */
+  /** id SMS yang sudah ditandai dibaca karena pengguna membuka utasnya */
   readSmsIds: string[]
-  /** 사용자가 보낸 메시지 중 상대가 읽은 id */
+  /** id pesan kiriman pengguna yang sudah dibaca lawan bicara */
   readByThemIds: string[]
-  /** 방별로 고정된 자동 답장 분기. 한 번 정해지면 바뀌지 않는다. */
+  /** Cabang balasan otomatis yang dikunci per ruang. Sekali ditentukan, tidak berubah. */
   autoReplies: Partial<Record<AutoReplyRoom, AutoReplyState>>
-  /** 영현 채팅방에서 "너 우준영 만난 건 아니지"를 실제로 확인했는지 */
+  /** Apakah "Kamu nggak ketemu Woo Junyoung, kan?" benar-benar sudah terlihat di ruang chat Younghyun */
   yhQuestionSeen: boolean
-  /** 다음에 보낼(또는 도착할) 메시지의 순서 번호 */
+  /** Nomor urut pesan berikutnya yang dikirim (atau diterima) */
   nextSeq: number
 }
 
@@ -86,7 +96,20 @@ export type Banner = {
   time: string
 }
 
-const STORAGE_KEY = 'wonpil-phone-story-v1'
+const STORAGE_KEY = 'wonpil-phone-story-v2'
+/** Daftar app terbaru (App Switcher) disimpan terpisah dari progres cerita, hanya untuk sesi ini. */
+const RECENTS_KEY = 'wonpil-phone-recents-v1'
+
+function loadRecents(): AppId[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const parsed: unknown = JSON.parse(window.sessionStorage.getItem(RECENTS_KEY) ?? '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((a): a is AppId => APP_ID_LIST.includes(a as AppId)).filter((a, i, all) => all.indexOf(a) === i)
+  } catch {
+    return []
+  }
+}
 const INITIAL: StoryProgress = {
   yhArrived: false,
   jyArrived: false,
@@ -131,6 +154,10 @@ type StoryContext = {
   lock: () => void
   goHome: () => void
   openApp: (app: AppId) => void
+  /** App yang pernah dibuka, terbaru di depan */
+  recentApps: AppId[]
+  openSwitcher: () => void
+  closeRecentApp: (app: AppId) => void
   kakaoRoomId: KakaoRoomId | null
   openKakaoRoom: (id: KakaoRoomId) => void
   closeKakaoRoom: () => void
@@ -139,11 +166,11 @@ type StoryContext = {
   totalUnread: number
   markRoomRead: (id: KakaoRoomId) => void
   onYhRoomShown: () => void
-  /** 채팅방 화면에 실제로 표시된 상대 메시지 id를 알린다 */
+  /** Melaporkan id pesan lawan bicara yang benar-benar tampil di layar ruang chat */
   onRoomMessagesSeen: (id: KakaoRoomId, messageIds: string[]) => void
   canSendIn: (id: KakaoRoomId) => boolean
   sendKakaoMessage: (id: KakaoRoomId, text: string) => void
-  /** 사용자가 보낸 메시지 중 상대가 아직 읽지 않은 것 */
+  /** Pesan kiriman pengguna yang belum dibaca lawan bicara */
   isUnreadByThem: (message: KakaoMessage) => boolean
   clock: string
   yhCallEnded: boolean
@@ -157,7 +184,7 @@ type StoryContext = {
   smsThreadId: string | null
   openSmsThread: (id: string) => void
   closeSmsThread: () => void
-  /** 잠금화면 알림에서 진입: 암호 입력 후 해당 문자 대화로 이동 */
+  /** Masuk dari notifikasi layar kunci: setelah kode sandi, pindah ke utas SMS tersebut */
   openSmsFromLock: (id: string) => void
   markSmsThreadRead: (id: string) => void
   smsUnreadByThread: Record<string, number>
@@ -169,6 +196,7 @@ const Ctx = createContext<StoryContext | null>(null)
 
 export function StoryProvider({ children }: { children: React.ReactNode }) {
   const [screen, setScreen] = useState<Screen>({ kind: 'lock' })
+  const [recentApps, setRecentApps] = useState<AppId[]>(loadRecents)
   const [kakaoRoomId, setKakaoRoomId] = useState<KakaoRoomId | null>(null)
   const [progress, setProgress] = useState<StoryProgress>(loadProgress)
   const [banner, setBanner] = useState<Banner | null>(null)
@@ -188,6 +216,20 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       // Storage can be unavailable (e.g. privacy mode); progress then lives in memory only.
     }
   }, [progress])
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(RECENTS_KEY, JSON.stringify(recentApps))
+    } catch {
+      // Sama seperti progres: tanpa storage, daftar app terbaru hanya hidup di memori.
+    }
+  }, [recentApps])
+
+  /** Menampilkan app di layar penuh sekaligus memindahkannya ke urutan terdepan daftar app terbaru. */
+  const showApp = useCallback((app: AppId) => {
+    setRecentApps((list) => [app, ...list.filter((a) => a !== app)])
+    setScreen({ kind: 'app', app })
+  }, [])
 
   useEffect(() => {
     window.addEventListener('pointerdown', unlockSounds, { once: true })
@@ -217,10 +259,10 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     progressRef.current = next
     setProgress(next)
     playSound('kakao')
-    setBanner({ key: 'yh', roomId: 'yh', sender: contacts.yh.name, lines: ['퇴근 안했지?'], time: '18:57' })
+    setBanner({ key: 'yh', roomId: 'yh', sender: contacts.yh.name, lines: ['Belum pulang kerja, kan?'], time: '18.57' })
   }, [])
 
-  /** 메시지를 하나씩 도착시킨다. 이미 도착한 메시지는 건너뛰어 새로고침 후 이어 받을 때도 중복되지 않는다. */
+  /** Mengirim pesan satu per satu. Pesan yang sudah tiba dilewati, jadi tidak dobel saat dilanjutkan setelah refresh. */
   const deliverSequentially = useCallback((messages: KakaoMessage[], gapMs: number, firstDelayMs: number) => {
     const pending = messages.filter((m) => !progressRef.current.addedMessages.some((x) => x.id === m.id))
     pending.forEach((message, i) => {
@@ -240,7 +282,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
               roomId: message.roomId,
               sender: senderName(message.roomId),
               lines: [message.content.text],
-              time: progressRef.current.yhCallEnded ? '18:58' : '18:57',
+              time: progressRef.current.yhCallEnded ? '18.58' : '18.57',
             })
           }
         }, firstDelayMs + i * gapMs),
@@ -276,8 +318,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       key: 'jy',
       roomId: 'jy',
       sender: contacts.jy.name,
-      lines: ['원필씨', '나 학원 주차장 도착했어요~'],
-      time: '18:57',
+      lines: ['Wonpil-ssi', 'Aku udah sampai di parkiran akademi~'],
+      time: '18.57',
     })
   }, [])
 
@@ -286,12 +328,12 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     pendingSmsThread.current = null
     if (target) {
       setSmsThreadId(target)
-      setScreen({ kind: 'app', app: 'messages' })
+      showApp('messages')
     } else {
       setScreen({ kind: 'home' })
     }
     if (!progressRef.current.yhArrived) schedule(triggerYh, 900)
-  }, [triggerYh])
+  }, [triggerYh, showApp])
 
   const onYhRoomShown = useCallback(() => {
     const p = progressRef.current
@@ -337,7 +379,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     commit({ ...p, readByThemIds: [...p.readByThemIds, messageId] })
   }, [])
 
-  /** 고정된 분기의 답장 중 아직 도착하지 않은 것만 순서대로 보낸다. 새로고침·재진입 시에도 중복 없이 이어진다. */
+  /** Mengirim berurutan hanya balasan cabang terkunci yang belum tiba. Tetap berlanjut tanpa dobel setelah refresh atau masuk ulang. */
   const deliverAutoReplies = useCallback((room: AutoReplyRoom, firstDelayMs: number) => {
     const state = progressRef.current.autoReplies[room]
     if (!state) return
@@ -368,7 +410,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
               roomId: room,
               sender: senderName(room),
               lines: [reply.text],
-              time: p.yhCallEnded ? '18:58' : '18:57',
+              time: p.yhCallEnded ? '18.58' : '18.57',
             })
           }
         }, firstDelayMs + i * AUTO_REPLY_GAP_MS),
@@ -412,7 +454,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
         next = { ...next, autoReplies: { ...next.autoReplies, [room]: { branch, triggerId: message.id } } }
       }
       commit(next)
-      // 조건이 확인된 메시지만 읽는다. 미분류 및 분기 확정 후 메시지는 읽지 않는다.
+      // Hanya pesan yang cocok dengan syarat yang dibaca. Pesan tak terklasifikasi dan pesan setelah cabang terkunci tidak dibaca.
       if (room && branch) {
         schedule(() => markReadByThem(message.id), AUTO_READ_DELAY_MS)
       }
@@ -486,11 +528,14 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       setScreen({ kind: 'lock' })
     },
     goHome: () => setScreen({ kind: 'home' }),
-    openApp: (app) => setScreen({ kind: 'app', app }),
+    openApp: showApp,
+    recentApps,
+    openSwitcher: () => setScreen({ kind: 'switcher' }),
+    closeRecentApp: (app) => setRecentApps((list) => list.filter((a) => a !== app)),
     kakaoRoomId,
     openKakaoRoom: (id) => {
       setKakaoRoomId(id)
-      setScreen({ kind: 'app', app: 'kakao' })
+      showApp('kakao')
     },
     closeKakaoRoom: () => setKakaoRoomId(null),
     rooms,
@@ -502,7 +547,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     canSendIn: (id) => canSend(id, progress),
     sendKakaoMessage,
     isUnreadByThem: (m) => m.from === 'me' && m.id.startsWith('sent-') && !progress.readByThemIds.includes(m.id),
-    clock: progress.yhCallEnded ? '18:58' : '18:57',
+    clock: progress.yhCallEnded ? '18.58' : '18.57',
     yhCallEnded: progress.yhCallEnded,
     endYhCall,
     banner,
@@ -510,7 +555,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     openBanner: (b) => {
       setBanner(null)
       setKakaoRoomId(b.roomId)
-      setScreen({ kind: 'app', app: 'kakao' })
+      showApp('kakao')
     },
     resetStory: () => {
       timers.current.forEach((t) => window.clearTimeout(t))
@@ -521,6 +566,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       setKakaoRoomId(null)
       setSmsThreadId(null)
       pendingSmsThread.current = null
+      setRecentApps([])
       setScreen({ kind: 'lock' })
     },
     cameraUsed: progress.cameraUsed,
@@ -533,7 +579,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     smsThreadId,
     openSmsThread: (id) => {
       setSmsThreadId(id)
-      setScreen({ kind: 'app', app: 'messages' })
+      showApp('messages')
     },
     closeSmsThread: () => setSmsThreadId(null),
     openSmsFromLock: (id) => {

@@ -5,7 +5,7 @@ export function Sticker({ kind }: { kind: 'pout' | 'teary' }) {
   return (
     <Image
       src={withBasePath('/images/stickers/bunny-cry.png')}
-      alt={kind === 'pout' ? '우는 토끼 이모티콘' : '눈물 흘리는 토끼 이모티콘'}
+      alt={kind === 'pout' ? 'Emotikon kelinci menangis' : 'Emotikon kelinci berlinang air mata'}
       width={112}
       height={112}
       className="size-28 select-none object-contain"

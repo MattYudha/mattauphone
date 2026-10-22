@@ -26,9 +26,9 @@ type Tab = 'friends' | 'chats'
 
 export function previewText(m: KakaoMessage) {
   if (m.content.type === 'text') return m.content.text.replace(/\n+/g, ' ')
-  if (m.content.type === 'sticker') return '이모티콘을 보냈습니다.'
+  if (m.content.type === 'sticker') return 'Mengirim emotikon.'
   if (m.content.type === 'card') return m.content.card.title
-  return '위치를 공유했습니다.'
+  return 'Membagikan lokasi.'
 }
 
 const HEADER_ICONS: Record<Tab, LucideIcon[]> = {
@@ -46,7 +46,7 @@ export function KakaoApp() {
     <AppShell
       header={
         <header className="flex h-[52px] shrink-0 items-center justify-between pl-5 pr-3">
-          <h2 className="text-[22px] font-bold tracking-tight">{tab === 'chats' ? '채팅' : '친구'}</h2>
+          <h2 className="text-[22px] font-bold tracking-tight">{tab === 'chats' ? 'Chat' : 'Teman'}</h2>
           <span className="flex items-center gap-4 pr-1" aria-hidden>
             {HEADER_ICONS[tab].map((Icon, i) => (
               <Icon key={i} className="size-[23px]" strokeWidth={1.7} />
@@ -64,20 +64,20 @@ export function KakaoApp() {
 function KakaoTabs({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
   const { totalUnread } = useStory()
   const items: { id: Tab | null; label: string; Icon: LucideIcon }[] = [
-    { id: 'friends', label: '친구', Icon: User },
-    { id: 'chats', label: '채팅', Icon: MessageCircle },
-    { id: null, label: '지금', Icon: Sparkles },
-    { id: null, label: '쇼핑', Icon: ShoppingBag },
-    { id: null, label: '더보기', Icon: Ellipsis },
+    { id: 'friends', label: 'Teman', Icon: User },
+    { id: 'chats', label: 'Chat', Icon: MessageCircle },
+    { id: null, label: 'Sekarang', Icon: Sparkles },
+    { id: null, label: 'Belanja', Icon: ShoppingBag },
+    { id: null, label: 'Lainnya', Icon: Ellipsis },
   ]
   return (
-    <nav aria-label="카카오톡 탭" className="grid shrink-0 grid-cols-5 border-t border-black/[0.06] bg-white pt-1.5">
+    <nav aria-label="Tab KakaoTalk" className="grid shrink-0 grid-cols-5 border-t border-black/[0.06] bg-white pt-1.5">
       {items.map(({ id, label, Icon }) => {
         const active = id === tab
         const inner = (
           <>
             <span className="relative">
-              <Icon className={cn('size-[26px]', active && 'fill-black')} strokeWidth={active ? 1.6 : 1.5} aria-hidden />
+              <Icon fill={active ? 'currentColor' : 'none'} className={cn('size-[26px]', active && 'fill-black')} strokeWidth={active ? 1.6 : 1.5} aria-hidden />
               {id === 'chats' && totalUnread > 0 && (
                 <span className="absolute -right-3 -top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#ff5b33] px-1 text-[10px] font-bold text-white">
                   {totalUnread}
@@ -131,7 +131,7 @@ function ChatList() {
                 <span className="text-[11.5px] text-[#a0a0a0]">{formatListDate(last.at)}</span>
                 {unread > 0 && (
                   <span className="flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-[#ff5b33] px-1.5 text-[11.5px] font-bold text-white">
-                    <span className="sr-only">읽지 않은 메시지 </span>
+                    <span className="sr-only">Pesan belum dibaca </span>
                     {unread}
                   </span>
                 )}
@@ -149,14 +149,14 @@ function FriendList() {
   return (
     <div className="pb-4">
       <div className="flex items-center gap-3.5 px-4 py-2.5">
-        <Avatar initial="원" color="#9aa3ad" size={60} shape="squircle" src={OWNER.photo} />
+        <Avatar initial="W" color="#9aa3ad" size={60} shape="squircle" src={OWNER.photo} />
         <div className="min-w-0">
           <p className="text-[17px] font-semibold">{OWNER.friendListName}</p>
           <p className="mt-0.5 truncate text-[13px] text-[#8a8a8a]">{OWNER.status}</p>
         </div>
       </div>
       <div className="mx-4 my-2 border-t border-black/[0.06]" />
-      <p className="px-4 pb-1.5 pt-1 text-[12.5px] text-[#8a8a8a]">친구 {kakaoFriendOrder.length}</p>
+      <p className="px-4 pb-1.5 pt-1 text-[12.5px] text-[#8a8a8a]">Teman {kakaoFriendOrder.length}</p>
       <ul>
         {kakaoFriendOrder.map((id) => {
           const c = contacts[id]

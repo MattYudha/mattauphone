@@ -86,46 +86,46 @@ function OutgoingCallScreen({ contactId, state }: { contactId: ContactId; state:
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={state === 'dialing' ? `${contact.name}에게 전화 거는 중` : `${contact.name}와 통화 중`}
+      aria-label={state === 'dialing' ? `Memanggil ${contact.name}` : `Sedang menelepon ${contact.name}`}
       className="animate-screen-in absolute inset-0 z-50 flex flex-col overflow-hidden bg-[#1c1c1e] text-white"
     >
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-8 pb-4 pt-10">
         <img
           src={contact.photo || withBasePath('/placeholder.svg')}
-          alt={`${contact.name} 프로필 사진`}
+          alt={`Foto profil ${contact.name}`}
           className="h-24 w-24 shrink-0 rounded-full object-cover ring-2 ring-white/30"
         />
         <h2 className="mt-3 text-balance text-center text-[30px] font-normal tracking-tight">{contact.name}</h2>
         <p className="mt-1 text-[15px] text-white/70" aria-live="polite">
-          {state === 'dialing' ? '전화 거는 중...' : formatDuration(seconds)}
+          {state === 'dialing' ? 'Memanggil...' : formatDuration(seconds)}
         </p>
       </div>
 
       <div className="flex shrink-0 flex-col items-center gap-8 px-10 pb-10">
         <div className="grid w-full grid-cols-3 gap-x-6 gap-y-5">
-          <Control text="소리 끔" active={muted} onClick={() => setMuted((v) => !v)}>
+          <Control text="Bisu" active={muted} onClick={() => setMuted((v) => !v)}>
             {muted ? <MicOff className="h-7 w-7" aria-hidden="true" /> : <Mic className="h-7 w-7" aria-hidden="true" />}
           </Control>
-          <Control text="키패드">
+          <Control text="Papan Angka">
             <Grid3x3 className="h-7 w-7" aria-hidden="true" />
           </Control>
-          <Control text="스피커" active={speaker} onClick={() => setSpeaker((v) => !v)}>
+          <Control text="Speaker" active={speaker} onClick={() => setSpeaker((v) => !v)}>
             <Volume2 className="h-7 w-7" aria-hidden="true" />
           </Control>
-          <Control text="통화 추가">
+          <Control text="Tambah Panggilan">
             <Plus className="h-7 w-7" aria-hidden="true" />
           </Control>
           <Control text="FaceTime">
             <Video className="h-7 w-7" aria-hidden="true" />
           </Control>
-          <Control text="연락처">
+          <Control text="Kontak">
             <UserRound className="h-7 w-7" aria-hidden="true" />
           </Control>
         </div>
         <button
           type="button"
           onClick={hangUp}
-          aria-label="통화 종료"
+          aria-label="Akhiri"
           className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#ff3b30] shadow-lg active:opacity-80"
         >
           <PhoneOff className="h-8 w-8" aria-hidden="true" />

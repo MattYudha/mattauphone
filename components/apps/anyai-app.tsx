@@ -20,7 +20,7 @@ export function AnyAiApp() {
         <button
           type="button"
           onClick={() => setListOpen(true)}
-          aria-label="대화 목록 열기"
+          aria-label="Buka daftar percakapan"
           className="flex size-9 flex-col items-start justify-center gap-[5px] pl-1.5"
         >
           <span className="h-[2px] w-[18px] rounded-full bg-current" />
@@ -63,8 +63,8 @@ export function AnyAiApp() {
           </span>
           <input
             disabled
-            aria-label="메시지 입력 (사용할 수 없음)"
-            placeholder="무엇이든 물어보세요"
+            aria-label="Ketik pesan (tidak tersedia)"
+            placeholder="Tanyakan apa saja"
             className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-black/40 disabled:cursor-default"
           />
           <Mic className="size-5 shrink-0 text-black/60" aria-hidden />
@@ -72,7 +72,7 @@ export function AnyAiApp() {
             <ArrowUp className="size-5" strokeWidth={2.4} />
           </span>
         </div>
-        <p className="pt-2 text-center text-[11px] text-black/40">any ai는 실수를 할 수 있습니다. 중요한 정보는 확인하세요.</p>
+        <p className="pt-2 text-center text-[11px] text-black/40">any ai bisa membuat kesalahan. Periksa info penting.</p>
       </div>
       <HomeIndicator />
 
@@ -93,15 +93,15 @@ export function AnyAiApp() {
 function ChatList({ activeId, onSelect, onClose }: { activeId: string; onSelect: (id: string) => void; onClose: () => void }) {
   return (
     <div className="absolute inset-0 z-20 flex">
-      <nav aria-label="대화 목록" className="flex h-full w-[82%] flex-col bg-[#f9f9f9] pt-12 shadow-xl">
+      <nav aria-label="Daftar percakapan" className="flex h-full w-[82%] flex-col bg-[#f9f9f9] pt-12 shadow-xl">
         <div className="flex items-center gap-2 px-4 pb-3">
           <div className="flex flex-1 items-center gap-2 rounded-[10px] bg-black/[0.06] px-3 py-2 text-[15px] text-black/40" aria-hidden>
             <Search className="size-4" />
-            검색
+            Cari
           </div>
           <SquarePen className="size-[22px] text-black/70" strokeWidth={1.8} aria-hidden />
         </div>
-        <p className="px-4 pb-1 pt-3 text-[12.5px] font-semibold text-black/45">최근 대화</p>
+        <p className="px-4 pb-1 pt-3 text-[12.5px] font-semibold text-black/45">Percakapan Terbaru</p>
         <ul className="flex flex-col px-2">
           {aiChats.map((c) => (
             <li key={c.id}>
@@ -119,7 +119,7 @@ function ChatList({ activeId, onSelect, onClose }: { activeId: string; onSelect:
           ))}
         </ul>
       </nav>
-      <button type="button" aria-label="대화 목록 닫기" onClick={onClose} className="flex-1 bg-black/30" />
+      <button type="button" aria-label="Tutup daftar percakapan" onClick={onClose} className="flex-1 bg-black/30" />
     </div>
   )
 }
