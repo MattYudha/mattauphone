@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { ArrowUp, ChevronLeft, Hash, Menu, Plus, Search, Smile, MapPin } from 'lucide-react'
 import { Avatar, HomeIndicator, StatusBar } from '@/components/phone/chrome'
 import { contacts } from '@/lib/story/contacts'
@@ -9,6 +10,23 @@ import { useStory } from '@/lib/story/store'
 import { dayKey, formatFullDate, formatTime } from '@/lib/story/time'
 import { Sticker } from './sticker'
 import { useIsAppActive } from '@/lib/story/app-presence'
+import { IosKeyboard, KEYBOARD_HEIGHT, keyForChar, type PressedKey } from '@/components/phone/ios-keyboard'
+import { SPRING } from '@/lib/motion/ios-physics'
+import { playKeyClick } from '@/lib/sound'
+
+/** Jeda sebelum karakter berikutnya diketik otomatis: acak seperti jari manusia, lebih lama setelah spasi & tanda baca. */
+function typingDelay(prev: string | undefined, isFirst: boolean) {
+  let ms = 55 + Math.random() * 65
+  if (isFirst) ms += 260
+  if (prev === ' ') ms += 45
+  if (prev && /[.,?!~]/.test(prev)) ms += 170
+  return ms
+}
+
+function keyFeedback(ch: string) {
+  playKeyClick(ch === ' ' ? 'special' : 'letter')
+  navigator.vibrate?.(4)
+}
 
 const ROOM_BG = '#bacee0'
 
@@ -24,14 +42,36 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
     isUnreadByThem,
     totalUnread,
     unreadByRoom,
+    replyOptions,
+    sendKakaoChoice,
+    isTypingIn,
   } = useStory()
   const [draft, setDraft] = useState('')
   const room = rooms.find((r) => r.id === roomId)!
   const canSend = canSendIn(roomId)
+  const options = replyOptions(roomId)
+  const theyAreTyping = isTypingIn(roomId)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [pressed, setPressed] = useState<PressedKey>(null)
+  /** Pilihan QuickType yang sedang/selesai diketik otomatis */
+  const [auto, setAuto] = useState<{ index: number; text: string; pos: number } | null>(null)
+  const autoTyping = !!auto && auto.pos < auto.text.length
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Keyboard hanya muncul bila ada giliran membalas (atau sudah terbuka sambil menunggu balasan).
+  const replyable = canSend || keyboardOpen
+
   const submit = () => {
-    if (!draft.trim()) return
-    sendKakaoMessage(roomId, draft)
+    if (!draft.trim() || !canSend || autoTyping) return
+    // Teks pilihan QuickType yang tidak diubah dikirim sebagai pilihan itu; selain itu ketikan bebas.
+    if (auto && draft === auto.text) sendKakaoChoice(roomId, auto.index)
+    else sendKakaoMessage(roomId, draft)
     setDraft('')
+    setAuto(null)
+  }
+
+  const flash = (key: PressedKey) => {
+    setPressed(key)
+    window.setTimeout(() => setPressed((cur) => (cur === key ? null : cur)), 95)
   }
   const contact = contacts[room.contactId]
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -45,6 +85,35 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
 
   // Kartu pratinjau di App Switcher tidak dihitung sebagai membuka ruang chat.
   const active = useIsAppActive()
+
+  // Mengetik otomatis satu karakter per langkah; berhenti saat app hanya pratinjau dan lanjut lagi saat aktif.
+  useEffect(() => {
+    if (!auto || !active || auto.pos >= auto.text.length) return
+    const ch = auto.text[auto.pos]
+    const timer = window.setTimeout(() => {
+      flash(keyForChar(ch))
+      keyFeedback(ch)
+      setDraft(auto.text.slice(0, auto.pos + 1))
+      setAuto({ ...auto, pos: auto.pos + 1 })
+    }, typingDelay(auto.text[auto.pos - 1], auto.pos === 0))
+    return () => window.clearTimeout(timer)
+  }, [auto, active])
+
+  useEffect(() => {
+    if (!active) setKeyboardOpen(false)
+  }, [active])
+
+  const keepBottom = () => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }
+  useLayoutEffect(keepBottom, [theyAreTyping])
+
+  const openKeyboard = () => {
+    if (!replyable) return
+    setKeyboardOpen(true)
+    inputRef.current?.focus({ preventScroll: true })
+  }
 
   useEffect(() => {
     if (!active) return
@@ -74,7 +143,16 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
           <Menu className="size-[22px]" strokeWidth={1.8} />
         </span>
       </header>
-      <div ref={scrollRef} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2.5 pb-3">
+      <div
+        ref={scrollRef}
+        onPointerDown={() => {
+          if (keyboardOpen) {
+            setKeyboardOpen(false)
+            inputRef.current?.blur()
+          }
+        }}
+        className="no-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2.5 pb-3"
+      >
         <MessageList
           messages={room.messages}
           contactName={contact.name}
@@ -83,6 +161,14 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
           photo={contact.photo}
           isUnreadByThem={isUnreadByThem}
         />
+        {theyAreTyping && (
+          <TypingIndicator
+            initial={contact.initial}
+            color={contact.color}
+            photo={contact.photo}
+            grouped={room.messages[room.messages.length - 1]?.from === 'them'}
+          />
+        )}
       </div>
       <form
         className="flex shrink-0 items-center gap-2 bg-white px-2.5 py-2"
@@ -94,20 +180,37 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#f2f2f2]" aria-hidden>
           <Plus className="size-5 text-[#6b6b6b]" strokeWidth={1.8} />
         </span>
-        <span className="flex h-9 min-w-0 flex-1 items-center gap-1 rounded-full bg-[#f2f2f2] pl-3.5 pr-3">
+        <span
+          className="flex min-h-9 min-w-0 flex-1 items-center gap-1 rounded-[18px] bg-[#f2f2f2] py-1.5 pl-3.5 pr-3"
+          onPointerDown={openKeyboard}
+        >
           <input
+            ref={inputRef}
             type="text"
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => {
+              if (autoTyping) return
+              setAuto(null)
+              setDraft(e.target.value)
+            }}
+            onFocus={() => replyable && setKeyboardOpen(true)}
             onKeyDown={(e) => {
+              // Keyboard fisik ikut menyalakan tombol di keyboard layar.
+              if (e.key.length === 1) {
+                flash(keyForChar(e.key))
+                keyFeedback(e.key)
+              } else if (e.key === 'Backspace') flash({ key: 'back' })
               if (e.key !== 'Enter' || e.nativeEvent.isComposing || e.keyCode === 229) return
               e.preventDefault()
               submit()
             }}
-            disabled={!canSend}
+            readOnly={autoTyping}
+            disabled={!replyable}
+            // Keyboard bawaan HP tidak muncul; yang dipakai keyboard iOS di layar.
+            inputMode="none"
             aria-label="Ketik pesan"
             enterKeyHint="send"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-black/30 disabled:cursor-not-allowed"
+            className="min-w-0 flex-1 bg-transparent text-[15px] caret-[#3478f6] outline-none placeholder:text-black/30 disabled:cursor-not-allowed"
           />
           <Smile className="size-[22px] shrink-0 text-[#6b6b6b]" strokeWidth={1.6} aria-hidden />
         </span>
@@ -123,12 +226,61 @@ export function ChatRoom({ roomId }: { roomId: KakaoRoomId }) {
           <Hash className="size-6 shrink-0 text-[#6b6b6b]" strokeWidth={1.7} aria-hidden />
         )}
       </form>
-      <HomeIndicator className="bg-white" />
+      <motion.div
+        className="shrink-0 overflow-hidden"
+        initial={false}
+        animate={{ height: keyboardOpen ? KEYBOARD_HEIGHT : 0 }}
+        transition={SPRING.appOpen}
+        onUpdate={keepBottom}
+      >
+        <IosKeyboard
+          suggestions={draft ? [] : options}
+          onSuggestion={(index) => {
+            const text = options[index]
+            if (!text) return
+            setDraft('')
+            setAuto({ index, text, pos: 0 })
+          }}
+          onKey={(ch) => {
+            if (autoTyping) return
+            keyFeedback(ch)
+            setAuto(null)
+            setDraft((d) => d + ch)
+          }}
+          onBackspace={() => {
+            if (autoTyping) return
+            playKeyClick('special')
+            setAuto(null)
+            setDraft((d) => d.slice(0, -1))
+          }}
+          onReturn={submit}
+          pressed={pressed}
+          locked={autoTyping}
+          canReturn={!!draft.trim() && canSend}
+        />
+      </motion.div>
+      <HomeIndicator className={keyboardOpen ? 'bg-[#d1d4da]' : 'bg-white'} />
     </div>
   )
 }
 
-function MessageList({
+/** Gelembung "sedang mengetik" lawan bicara. */
+function TypingIndicator({ initial, color, photo, grouped }: { initial: string; color: string; photo?: string; grouped: boolean }) {
+  return (
+    <div className={`flex gap-2 ${grouped ? 'mt-[5px]' : 'mt-2.5'}`} role="status" aria-label="Sedang mengetik">
+      {/* Seperti gelembung KakaoTalk: avatar tidak diulang bila pesan sebelumnya juga dari lawan bicara. */}
+      <span className="w-10 shrink-0">{!grouped && <Avatar initial={initial} color={color} size={40} shape="squircle" src={photo} />}</span>
+      <div className="ml-1.5 flex items-center gap-[5px] rounded-[15px] bg-white px-3.5 py-[11px]">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="animate-typing-dot size-[7px] rounded-full bg-[#9aa3ad]" style={{ animationDelay: `${i * 160}ms` }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Di-memo agar ketikan per huruf tidak me-render ulang seluruh riwayat chat. */
+const MessageList = memo(function MessageList({
   messages,
   contactName,
   initial,
@@ -188,7 +340,7 @@ function MessageList({
       })}
     </ol>
   )
-}
+})
 
 function Bubble({ message, mine = false, tail }: { message: KakaoMessage; mine?: boolean; tail: boolean }) {
   const c = message.content

@@ -122,3 +122,42 @@ export function stopSound(id: SoundId) {
   audio.pause()
   audio.currentTime = 0
 }
+
+/* ------------------------------------------------------------------ */
+/* Klik keyboard: disintesis dengan Web Audio, tanpa file audio        */
+/* ------------------------------------------------------------------ */
+
+let keyCtx: AudioContext | null = null
+let keyNoise: AudioBuffer | null = null
+
+function keyContext() {
+  if (typeof window === 'undefined') return null
+  const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!Ctor) return null
+  keyCtx ??= new Ctor()
+  if (!keyNoise) {
+    // Derau pendek yang meluruh cepat terdengar seperti "tik" keyboard iOS.
+    const length = Math.floor(keyCtx.sampleRate * 0.025)
+    keyNoise = keyCtx.createBuffer(1, length, keyCtx.sampleRate)
+    const data = keyNoise.getChannelData(0)
+    for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 4
+  }
+  return keyCtx
+}
+
+/** Bunyi klik satu tombol keyboard. `kind` membedakan tombol huruf dan tombol khusus (spasi, hapus). */
+export function playKeyClick(kind: 'letter' | 'special' = 'letter') {
+  const ctx = keyContext()
+  if (!ctx || !keyNoise) return
+  if (ctx.state === 'suspended') ctx.resume().catch(() => {})
+  const source = ctx.createBufferSource()
+  source.buffer = keyNoise
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'bandpass'
+  filter.frequency.value = kind === 'letter' ? 3200 : 2100
+  filter.Q.value = 0.9
+  const gain = ctx.createGain()
+  gain.gain.value = kind === 'letter' ? 0.32 : 0.4
+  source.connect(filter).connect(gain).connect(ctx.destination)
+  source.start()
+}

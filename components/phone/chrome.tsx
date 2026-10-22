@@ -49,8 +49,9 @@ export function StatusBar({ tone = 'dark', className }: { tone?: 'dark' | 'light
       )}
     >
       <span className="w-14 text-center tabular-nums tracking-tight">{clock}</span>
+      {/* Dynamic Island: tampil sama di layar lebar maupun HP; menyusut sedikit di layar yang sangat sempit. */}
       <span
-        className="absolute left-1/2 top-[11px] hidden h-[34px] w-[118px] -translate-x-1/2 rounded-full bg-black sm:block"
+        className="absolute left-1/2 top-[11px] h-[34px] w-[clamp(96px,30%,118px)] -translate-x-1/2 rounded-full bg-black"
         aria-hidden
       />
       <span className="flex items-center gap-[6px]" aria-label="Sinyal, Wi-Fi, baterai 85%">

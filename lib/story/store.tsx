@@ -19,6 +19,7 @@ import {
   type AutoReplyState,
 } from './auto-reply'
 import { kakaoRooms, type KakaoMessage, type KakaoRoom, type KakaoRoomId } from './kakao'
+import { FIRST_TURN, FOLLOW_UPS, followUpReplyId } from './reply-scripts'
 import { smsThreads, type SmsMessage, type SmsThread } from './sms'
 import { NOW_ISO, toTime } from './time'
 
@@ -83,6 +84,31 @@ type StoryProgress = {
   yhQuestionSeen: boolean
   /** Nomor urut pesan berikutnya yang dikirim (atau diterima) */
   nextSeq: number
+  /** Giliran percakapan lanjutan per ruang setelah cabang terkunci: pilihan QuickType (indeks) atau ketikan bebas */
+  followUps: Partial<Record<AutoReplyRoom, FollowUp[]>>
+}
+
+type FollowUp = { choice: number | 'free'; sentId: string }
+type Reply = { id: string; text: string }
+
+/** Lama lawan bicara "sedang mengetik" sebelum pesan muncul, sebanding dengan panjang pesan. */
+const typingDuration = (text: string) => Math.min(2600, Math.max(900, 500 + text.length * 55))
+const TYPING_START_MS = 1000
+const TYPING_GAP_MS = 450
+
+/** Semua balasan yang seharusnya sudah/akan dikirim lawan bicara di ruang ini, berurutan. */
+function expectedReplies(room: AutoReplyRoom, p: StoryProgress): Reply[] {
+  const state = p.autoReplies[room]
+  if (!state) return []
+  const list: Reply[] = autoReplyLines(room, state.branch).map((text, i) => ({ text, id: autoReplyId(room, state.branch, i) }))
+  const turns = FOLLOW_UPS[room][state.branch]
+  ;(p.followUps[room] ?? []).forEach((f, turn) => {
+    const script = turns[turn]
+    if (!script) return
+    const lines = f.choice === 'free' ? script.freeReplies : script.options[f.choice].replies
+    lines.forEach((text, i) => list.push({ text, id: followUpReplyId(room, state.branch, turn, f.choice, i) }))
+  })
+  return list
 }
 
 const BANNER_GAP_MS = 1800
@@ -123,6 +149,7 @@ const INITIAL: StoryProgress = {
   autoReplies: {},
   yhQuestionSeen: false,
   nextSeq: FIRST_SENT_SEQ,
+  followUps: {},
 }
 
 function loadProgress(): StoryProgress {
@@ -137,6 +164,7 @@ function loadProgress(): StoryProgress {
     if (!Array.isArray(merged.readByThemIds)) merged.readByThemIds = []
     if (!merged.autoReplies || typeof merged.autoReplies !== 'object') merged.autoReplies = {}
     if (typeof merged.nextSeq !== 'number') merged.nextSeq = FIRST_SENT_SEQ
+    if (!merged.followUps || typeof merged.followUps !== 'object') merged.followUps = {}
     return Array.isArray(merged.readRooms) ? merged : { ...merged, readRooms: [] }
   } catch {
     return INITIAL
@@ -170,6 +198,12 @@ type StoryContext = {
   onRoomMessagesSeen: (id: KakaoRoomId, messageIds: string[]) => void
   canSendIn: (id: KakaoRoomId) => boolean
   sendKakaoMessage: (id: KakaoRoomId, text: string) => void
+  /** Dua kalimat untuk bar QuickType di ruang ini (kosong jika tidak ada giliran yang bisa dibalas) */
+  replyOptions: (id: KakaoRoomId) => string[]
+  /** Mengirim pilihan QuickType ke-index (teks sudah selesai diketik di kolom pesan) */
+  sendKakaoChoice: (id: KakaoRoomId, index: number) => void
+  /** Lawan bicara sedang mengetik di ruang ini */
+  isTypingIn: (id: KakaoRoomId) => boolean
   /** Pesan kiriman pengguna yang belum dibaca lawan bicara */
   isUnreadByThem: (message: KakaoMessage) => boolean
   clock: string
@@ -201,6 +235,9 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<StoryProgress>(loadProgress)
   const [banner, setBanner] = useState<Banner | null>(null)
   const [smsThreadId, setSmsThreadId] = useState<string | null>(null)
+  const [typing, setTyping] = useState<Partial<Record<AutoReplyRoom, boolean>>>({})
+  /** Ruang yang balasannya sedang dijadwalkan, supaya jadwal tidak dibuat dua kali */
+  const delivering = useRef<Partial<Record<AutoReplyRoom, boolean>>>({})
   const pendingSmsThread = useRef<string | null>(null)
   const progressRef = useRef(progress)
   progressRef.current = progress
@@ -242,7 +279,12 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const list = timers.current
-    return () => list.forEach((t) => window.clearTimeout(t))
+    return () => {
+      list.forEach((t) => window.clearTimeout(t))
+      // Jadwal balasan ikut batal, jadi ruang boleh dijadwalkan ulang (mis. StrictMode memasang ulang effect).
+      delivering.current = {}
+      setTyping({})
+    }
   }, [])
 
   const schedule = (fn: () => void, ms: number) => {
@@ -379,43 +421,52 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     commit({ ...p, readByThemIds: [...p.readByThemIds, messageId] })
   }, [])
 
-  /** Mengirim berurutan hanya balasan cabang terkunci yang belum tiba. Tetap berlanjut tanpa dobel setelah refresh atau masuk ulang. */
-  const deliverAutoReplies = useCallback((room: AutoReplyRoom, firstDelayMs: number) => {
-    const state = progressRef.current.autoReplies[room]
-    if (!state) return
-    const lines = autoReplyLines(room, state.branch)
-    const pending = lines
-      .map((text, index) => ({ text, id: autoReplyId(room, state.branch, index) }))
-      .filter((r) => !progressRef.current.addedMessages.some((m) => m.id === r.id))
+  /**
+   * Mengirim berurutan balasan yang belum tiba, masing-masing didahului indikator "sedang mengetik".
+   * Balasan yang sudah tiba dilewati, jadi tetap berlanjut tanpa dobel setelah refresh atau masuk ulang.
+   */
+  const deliverReplies = useCallback((room: AutoReplyRoom, firstDelayMs: number) => {
+    if (delivering.current[room]) return
+    const pending = expectedReplies(room, progressRef.current).filter(
+      (r) => !progressRef.current.addedMessages.some((m) => m.id === r.id),
+    )
+    if (pending.length === 0) return
+    delivering.current[room] = true
+    let t = firstDelayMs
     pending.forEach((reply, i) => {
-      timers.current.push(
-        window.setTimeout(() => {
-          const p = progressRef.current
-          if (p.addedMessages.some((m) => m.id === reply.id)) return
-          const message: KakaoMessage = {
-            id: reply.id,
+      const startAt = t
+      const deliverAt = startAt + typingDuration(reply.text)
+      t = deliverAt + TYPING_GAP_MS
+      schedule(() => setTyping((x) => ({ ...x, [room]: true })), startAt)
+      schedule(() => {
+        const p = progressRef.current
+        setTyping((x) => ({ ...x, [room]: false }))
+        if (i === pending.length - 1) delivering.current[room] = false
+        if (p.addedMessages.some((m) => m.id === reply.id)) return
+        const message: KakaoMessage = {
+          id: reply.id,
+          roomId: room,
+          from: 'them',
+          at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
+          seq: p.nextSeq,
+          content: { type: 'text', text: reply.text },
+        }
+        commit({ ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] })
+        playSound('kakao')
+        const { screen: s, kakaoRoomId: openRoom } = viewRef.current
+        const viewingRoom = s.kind === 'app' && s.app === 'kakao' && openRoom === room
+        if (!viewingRoom) {
+          setBanner({
+            key: message.id,
             roomId: room,
-            from: 'them',
-            at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
-            seq: p.nextSeq,
-            content: { type: 'text', text: reply.text },
-          }
-          commit({ ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] })
-          playSound('kakao')
-          const { screen: s, kakaoRoomId: openRoom } = viewRef.current
-          const viewingRoom = s.kind === 'app' && s.app === 'kakao' && openRoom === room
-          if (!viewingRoom) {
-            setBanner({
-              key: message.id,
-              roomId: room,
-              sender: senderName(room),
-              lines: [reply.text],
-              time: p.yhCallEnded ? '18.58' : '18.57',
-            })
-          }
-        }, firstDelayMs + i * AUTO_REPLY_GAP_MS),
-      )
+            sender: senderName(room),
+            lines: [reply.text],
+            time: p.yhCallEnded ? '18.58' : '18.57',
+          })
+        }
+      }, deliverAt)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -424,43 +475,93 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       const state = p.autoReplies[room]
       if (!state) continue
       markReadByThem(state.triggerId)
-      deliverAutoReplies(room, 1000)
+      for (const f of p.followUps[room] ?? []) markReadByThem(f.sentId)
+      deliverReplies(room, TYPING_START_MS)
     }
-  }, [markReadByThem, deliverAutoReplies])
+  }, [markReadByThem, deliverReplies])
 
-  const canSend = (id: KakaoRoomId, p: StoryProgress) => {
+  /** Syarat cerita untuk membalas di ruang ini, belum memperhitungkan giliran. */
+  const roomOpen = (id: KakaoRoomId, p: StoryProgress) => {
     if (id === 'yh') return p.yhQuestionSeen
     if (id === 'jy') return p.jyArrived
     return false
+  }
+
+  /** Bisa membalas bila syarat cerita terpenuhi, semua balasan lawan bicara sudah tiba, dan masih ada giliran. */
+  const canSend = (id: KakaoRoomId, p: StoryProgress) => {
+    if (!roomOpen(id, p) || !isAutoReplyRoom(id)) return false
+    const state = p.autoReplies[id]
+    if (!state) return true
+    if (expectedReplies(id, p).some((r) => !p.addedMessages.some((m) => m.id === r.id))) return false
+    return (p.followUps[id]?.length ?? 0) < FOLLOW_UPS[id][state.branch].length
+  }
+
+  const replyOptions = (id: KakaoRoomId, p: StoryProgress): string[] => {
+    if (!isAutoReplyRoom(id) || !canSend(id, p)) return []
+    const state = p.autoReplies[id]
+    if (!state) return [FIRST_TURN[id].A, FIRST_TURN[id].B]
+    const turn = FOLLOW_UPS[id][state.branch][p.followUps[id]?.length ?? 0]
+    return turn ? turn.options.map((o) => o.text) : []
+  }
+
+  /** Menyimpan pesan pengguna lalu menjadwalkan "dibaca" dan balasan lawan bicara. */
+  const sendAndReply = (
+    id: AutoReplyRoom,
+    text: string,
+    apply: (next: StoryProgress, sentId: string) => StoryProgress | null,
+  ) => {
+    const p = progressRef.current
+    const message: KakaoMessage = {
+      id: `sent-${p.nextSeq}`,
+      roomId: id,
+      from: 'me',
+      at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
+      seq: p.nextSeq,
+      content: { type: 'text', text },
+    }
+    const base: StoryProgress = { ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] }
+    const next = apply(base, message.id)
+    commit(next ?? base)
+    // Hanya pesan yang memenuhi syarat yang dibaca. Pesan tak terklasifikasi tetap belum dibaca dan tidak dibalas.
+    if (!next) return
+    schedule(() => markReadByThem(message.id), AUTO_READ_DELAY_MS)
+    deliverReplies(id, TYPING_START_MS)
   }
 
   const sendKakaoMessage = useCallback(
     (id: KakaoRoomId, rawText: string) => {
       const text = rawText.trim()
       const p = progressRef.current
-      if (!text || !canSend(id, p)) return
-      const message: KakaoMessage = {
-        id: `sent-${p.nextSeq}`,
-        roomId: id,
-        from: 'me',
-        at: p.yhCallEnded ? AFTER_CALL_ISO : NOW_ISO,
-        seq: p.nextSeq,
-        content: { type: 'text', text },
-      }
-      let next: StoryProgress = { ...p, nextSeq: p.nextSeq + 1, addedMessages: [...p.addedMessages, message] }
-      const room = isAutoReplyRoom(id) && !p.autoReplies[id] ? id : null
-      const branch = room ? matchBranch(room, text) : null
-      if (room && branch) {
-        next = { ...next, autoReplies: { ...next.autoReplies, [room]: { branch, triggerId: message.id } } }
-      }
-      commit(next)
-      // Hanya pesan yang cocok dengan syarat yang dibaca. Pesan tak terklasifikasi dan pesan setelah cabang terkunci tidak dibaca.
-      if (room && branch) {
-        schedule(() => markReadByThem(message.id), AUTO_READ_DELAY_MS)
-      }
-      if (room && branch) deliverAutoReplies(room, AUTO_REPLY_FIRST_MS)
+      if (!text || !isAutoReplyRoom(id) || !canSend(id, p)) return
+      sendAndReply(id, text, (next, sentId) => {
+        if (!next.autoReplies[id]) {
+          const branch = matchBranch(id, text)
+          return branch ? { ...next, autoReplies: { ...next.autoReplies, [id]: { branch, triggerId: sentId } } } : null
+        }
+        // Ketikan bebas di giliran lanjutan tetap dijawab dengan balasan umum yang nyambung.
+        return { ...next, followUps: { ...next.followUps, [id]: [...(next.followUps[id] ?? []), { choice: 'free', sentId }] } }
+      })
     },
-    [markReadByThem, deliverAutoReplies],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [markReadByThem, deliverReplies],
+  )
+
+  const sendKakaoChoice = useCallback(
+    (id: KakaoRoomId, index: number) => {
+      const p = progressRef.current
+      if (!isAutoReplyRoom(id)) return
+      const text = replyOptions(id, p)[index]
+      if (!text) return
+      sendAndReply(id, text, (next, sentId) => {
+        if (!next.autoReplies[id]) {
+          const branch = index === 0 ? 'A' : 'B'
+          return { ...next, autoReplies: { ...next.autoReplies, [id]: { branch, triggerId: sentId } } }
+        }
+        return { ...next, followUps: { ...next.followUps, [id]: [...(next.followUps[id] ?? []), { choice: index, sentId }] } }
+      })
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [markReadByThem, deliverReplies],
   )
 
   const rooms = useMemo(() => {
@@ -546,6 +647,9 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     onRoomMessagesSeen,
     canSendIn: (id) => canSend(id, progress),
     sendKakaoMessage,
+    replyOptions: (id) => replyOptions(id, progress),
+    sendKakaoChoice,
+    isTypingIn: (id) => isAutoReplyRoom(id) && !!typing[id],
     isUnreadByThem: (m) => m.from === 'me' && m.id.startsWith('sent-') && !progress.readByThemIds.includes(m.id),
     clock: progress.yhCallEnded ? '18.58' : '18.57',
     yhCallEnded: progress.yhCallEnded,
@@ -560,6 +664,8 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     resetStory: () => {
       timers.current.forEach((t) => window.clearTimeout(t))
       timers.current = []
+      delivering.current = {}
+      setTyping({})
       progressRef.current = INITIAL
       setProgress(INITIAL)
       setBanner(null)
